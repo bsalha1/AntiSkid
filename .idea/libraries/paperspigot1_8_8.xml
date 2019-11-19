@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="paperspigot1.8.8">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../Desktop/Minecraft Server/paperspigot1.8.8.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../../../Desktop/Minecraft Server/paperspigot1.8.8.jar!/" />
+    </SOURCES>
+  </library>
+</component>

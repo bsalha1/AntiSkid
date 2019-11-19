@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ProtocolTest:jar">
+    <output-path>$PROJECT_DIR$/../../../Desktop/Minecraft Server/plugins</output-path>
+    <root id="archive" name="ProtocolTest.jar">
+      <element id="module-output" name="AntiSkid" />
+    </root>
+  </artifact>
+</component>
