@@ -1,6 +1,6 @@
-package me.reachcarter.protocoltest.listen;
+package com.reliableplugins.antiskid.listen;
 
-import me.reachcarter.protocoltest.Main;
+import com.reliableplugins.antiskid.Main;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -38,10 +38,7 @@ public class ListenRepeaterPlace implements Listener
             return;
         }
 
-        //main.repeaters.get(chunk).add(block);
-        Set<Block> blockSet = main.repeaters.get(chunk);
-        blockSet.add(block);
-        main.repeaters.replace(chunk, blockSet);
+        main.repeaters.get(chunk).add(block);
         return;
     }
 }

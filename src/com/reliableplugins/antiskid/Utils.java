@@ -1,4 +1,4 @@
-package me.reachcarter.protocoltest;
+package com.reliableplugins.antiskid;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

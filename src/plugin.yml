@@ -1,8 +1,4 @@
-name: ProtocolTest
-main: me.reachcarter.protocoltest.Main
+name: AntiSkid
+main: com.reliableplugins.antiskid.Main
 version: 1.0
 depend: [ProtocolLib]
-commands:
-   test:
-      description: "no"
-      usage: "/test"
