@@ -1,4 +1,0 @@
-name: AntiSkid
-main: com.reliableplugins.antiskid.Main
-version: 1.0
-depend: [ProtocolLib]

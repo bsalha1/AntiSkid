@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="AntiSkid:jar">
-    <output-path>$PROJECT_DIR$/../../../Desktop/Minecraft Server/plugins</output-path>
-    <root id="archive" name="AntiSkid.jar">
-      <element id="module-output" name="AntiSkid" />
-    </root>
-  </artifact>
-</component>
