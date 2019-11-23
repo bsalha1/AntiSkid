@@ -34,10 +34,9 @@ public class MaskRepeaters implements Runnable
     public void run()
     {
         Set<Block> blockSet = this.main.repeaterMap.get(player);
+        if(blockSet == null) return;
         Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
 
-        if(blockSet == null) return;
-        long start = System.nanoTime();
         for(Block b : blockSet)
         {
             if(!b.getLocation().getChunk().isLoaded()) continue;
@@ -48,9 +47,6 @@ public class MaskRepeaters implements Runnable
                 new RepeaterShufflePacket(b).sendPacket(p);
             }
         }
-        long end = System.nanoTime();
-        double elapse = (end - start) / Math.pow(10, 9);
-        Bukkit.broadcastMessage("Took " + Double.toString(elapse) + "sec");
     }
 
 
