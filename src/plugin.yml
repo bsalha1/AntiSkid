@@ -2,3 +2,7 @@ name: AntiSkid
 main: com.reliableplugins.antiskid.Main
 version: 1.0
 depend: [ProtocolLib]
+commands:
+  antiskid:
+    description: Shuffles the repeaters on your cannon to protect it from skidding
+    usage: "/antiskid on/off"
