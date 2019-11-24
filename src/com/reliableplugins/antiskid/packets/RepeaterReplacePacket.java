@@ -11,14 +11,15 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.reliableplugins.antiskid.abstracts.AbstractPacket;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 
-public class RepeaterShufflePacket extends AbstractPacket
+public class RepeaterReplacePacket extends AbstractPacket
 {
     private static final PacketType type = PacketType.Play.Server.BLOCK_CHANGE;
 
-    public RepeaterShufflePacket(Block diode)
+    public RepeaterReplacePacket(Block diode)
     {
         super(new PacketContainer(type), type);
         this.handle.getModifier().writeDefaults();

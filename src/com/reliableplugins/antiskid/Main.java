@@ -6,11 +6,11 @@
 
 package com.reliableplugins.antiskid;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.reliableplugins.antiskid.commands.CmdAntiSkid;
-import com.reliableplugins.antiskid.listeners.ListenPlayerLeave;
-import com.reliableplugins.antiskid.listeners.ListenRepeaterBreak;
-import com.reliableplugins.antiskid.listeners.ListenRepeaterPlace;
-import com.reliableplugins.antiskid.runnables.MaskRepeaters;
+import com.reliableplugins.antiskid.listeners.*;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -24,9 +24,10 @@ import java.util.Set;
 
 public class Main extends JavaPlugin
 {
-    public volatile Map<Player, Set<Block>> repeaterMap = new LinkedHashMap<>(); // Volatile because it is accessed in different threads
-    public Map<Player, MaskRepeaters> tasks = new LinkedHashMap<>();
+    public volatile Map<Player, Set<Block>> diodeMap = new LinkedHashMap<>(); // Volatile because it is accessed in different threads
+    public volatile Set<Player> executors = new HashSet<>();
     public static final PluginManager plugMan = Bukkit.getPluginManager();
+    public static final ProtocolManager protMan = ProtocolLibrary.getProtocolManager();
 
     public void onEnable()
     {
@@ -46,8 +47,9 @@ public class Main extends JavaPlugin
 
     private void loadListeners()
     {
-        plugMan.registerEvents(new ListenRepeaterPlace(this), this);
+        protMan.addPacketListener(new ListenBlockChangePacket(this, PacketType.Play.Server.BLOCK_CHANGE));
+
+        plugMan.registerEvents(new ListenRepeaterAlter(this), this);
         plugMan.registerEvents(new ListenRepeaterBreak(this), this);
-        plugMan.registerEvents(new ListenPlayerLeave(this), this);
     }
 }

@@ -19,6 +19,7 @@ public enum Message
 
     // Error Messages
     ERROR_NOT_PLAYER(ChatColor.RED + "Only players may execute this command."),
+    ERROR_PROTECTED_DIODE(ChatColor.RED + "That diode is protected!"),
     ERROR_ALREADY_PROTECTED(ChatColor.RED + "You already have antiskid on."),
     ERROR_NOT_PROTECTED(ChatColor.RED + "You do not have antiskid on.");
 

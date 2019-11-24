@@ -8,13 +8,17 @@ package com.reliableplugins.antiskid.commands;
 
 import com.reliableplugins.antiskid.Main;
 import com.reliableplugins.antiskid.enums.Message;
+import com.reliableplugins.antiskid.packets.RepeaterReplacePacket;
 import com.reliableplugins.antiskid.packets.RepeaterRevertPacket;
-import com.reliableplugins.antiskid.runnables.MaskRepeaters;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.Collection;
+import java.util.Set;
 
 public class CmdAntiSkid implements CommandExecutor
 {
@@ -76,16 +80,25 @@ public class CmdAntiSkid implements CommandExecutor
      */
     private void antiskidOn()
     {
-        // If executor already registered their diodes, throw error and exit command
-        if(this.main.tasks.containsKey(executor))
+        this.main.executors.add(executor);
+
+        Set<Block> blockSet = this.main.diodeMap.get(executor);
+        if(blockSet == null)
         {
-            executor.sendMessage(Message.ERROR_ALREADY_PROTECTED.toString());
+            executor.sendMessage(Message.ANTISKID_ON.toString());
             return;
         }
+        Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
 
-        // Else begin the antiskid and register the task with the plugin
-        MaskRepeaters maskTask = new MaskRepeaters(this.main, executor);
-        this.main.tasks.put(executor, maskTask);
+        for(Block b : blockSet) // Foreach repeater placed by executor
+        {
+            for (Player p : onlinePlayers) // Foreach online player
+            {
+                // Whitelist here
+                if (p.equals(executor)) continue;
+                new RepeaterReplacePacket(b).sendPacket(p); // Replace diode with carpet
+            }
+        }
         executor.sendMessage(Message.ANTISKID_ON.toString());
     }
 
@@ -96,28 +109,25 @@ public class CmdAntiSkid implements CommandExecutor
      */
     private void antiskidOff()
     {
-        // If executor has not executed /antiskid, throw error and quit command
-        if(!this.main.tasks.containsKey(executor))
+        if(this.main.diodeMap.get(executor) == null) // If there are no diodes registered
         {
-            executor.sendMessage(Message.ERROR_NOT_PROTECTED.toString());
+            executor.sendMessage(Message.ANTISKID_OFF.toString());
             return;
         }
 
-        // Cancel the task and remove from list
-        this.main.tasks.get(executor).cancel();
-        this.main.tasks.remove(executor);
+        Collection<? extends Player> onlinePlayers = this.main.getServer().getOnlinePlayers();
+        Set<Block> blockSet = this.main.diodeMap.get(executor);
 
         // Revert diodes back to their original state
-        for(Player p : this.main.getServer().getOnlinePlayers())
+        for(Player p : onlinePlayers)
         {
-            if(this.main.repeaterMap.get(executor) == null) return; // If there are no diodes registered
-
-            for(Block b : this.main.repeaterMap.get(executor)) // Foreach diode registered to the protected executor
+            for(Block b : blockSet) // Foreach diode registered to the protected executor
             {
                 new RepeaterRevertPacket(b).sendPacket(p); // Revert the diode
             }
         }
-        this.main.repeaterMap.remove(executor);
+        this.main.diodeMap.remove(executor);
+        this.main.executors.remove(executor);
         executor.sendMessage(Message.ANTISKID_OFF.toString());
     }
 }

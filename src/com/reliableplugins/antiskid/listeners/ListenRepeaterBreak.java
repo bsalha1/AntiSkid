@@ -29,15 +29,18 @@ public class ListenRepeaterBreak implements Listener
     @EventHandler
     public void onRepeaterBreak(BlockBreakEvent event)
     {
-        Block block = event.getBlock();
-        if((block.getType() != Material.DIODE_BLOCK_OFF) && (block.getType() != Material.DIODE_BLOCK_ON)) return;
+        Material material = event.getBlock().getType();
+        if((material != Material.DIODE_BLOCK_OFF) && (material != Material.DIODE_BLOCK_ON)) return;
 
-        // If block broken is a registered repeater, deregister it
-        for(Map.Entry<Player, Set<Block>> entry : this.main.repeaterMap.entrySet())
+        Set<Map.Entry<Player, Set<Block>>> entries = main.diodeMap.entrySet();
+        Block block = event.getBlock();
+
+        // If block broken is a registered diode, deregister it
+        for(Map.Entry<Player, Set<Block>> entry : entries)
         {
             if(entry.getValue().contains(block))
             {
-                this.main.repeaterMap.get(entry.getKey()).remove(block);
+                this.main.diodeMap.get(entry.getKey()).remove(block);
             }
         }
     }
