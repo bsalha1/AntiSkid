@@ -23,6 +23,10 @@
 package com.reliableplugins.antiskid.abstracts;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.Set;
+
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -57,9 +61,14 @@ public abstract class AbstractPacket
         }
     }
 
-    public void broadcastPacket()
+    public void broadcastPacket(Set<Player> whitelist)
     {
-        ProtocolLibrary.getProtocolManager().broadcastServerPacket(getHandle());
+        Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+        for(Player p : onlinePlayers)
+        {
+            if(whitelist.contains(p)) continue;
+            this.sendPacket(p);
+        }
     }
 
     public void receivePacket(Player sender)

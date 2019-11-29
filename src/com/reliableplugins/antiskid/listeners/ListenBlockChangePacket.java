@@ -12,14 +12,9 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.reliableplugins.antiskid.Main;
-import com.reliableplugins.antiskid.enums.Message;
-import com.reliableplugins.antiskid.packets.RepeaterReplacePacket;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +33,6 @@ public class ListenBlockChangePacket extends PacketAdapter
     public void onPacketSending(PacketEvent event)
     {
         if(!event.getPacket().getBlockData().read(0).equals(WrappedBlockData.createData(Material.DIODE_BLOCK_OFF))) return;
-
         Player player = event.getPlayer();
         BlockPosition blockPos = event.getPacket().getBlockPositionModifier().read(0);
         Block block = blockPos.toLocation(player.getLocation().getWorld()).getBlock();
@@ -49,7 +43,6 @@ public class ListenBlockChangePacket extends PacketAdapter
             {
                 if(entry.getKey().equals(player)) return; // If it's the player's diode, allow them to see it
                 event.setCancelled(true); // Keep diode hidden
-                player.sendMessage(Message.ERROR_PROTECTED_DIODE.toString());
                 return;
             }
         }

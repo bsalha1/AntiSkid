@@ -9,9 +9,14 @@ package com.reliableplugins.antiskid;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.google.common.collect.Table;
 import com.reliableplugins.antiskid.commands.CmdAntiSkid;
+import com.reliableplugins.antiskid.items.AntiSkidTool;
 import com.reliableplugins.antiskid.listeners.*;
+import javafx.util.Pair;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -24,13 +29,16 @@ import java.util.Set;
 
 public class Main extends JavaPlugin
 {
-    public volatile Map<Player, Set<Block>> diodeMap = new LinkedHashMap<>(); // Volatile because it is accessed in different threads
+    public volatile Map<Player, Set<Block>> diodeMap = new LinkedHashMap<>();
     public volatile Set<Player> executors = new HashSet<>();
+    public volatile Map<Player, Pair<Location, Location>> toolPoints = new LinkedHashMap<>();
     public static final PluginManager plugMan = Bukkit.getPluginManager();
     public static final ProtocolManager protMan = ProtocolLibrary.getProtocolManager();
+    public PacketAdapter blockChangeListener = new ListenBlockChangePacket(this, PacketType.Play.Server.BLOCK_CHANGE);
 
     public void onEnable()
     {
+        loadItems();
         loadCommands();
         loadListeners();
     }
@@ -40,14 +48,29 @@ public class Main extends JavaPlugin
 
     }
 
+
+    /**
+     * Loads item handlers
+     */
+    private void loadItems()
+    {
+        new AntiSkidTool(this, new AntiSkidToolHandler(this));
+    }
+
+    /**
+     * Loads commands
+     */
     private void loadCommands()
     {
         getCommand("antiskid").setExecutor(new CmdAntiSkid(this));
     }
 
+    /**
+     * Loads listeners
+     */
     private void loadListeners()
     {
-        protMan.addPacketListener(new ListenBlockChangePacket(this, PacketType.Play.Server.BLOCK_CHANGE));
+        protMan.addPacketListener(blockChangeListener);
 
         plugMan.registerEvents(new ListenRepeaterAlter(this), this);
         plugMan.registerEvents(new ListenRepeaterBreak(this), this);
