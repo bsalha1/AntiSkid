@@ -8,7 +8,7 @@ package com.reliableplugins.antiskid.runnables;
 
 import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.abstracts.AbstractTask;
-import com.reliableplugins.antiskid.packets.RepeaterReplacePacket;
+import com.reliableplugins.antiskid.packets.RepeaterHidePacket;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -34,7 +34,7 @@ public class TaskProtectRepeaters extends AbstractTask
             whitelist = antiSkid.whitelists.get(entry.getKey());
             for(Block b : entry.getValue())
             {
-                new RepeaterReplacePacket(b).broadcastPacket(whitelist);
+                new RepeaterHidePacket(b).broadcastPacket(whitelist);
             }
         }
     }

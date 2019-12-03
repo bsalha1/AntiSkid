@@ -1,5 +1,5 @@
 name: AntiSkid
-main: com.reliableplugins.antiskid.Main
+main: com.reliableplugins.antiskid.AntiSkid
 version: 1.0
 depend: [ProtocolLib]
 commands:

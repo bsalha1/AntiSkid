@@ -7,7 +7,7 @@
 package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
-import com.reliableplugins.antiskid.packets.RepeaterReplacePacket;
+import com.reliableplugins.antiskid.packets.RepeaterHidePacket;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,7 +35,7 @@ public class ListenPlayerJoin implements Listener
         {
             for(Block b : entry.getValue())
             {
-                new RepeaterReplacePacket(b).sendPacket(player);
+                new RepeaterHidePacket(b).sendPacket(player);
             }
         }
     }

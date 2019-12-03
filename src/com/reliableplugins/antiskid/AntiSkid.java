@@ -10,7 +10,6 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
-import com.google.common.collect.Table;
 import com.reliableplugins.antiskid.commands.CmdAntiSkid;
 import com.reliableplugins.antiskid.items.AntiSkidTool;
 import com.reliableplugins.antiskid.listeners.*;
@@ -23,15 +22,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class AntiSkid extends JavaPlugin
 {
-    public volatile Set<Player> executors = new HashSet<>();
-
     public volatile Map<Player, Set<Block>> diodeMap = new LinkedHashMap<>();
     public volatile Map<Player, Set<Player>> whitelists = new LinkedHashMap<>();
     public volatile Map<Player, Pair<Location, Location>> toolPoints = new LinkedHashMap<>();

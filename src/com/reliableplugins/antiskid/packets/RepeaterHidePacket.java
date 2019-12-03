@@ -25,12 +25,12 @@ import org.bukkit.entity.Player;
 import java.util.Collection;
 import java.util.Set;
 
-public class RepeaterReplacePacket extends AbstractPacket
+public class RepeaterHidePacket extends AbstractPacket
 {
     private static final PacketType type = PacketType.Play.Server.BLOCK_CHANGE;
     private Block diode;
 
-    public RepeaterReplacePacket(Block diode)
+    public RepeaterHidePacket(Block diode)
     {
         super(new PacketContainer(type), type);
         this.diode = diode;
