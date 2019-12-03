@@ -10,14 +10,12 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
-import com.reliableplugins.antiskid.commands.CmdAntiSkid;
+import com.reliableplugins.antiskid.commands.Base_CommandAntiSkid;
 import com.reliableplugins.antiskid.listeners.ListenBlockChangePacket;
 import com.reliableplugins.antiskid.packets.RepeaterRevealPacket;
 import com.reliableplugins.antiskid.runnables.TaskProtectRepeaters;
-import javafx.util.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -88,7 +86,7 @@ public class AntiSkid extends JavaPlugin
      */
     private void loadCommands()
     {
-        getCommand("antiskid").setExecutor(new CmdAntiSkid(this));
+        new Base_CommandAntiSkid(this);
     }
 
 

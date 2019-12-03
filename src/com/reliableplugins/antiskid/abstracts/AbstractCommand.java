@@ -6,19 +6,72 @@
 
 package com.reliableplugins.antiskid.abstracts;
 
-import org.bukkit.command.CommandExecutor;
+import com.reliableplugins.antiskid.AntiSkid;
+import com.reliableplugins.antiskid.annotation.CommandBuilder;
 
-public abstract class AbstractCommand implements CommandExecutor
+import com.google.common.collect.Sets;
+import org.bukkit.command.CommandSender;
+
+import java.util.Set;
+
+public abstract class AbstractCommand
 {
-    private String node;
+    private String label;
+    private String[] alias;
+    private String permission;
+    private String description;
+    private boolean playerRequired;
 
-    public String getNode()
+    protected AntiSkid plugin;
+
+    public AbstractCommand()
     {
-        return this.node;
+        this.label = getClass().getAnnotation(CommandBuilder.class).label();
+        this.alias = getClass().getAnnotation(CommandBuilder.class).alias();
+        this.permission = getClass().getAnnotation(CommandBuilder.class).permission();
+        this.description = getClass().getAnnotation(CommandBuilder.class).description();
+        this.playerRequired = getClass().getAnnotation(CommandBuilder.class).playerRequired();
     }
 
-    public void setNode(String node)
+    public abstract void execute(CommandSender executor, String[] args);
+
+    public String getLabel()
     {
-        this.node = node;
+        return label;
+    }
+
+    public Set<String> getAlias()
+    {
+        return Sets.newHashSet(alias);
+    }
+
+    public String getPermission()
+    {
+        return permission;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setPlugin(AntiSkid plugin)
+    {
+        this.plugin = plugin;
+    }
+
+    public AntiSkid getPlugin()
+    {
+        return plugin;
+    }
+
+    public boolean hasPermission()
+    {
+        return permission.length() != 0;
+    }
+
+    public boolean isPlayerRequired()
+    {
+        return playerRequired;
     }
 }
