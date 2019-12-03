@@ -41,7 +41,7 @@ public class ListenBlockChangePacket extends PacketAdapter
         {
             if(entry.getValue().contains(block)) // If protected diode
             {
-                if(entry.getKey().equals(player)) return; // If it's the player's diode, allow them to see it
+                if(antiSkid.whitelists.get(entry.getKey()).contains(player)) continue; // If player is whitelisted, allow them to see it
                 event.setCancelled(true); // Keep diode hidden
                 return;
             }

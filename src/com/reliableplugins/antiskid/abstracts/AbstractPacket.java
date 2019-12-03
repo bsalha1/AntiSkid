@@ -49,6 +49,11 @@ public abstract class AbstractPacket
         return handle;
     }
 
+
+    /**
+     * Send packet to a player
+     * @param receiver player to receive the packet
+     */
     public void sendPacket(Player receiver)
     {
         try
@@ -61,6 +66,11 @@ public abstract class AbstractPacket
         }
     }
 
+
+    /**
+     * Send packet to all online players not in whitelist
+     * @param whitelist players to not receive packet
+     */
     public void broadcastPacket(Set<Player> whitelist)
     {
         Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
@@ -71,6 +81,24 @@ public abstract class AbstractPacket
         }
     }
 
+
+    /**
+     * Send packet to all online players
+     */
+    public void broadcastPacket()
+    {
+        Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+        for(Player p : onlinePlayers)
+        {
+            this.sendPacket(p);
+        }
+    }
+
+
+    /**
+     * Mimic receiving packet
+     * @param sender player sending packet
+     */
     public void receivePacket(Player sender)
     {
         try

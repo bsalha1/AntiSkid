@@ -10,13 +10,9 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.enums.Message;
 import com.reliableplugins.antiskid.hook.impl.FactionHook;
-import com.reliableplugins.antiskid.items.AntiSkidTool;
 import com.reliableplugins.antiskid.packets.RepeaterHidePacket;
 import com.reliableplugins.antiskid.packets.RepeaterRevealPacket;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -61,14 +57,6 @@ public class CmdAntiSkid implements CommandExecutor
             return true;
         }
 
-        /* GET TOOL */
-        if(strings[0].equalsIgnoreCase("tool"))
-        {
-            antiskidTool();
-            return true;
-        }
-
-
         /* ANTISKID ON */
         else if(strings[0].equalsIgnoreCase("on"))
         {
@@ -88,35 +76,48 @@ public class CmdAntiSkid implements CommandExecutor
         /* WHITELIST */
         else if(strings[0].equalsIgnoreCase("whitelist"))
         {
-            if(strings.length == 3)
+            // If /antiskid whitelist <no arguments>
+            if(strings.length == 1)
             {
-                String targetName = strings[2];
-                Player target = Bukkit.getPlayer(targetName);
+                printWhitelist();
+                return true;
+            }
 
-                if(target == null) // Invalid player
-                {
-                    executor.sendMessage(String.format(Message.ERROR_INVALID_PLAYER.toString(), targetName));
-                    return true;
-                }
-                else if(strings[1].equalsIgnoreCase("add")) // Adding player to whitelist
+            // If /antiskid whitelist <arg1> <arg2>
+            else if(strings.length == 3)
+            {
+                Player target = Bukkit.getPlayer(strings[2]);
+
+                // If /antiskid whitelist <add> <arg2>
+                if(strings[1].equalsIgnoreCase("add"))
                 {
                     whitelistPlayer(target);
                     return true;
                 }
-                else if(strings[1].equalsIgnoreCase("del")) // Deleting player from whitelist
+
+                // If /antiskid whitelist <del/delete/rem/remove> <arg2>
+                else if(
+                        strings[1].equalsIgnoreCase("del")
+                        || strings[1].equalsIgnoreCase("delete")
+                        || strings[1].equalsIgnoreCase("rem")
+                        || strings[1].equalsIgnoreCase("remove"))
                 {
                     unWhitelistPlayer(target);
                     return true;
                 }
-                else // Invalid whitelist argument
+
+                // If /antiskid whitelist <invalid argument>
+                else
                 {
-                    executor.sendMessage(Message.HELP_ANTISKID.toString());
+                    executor.sendMessage(Message.HELP_WHITELIST.toString());
                     return true;
                 }
             }
-            else // Invalid whitelist argument
+
+            // If /antiskid whitelist <invalid arguments>
+            else
             {
-                printWhitelist();
+                executor.sendMessage(Message.HELP_WHITELIST.toString());
                 return true;
             }
         }
@@ -133,6 +134,10 @@ public class CmdAntiSkid implements CommandExecutor
         return true;
     }
 
+
+    /**
+     * Prints the executor's whitelist
+     */
     private void printWhitelist()
     {
         // If whitelist isn't initialized, throw error
@@ -168,21 +173,38 @@ public class CmdAntiSkid implements CommandExecutor
      */
     private void unWhitelistPlayer(Player player)
     {
+        // If invalid player... throw error
+        if(player == null)
+        {
+            executor.sendMessage(Message.ERROR_INVALID_PLAYER.toString());
+            return;
+        }
+
         // If executor has no whitelist... throw error
         if(whitelist == null)
         {
             executor.sendMessage(Message.ERROR_NO_WHITELIST.toString());
+            return;
         }
         // If whitelist contains player... remove them
         else if(whitelist.contains(player))
         {
             whitelist.remove(player);
+
+            // If executor has protected diodes, hide them from the removed player
+            if(diodes != null)
+            {
+                for(Block b : diodes) new RepeaterHidePacket(b).sendPacket(player); // Hide repeaters
+            }
+
             executor.sendMessage(String.format(Message.UNWHITELISTED.toString(), player.getName()));
+            return;
         }
         // If whitelist doesn't contain player... throw error
         else
         {
             executor.sendMessage(String.format(Message.ERROR_PLAYER_NOT_WHITELISTED.toString(), player.getName()));
+            return;
         }
     }
 
@@ -193,6 +215,13 @@ public class CmdAntiSkid implements CommandExecutor
      */
     private void whitelistPlayer(Player player)
     {
+        // If invalid player... throw error
+        if(player == null)
+        {
+            executor.sendMessage(Message.ERROR_INVALID_PLAYER.toString());
+            return;
+        }
+
         // If the whitelist isn't initialized, initialize it
         if(whitelist == null)
         {
@@ -210,97 +239,85 @@ public class CmdAntiSkid implements CommandExecutor
             whitelist.add(player);
         }
 
+        // Reveal the hidden repeaters
         AntiSkid.protMan.removePacketListener(antiSkid.blockChangeListener);
-        for(Block b : diodes) new RepeaterRevealPacket(b).sendPacket(player); // Reveal repeaters
-        AntiSkid.protMan.removePacketListener(antiSkid.blockChangeListener);
+        if(diodes != null)
+        {
+            for(Block b : diodes) new RepeaterRevealPacket(b).sendPacket(player); // Reveal repeaters
+        }
+        AntiSkid.protMan.addPacketListener(antiSkid.blockChangeListener);
 
         executor.sendMessage(String.format(Message.WHITELISTED.toString(), player.getName()));
     }
-
-
-    /**
-     * Gives executor the antiskid tool
-     */
-    private void antiskidTool()
-    {
-        new AntiSkidTool().give(executor);
-        executor.sendMessage(Message.HELP_TOOL.toString());
-    }
-
 
     /**
      * Turns antiskid protection on. Parse region for repeaters and broadcast a packet change for all blacklisted players
      */
     private void antiskidOn()
     {
-        // If player either hasn't selected a region, has no position #1 or has no position #2, error
-        if(!antiSkid.toolPoints.containsKey(executor) || (antiSkid.toolPoints.get(executor).getKey() == null) || (antiSkid.toolPoints.get(executor).getValue() == null))
+        int count = 0;
+        int x1;
+        int z1;
+        Block block;
+        Set<Chunk> chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
+
+        // If the chunks are not the executors...
+        if(chunks.isEmpty())
         {
-            executor.sendMessage(Message.ERROR_NO_REGION.toString());
+            executor.sendMessage(Message.ERROR_NOT_TERRITORY.toString());
             return;
         }
+
+        // If player already has protected chunks
+        if(antiSkid.chunkMap.containsKey(executor))
+        {
+            antiSkid.chunkMap.get(executor).addAll(chunks);
+        }
+        // If player doesn't have protected chunks
         else
         {
-            World world = executor.getWorld();
-            Location point1 = antiSkid.toolPoints.get(executor).getKey();
-            Location point2 = antiSkid.toolPoints.get(executor).getValue();
-            Location loc;
-            Block block;
-            Set<Block> diodes = new HashSet<>();
+            antiSkid.chunkMap.put(executor, chunks);
+        }
 
-            int x1 = (int) point1.getX();
-            int x2 = (int) point2.getX();
-            int diffX = sign(x2 - x1);
+        World world = chunks.iterator().next().getWorld();
+        Set<Block> diodes = new HashSet<>();
 
-            int y1 = (int) point1.getY();
-            int y2 = (int) point2.getY();
-            int diffY = sign(y2 - y1);
-
-            int z1 = (int) point1.getZ();
-            int z2 = (int) point2.getZ();
-            int diffZ = sign(z2 - z1);
-
-            int count = 0;
-
-            for(int z = z1; diffZ > 0? (z <= z2) : (z >= z2); z += diffZ)
-            {
-                for(int y = y1; diffY > 0? (y <= y2) : (y >= y2); y += diffY)
-                {
-                    for(int x = x1; diffX > 0? (x <= x2) : (x >= x2); x += diffX)
+        long start = System.currentTimeMillis();
+        for(Chunk c : chunks)
+        {
+            x1 = c.getX() << 4;
+            z1 = c.getZ() << 4;
+            for(int x = x1; x < x1 + 16; x++)
+                for(int z = z1; z < z1 + 16; z++)
+                    for(int y = 0; y < 256; y++)
                     {
-                        loc = new Location(world, x, y, z);
-                        if(!FactionHook.canBuild(executor, loc.getChunk()))
-                        {
-                            executor.sendMessage(Message.ERROR_NOT_TERRITORY.toString());
-                            return;
-                        }
-                        block = loc.getBlock();
+                        block = world.getBlockAt(x, y, z);
                         if(block.getType().equals(Material.DIODE_BLOCK_OFF))
                         {
                             diodes.add(block);
                             count++;
                         }
                     }
-                }
-            }
-
-            // If whitelist hasn't already been populated, populate it with the executor
-            if(!antiSkid.whitelists.containsKey(executor))
-            {
-                antiSkid.whitelists.put(executor, new HashSet<>(Collections.singletonList(executor)));
-            }
-
-            // Change diodes to carpets for all players not in whitelist
-            for(Block b : diodes)
-            {
-                new RepeaterHidePacket(b).broadcastPacket(antiSkid.whitelists.get(executor));
-            }
-
-            // Store diodes
-            antiSkid.diodeMap.put(executor, diodes);
-
-            executor.sendMessage(String.format(Message.ANTISKID_ON.toString(), count));
         }
+        long end = System.currentTimeMillis();
+        Bukkit.broadcastMessage("Took " + Long.toString(end - start) + " ms");
+
+        // If whitelist hasn't already been populated, populate it with the executor
+        if(!antiSkid.whitelists.containsKey(executor))
+        {
+            antiSkid.whitelists.put(executor, new HashSet<>(Collections.singletonList(executor)));
+        }
+
+        // Change diodes to carpets for all players not in whitelist
+        for(Block b : diodes)
+        {
+            new RepeaterHidePacket(b).broadcastPacket(antiSkid.whitelists.get(executor));
+        }
+
+        // Store diodes
+        antiSkid.diodeMap.put(executor, diodes);
+
+        executor.sendMessage(String.format(Message.ANTISKID_ON.toString(), count));
     }
 
     private int sign(int number)

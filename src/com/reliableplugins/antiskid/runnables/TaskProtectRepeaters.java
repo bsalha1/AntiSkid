@@ -19,7 +19,7 @@ public class TaskProtectRepeaters extends AbstractTask
 {
     public TaskProtectRepeaters(AntiSkid antiSkid)
     {
-        super(antiSkid, 0, 20);
+        super(antiSkid, 0, antiSkid.getConfig().getInt("asynch-thread-period"));
     }
 
     @Override

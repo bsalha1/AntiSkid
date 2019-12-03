@@ -21,9 +21,6 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
-import java.util.Set;
-
 public class RepeaterRevealPacket extends AbstractPacket
 {
     private static final PacketType type = PacketType.Play.Server.BLOCK_CHANGE;
@@ -56,18 +53,6 @@ public class RepeaterRevealPacket extends AbstractPacket
         catch(Exception e)
         {
             Bukkit.getConsoleSender().sendMessage("Failed to send blockchange packet: " + e.toString());
-        }
-    }
-
-    @Override
-    public void broadcastPacket(Set<Player> whitelist)
-    {
-        Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
-
-        for(Player p : onlinePlayers)
-        {
-            if(whitelist.contains(p)) continue;
-            this.sendPacket(p);
         }
     }
 }

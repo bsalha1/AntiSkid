@@ -11,11 +11,12 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.reliableplugins.antiskid.commands.CmdAntiSkid;
-import com.reliableplugins.antiskid.items.AntiSkidTool;
-import com.reliableplugins.antiskid.listeners.*;
+import com.reliableplugins.antiskid.listeners.ListenBlockChangePacket;
+import com.reliableplugins.antiskid.packets.RepeaterRevealPacket;
 import com.reliableplugins.antiskid.runnables.TaskProtectRepeaters;
 import javafx.util.Pair;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -29,26 +30,49 @@ import java.util.Set;
 public class AntiSkid extends JavaPlugin
 {
     public volatile Map<Player, Set<Block>> diodeMap = new LinkedHashMap<>();
+    public volatile Map<Player, Set<Chunk>> chunkMap = new LinkedHashMap<>();
     public volatile Map<Player, Set<Player>> whitelists = new LinkedHashMap<>();
-    public volatile Map<Player, Pair<Location, Location>> toolPoints = new LinkedHashMap<>();
 
     public static final PluginManager plugMan = Bukkit.getPluginManager();
     public static final ProtocolManager protMan = ProtocolLibrary.getProtocolManager();
 
     public PacketAdapter blockChangeListener = new ListenBlockChangePacket(this, PacketType.Play.Server.BLOCK_CHANGE);
 
+    @Override
     public void onEnable()
     {
+        loadConfig();
         loadTasks();
-        loadItems();
         loadCommands();
         loadListeners();
     }
 
+    @Override
     public void onDisable()
     {
-
+        for(Map.Entry<Player, Set<Block>> entry : diodeMap.entrySet())
+        {
+            for(Block b : entry.getValue())
+            {
+                new RepeaterRevealPacket(b).broadcastPacket();
+            }
+        }
+        this.saveConfig();
     }
+
+
+    /**
+     * Loads the config
+     */
+    private void loadConfig()
+    {
+        Map<String, Object> defaults = new LinkedHashMap<>();
+        defaults.put("asynch-thread-period", 20);
+        this.getConfig().addDefaults(defaults);
+        this.getConfig().options().copyDefaults(true);
+        this.saveConfig();
+    }
+
 
     /**
      * Loads tasks
@@ -58,13 +82,6 @@ public class AntiSkid extends JavaPlugin
         new TaskProtectRepeaters(this);
     }
 
-    /**
-     * Loads item handlers
-     */
-    private void loadItems()
-    {
-        new AntiSkidTool(this, new AntiSkidToolHandler(this));
-    }
 
     /**
      * Loads commands
@@ -74,13 +91,12 @@ public class AntiSkid extends JavaPlugin
         getCommand("antiskid").setExecutor(new CmdAntiSkid(this));
     }
 
+
     /**
      * Loads listeners
      */
     private void loadListeners()
     {
         protMan.addPacketListener(blockChangeListener);
-
-        plugMan.registerEvents(new ListenRepeaterBreak(this), this);
     }
 }
