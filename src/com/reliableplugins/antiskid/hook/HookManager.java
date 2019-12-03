@@ -6,7 +6,7 @@
 
 package com.reliableplugins.antiskid.hook;
 
-import com.reliableplugins.antiskid.Main;
+import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.hook.impl.FactionHook;
 
 import java.util.HashMap;
@@ -15,23 +15,23 @@ import java.util.logging.Level;
 
 public class HookManager
 {
-    private Main main;
+    private AntiSkid antiSkid;
     private Map<String, PluginHook> pluginMap = new HashMap<>();
 
-    public HookManager(Main main)
+    public HookManager(AntiSkid antiSkid)
     {
-        this.main = main;
+        this.antiSkid = antiSkid;
         hookPlugin(new FactionHook());
     }
 
     private void hookPlugin(PluginHook pluginHook)
     {
-        if (main.getServer().getPluginManager().getPlugin(pluginHook.getName()) == null)
+        if (antiSkid.getServer().getPluginManager().getPlugin(pluginHook.getName()) == null)
         {
-            main.getServer().getLogger().log(Level.SEVERE, "Plugin failed to find " + pluginHook.getName());
+            antiSkid.getServer().getLogger().log(Level.SEVERE, "Plugin failed to find " + pluginHook.getName());
             return;
         }
-        pluginMap.put(pluginHook.getName().toLowerCase(), (PluginHook<?>) pluginHook.setup(main));
+        pluginMap.put(pluginHook.getName().toLowerCase(), (PluginHook<?>) pluginHook.setup(antiSkid));
     }
 
     public Map<String, PluginHook> getPluginMap()

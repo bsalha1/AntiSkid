@@ -1,10 +1,10 @@
 package com.reliableplugins.antiskid.hook;
 
-import com.reliableplugins.antiskid.Main;
+import com.reliableplugins.antiskid.AntiSkid;
 
 public interface PluginHook<T>
 {
-    T setup(Main main);
+    T setup(AntiSkid antiSkid);
 
     String getName();
 }

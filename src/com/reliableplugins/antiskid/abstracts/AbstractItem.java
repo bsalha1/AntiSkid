@@ -6,7 +6,7 @@
 
 package com.reliableplugins.antiskid.abstracts;
 
-import com.reliableplugins.antiskid.Main;
+import com.reliableplugins.antiskid.AntiSkid;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -21,7 +21,7 @@ public abstract class AbstractItem
 {
     protected ItemStack item;
     protected ItemMeta itemMeta;
-    protected Main main;
+    protected AntiSkid antiSkid;
     protected Listener clickHandler;
 
 
@@ -38,13 +38,13 @@ public abstract class AbstractItem
 
     /**
      * Registers a click handler for the item. Used in plugin initialization
-     * @param main
+     * @param antiSkid
      * @param clickHandler
      */
-    protected AbstractItem(Main main, Listener clickHandler)
+    protected AbstractItem(AntiSkid antiSkid, Listener clickHandler)
     {
         this.clickHandler = clickHandler;
-        Bukkit.getPluginManager().registerEvents(clickHandler, main);
+        Bukkit.getPluginManager().registerEvents(clickHandler, antiSkid);
     }
 
     public void give(Player player)

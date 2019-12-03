@@ -6,7 +6,7 @@
 
 package com.reliableplugins.antiskid.listeners;
 
-import com.reliableplugins.antiskid.Main;
+import com.reliableplugins.antiskid.AntiSkid;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -19,11 +19,11 @@ import java.util.Set;
 
 public class ListenRepeaterBreak implements Listener
 {
-    private Main main;
+    private AntiSkid antiSkid;
 
-    public ListenRepeaterBreak(Main main)
+    public ListenRepeaterBreak(AntiSkid antiSkid)
     {
-        this.main = main;
+        this.antiSkid = antiSkid;
     }
 
     @EventHandler
@@ -32,7 +32,7 @@ public class ListenRepeaterBreak implements Listener
         Material material = event.getBlock().getType();
         if((material != Material.DIODE_BLOCK_OFF) && (material != Material.DIODE_BLOCK_ON)) return;
 
-        Set<Map.Entry<Player, Set<Block>>> entries = main.diodeMap.entrySet();
+        Set<Map.Entry<Player, Set<Block>>> entries = antiSkid.diodeMap.entrySet();
         Block block = event.getBlock();
 
         // If block broken is a registered diode, deregister it
@@ -40,7 +40,7 @@ public class ListenRepeaterBreak implements Listener
         {
             if(entry.getValue().contains(block))
             {
-                this.main.diodeMap.get(entry.getKey()).remove(block);
+                this.antiSkid.diodeMap.get(entry.getKey()).remove(block);
             }
         }
     }

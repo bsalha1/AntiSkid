@@ -28,7 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class Main extends JavaPlugin
+public class AntiSkid extends JavaPlugin
 {
     public volatile Set<Player> executors = new HashSet<>();
 

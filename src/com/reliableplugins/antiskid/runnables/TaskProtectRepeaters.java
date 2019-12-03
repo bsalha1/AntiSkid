@@ -6,22 +6,20 @@
 
 package com.reliableplugins.antiskid.runnables;
 
-import com.reliableplugins.antiskid.Main;
+import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.abstracts.AbstractTask;
 import com.reliableplugins.antiskid.packets.RepeaterReplacePacket;
-import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 public class TaskProtectRepeaters extends AbstractTask
 {
-    public TaskProtectRepeaters(Main main)
+    public TaskProtectRepeaters(AntiSkid antiSkid)
     {
-        super(main, 0, 20);
+        super(antiSkid, 0, 20);
     }
 
     @Override
@@ -30,10 +28,10 @@ public class TaskProtectRepeaters extends AbstractTask
         Set<Player> whitelist;
 
         // For all diode maps
-        for(Map.Entry<Player, Set<Block>> entry : main.diodeMap.entrySet())
+        for(Map.Entry<Player, Set<Block>> entry : antiSkid.diodeMap.entrySet())
         {
             // Send block changes to all players not in whitelist (who have the chunk loaded)
-            whitelist = main.whitelists.get(entry.getKey());
+            whitelist = antiSkid.whitelists.get(entry.getKey());
             for(Block b : entry.getValue())
             {
                 new RepeaterReplacePacket(b).broadcastPacket(whitelist);

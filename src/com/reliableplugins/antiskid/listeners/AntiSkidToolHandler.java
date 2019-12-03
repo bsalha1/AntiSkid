@@ -6,7 +6,7 @@
 
 package com.reliableplugins.antiskid.listeners;
 
-import com.reliableplugins.antiskid.Main;
+import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.enums.Message;
 import com.reliableplugins.antiskid.items.AntiSkidTool;
 import javafx.util.Pair;
@@ -19,11 +19,11 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class AntiSkidToolHandler implements Listener
 {
-    private Main main;
+    private AntiSkid antiSkid;
 
-    public AntiSkidToolHandler(Main main)
+    public AntiSkidToolHandler(AntiSkid antiSkid)
     {
-        this.main = main;
+        this.antiSkid = antiSkid;
     }
 
     @EventHandler
@@ -45,10 +45,10 @@ public class AntiSkidToolHandler implements Listener
         if(action.equals(Action.LEFT_CLICK_BLOCK))
         {
             // If player doesn't have any toolpoints, add a toolpoint and make position 2 null
-            if(!main.toolPoints.containsKey(player)) points = new Pair<>(location, null);
+            if(!antiSkid.toolPoints.containsKey(player)) points = new Pair<>(location, null);
 
             // If player already has a toolpoint, keep position 2 but change position 1
-            else points = new Pair<>(location, main.toolPoints.get(player).getValue());
+            else points = new Pair<>(location, antiSkid.toolPoints.get(player).getValue());
 
             player.sendMessage(String.format(Message.FIRST_POINT_SET.toString(), location.toVector().toString()));
         }
@@ -57,14 +57,14 @@ public class AntiSkidToolHandler implements Listener
         if(action.equals(Action.RIGHT_CLICK_BLOCK))
         {
             // If player doesn't have any toolpoints, add a toolpoint and make position 1 null
-            if(!main.toolPoints.containsKey(player)) points = new Pair<>(null, location);
+            if(!antiSkid.toolPoints.containsKey(player)) points = new Pair<>(null, location);
 
             // If player already has a toolpoint, keep position 1 but change position 2
-            else points = new Pair<>(main.toolPoints.get(player).getKey(), location);
+            else points = new Pair<>(antiSkid.toolPoints.get(player).getKey(), location);
 
             player.sendMessage(String.format(Message.SECOND_POINT_SET.toString(), location.toVector().toString()));
         }
 
-        main.toolPoints.put(player, points);
+        antiSkid.toolPoints.put(player, points);
     }
 }

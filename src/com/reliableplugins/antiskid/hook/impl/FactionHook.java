@@ -7,9 +7,8 @@
 package com.reliableplugins.antiskid.hook.impl;
 
 import com.massivecraft.factions.*;
-import com.reliableplugins.antiskid.Main;
+import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.hook.PluginHook;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 
@@ -34,7 +33,7 @@ public class FactionHook implements PluginHook<FactionHook>
     }
 
     @Override
-    public FactionHook setup(Main main)
+    public FactionHook setup(AntiSkid antiSkid)
     {
         return this;
     }

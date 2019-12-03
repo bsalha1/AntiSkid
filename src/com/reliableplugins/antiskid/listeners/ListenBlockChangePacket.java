@@ -11,7 +11,7 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
-import com.reliableplugins.antiskid.Main;
+import com.reliableplugins.antiskid.AntiSkid;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -21,12 +21,12 @@ import java.util.Set;
 
 public class ListenBlockChangePacket extends PacketAdapter
 {
-    private Main main;
+    private AntiSkid antiSkid;
 
-    public ListenBlockChangePacket(Main main, PacketType... types)
+    public ListenBlockChangePacket(AntiSkid antiSkid, PacketType... types)
     {
-        super(main, types);
-        this.main = main;
+        super(antiSkid, types);
+        this.antiSkid = antiSkid;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class ListenBlockChangePacket extends PacketAdapter
         BlockPosition blockPos = event.getPacket().getBlockPositionModifier().read(0);
         Block block = blockPos.toLocation(player.getLocation().getWorld()).getBlock();
 
-        for(Map.Entry<Player, Set<Block>> entry : main.diodeMap.entrySet())
+        for(Map.Entry<Player, Set<Block>> entry : antiSkid.diodeMap.entrySet())
         {
             if(entry.getValue().contains(block)) // If protected diode
             {

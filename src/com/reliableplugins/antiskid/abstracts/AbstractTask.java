@@ -6,26 +6,26 @@
 
 package com.reliableplugins.antiskid.abstracts;
 
-import com.reliableplugins.antiskid.Main;
+import com.reliableplugins.antiskid.AntiSkid;
 import org.bukkit.Bukkit;
 
 public abstract class AbstractTask implements Runnable
 {
     protected int id;
-    protected Main main;
+    protected AntiSkid antiSkid;
 
     // Set delayed task
-    public AbstractTask(Main main, long delay)
+    public AbstractTask(AntiSkid antiSkid, long delay)
     {
-        this.main = main;
-        this.id = Bukkit.getScheduler().scheduleSyncDelayedTask(main, this, delay);
+        this.antiSkid = antiSkid;
+        this.id = Bukkit.getScheduler().scheduleSyncDelayedTask(antiSkid, this, delay);
     }
 
     // Set delayed repeating task
-    public AbstractTask(Main main, long delay, long period)
+    public AbstractTask(AntiSkid antiSkid, long delay, long period)
     {
-        this.main = main;
-        this.id = Bukkit.getScheduler().scheduleSyncRepeatingTask(main, this, delay, period);
+        this.antiSkid = antiSkid;
+        this.id = Bukkit.getScheduler().scheduleSyncRepeatingTask(antiSkid, this, delay, period);
     }
 
     public int getId()

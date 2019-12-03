@@ -6,7 +6,7 @@
 
 package com.reliableplugins.antiskid.listeners;
 
-import com.reliableplugins.antiskid.Main;
+import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.packets.RepeaterReplacePacket;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -19,11 +19,11 @@ import java.util.Set;
 
 public class ListenPlayerJoin implements Listener
 {
-    private Main main;
+    private AntiSkid antiSkid;
 
-    public ListenPlayerJoin(Main main)
+    public ListenPlayerJoin(AntiSkid antiSkid)
     {
-        this.main = main;
+        this.antiSkid = antiSkid;
     }
 
     @EventHandler
@@ -31,7 +31,7 @@ public class ListenPlayerJoin implements Listener
     {
         Player player = event.getPlayer();
 
-        for(Map.Entry<Player, Set<Block>> entry : main.diodeMap.entrySet())
+        for(Map.Entry<Player, Set<Block>> entry : antiSkid.diodeMap.entrySet())
         {
             for(Block b : entry.getValue())
             {

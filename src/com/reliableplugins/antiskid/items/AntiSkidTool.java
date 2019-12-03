@@ -6,14 +6,12 @@
 
 package com.reliableplugins.antiskid.items;
 
-import com.reliableplugins.antiskid.Main;
+import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.abstracts.AbstractItem;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.Arrays;
 
 public class AntiSkidTool extends AbstractItem
 {
@@ -21,12 +19,12 @@ public class AntiSkidTool extends AbstractItem
 
     /**
      * Loads the clickhandler
-     * @param main
+     * @param antiSkid
      * @param clickHandler
      */
-    public AntiSkidTool(Main main, Listener clickHandler)
+    public AntiSkidTool(AntiSkid antiSkid, Listener clickHandler)
     {
-        super(main, clickHandler);
+        super(antiSkid, clickHandler);
     }
 
 
