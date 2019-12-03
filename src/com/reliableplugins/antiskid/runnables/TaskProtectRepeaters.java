@@ -13,22 +13,31 @@ import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-public class ReplaceRepeater extends AbstractTask
-{
-    private Block block;
-    private Player player;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
-    public ReplaceRepeater(Main main, Block block, Player player)
+public class TaskProtectRepeaters extends AbstractTask
+{
+    public TaskProtectRepeaters(Main main)
     {
-        super(main);
-        this.block = block;
-        this.player = player;
-        Bukkit.getScheduler().scheduleSyncDelayedTask(this.main, this, 2);
+        super(main, 0, 20);
     }
 
     @Override
     public void run()
     {
-        new RepeaterReplacePacket(block).sendPacket(player);
+        Set<Player> whitelist;
+
+        // For all diode maps
+        for(Map.Entry<Player, Set<Block>> entry : main.diodeMap.entrySet())
+        {
+            // Send block changes to all players not in whitelist (who have the chunk loaded)
+            whitelist = main.whitelists.get(entry.getKey());
+            for(Block b : entry.getValue())
+            {
+                new RepeaterReplacePacket(b).broadcastPacket(whitelist);
+            }
+        }
     }
 }

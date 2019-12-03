@@ -14,12 +14,27 @@ public abstract class AbstractTask implements Runnable
     protected int id;
     protected Main main;
 
-    protected AbstractTask(Main main)
+    // Set delayed task
+    public AbstractTask(Main main, long delay)
     {
         this.main = main;
+        this.id = Bukkit.getScheduler().scheduleSyncDelayedTask(main, this, delay);
     }
 
-    public int getId() { return this.id; }
+    // Set delayed repeating task
+    public AbstractTask(Main main, long delay, long period)
+    {
+        this.main = main;
+        this.id = Bukkit.getScheduler().scheduleSyncRepeatingTask(main, this, delay, period);
+    }
 
-    public void cancel() { Bukkit.getScheduler().cancelTask(this.id); }
+    public int getId()
+    {
+        return this.id;
+    }
+
+    public void cancel()
+    {
+        Bukkit.getScheduler().cancelTask(this.id);
+    }
 }

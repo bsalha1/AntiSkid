@@ -11,9 +11,9 @@ import org.bukkit.ChatColor;
 public enum Message
 {
     // Info Messages
-    FIRST_POINT_SET(ChatColor.GRAY + "position #1: "),
-    SECOND_POINT_SET(ChatColor.GRAY + "position #2: "),
-    ANTISKID_ON(ChatColor.AQUA + "Antiskid protection has been turned on."),
+    FIRST_POINT_SET(ChatColor.GRAY + "position #1: %s"),
+    SECOND_POINT_SET(ChatColor.GRAY + "position #2: %s"),
+    ANTISKID_ON(ChatColor.AQUA + "Antiskid protection has been turned on (%d repeaters protected)"),
     ANTISKID_OFF(ChatColor.AQUA + "Antiskid protection has been turned off."),
 
     // Help Messages
@@ -24,7 +24,8 @@ public enum Message
     ERROR_NO_REGION(ChatColor.RED + "You haven't selected a region yet; execute \"/antiskid tool\" and select your region."),
     ERROR_NO_PROTECTED(ChatColor.RED + "You have not turned on antiskid yet."),
     ERROR_NOT_PLAYER(ChatColor.RED + "Only players may execute this command."),
-    ERROR_PROTECTED_DIODE(ChatColor.RED + "That diode is protected!");
+    ERROR_PROTECTED_DIODE(ChatColor.RED + "That diode is protected!"),
+    ERROR_NOT_TERRITORY(ChatColor.RED + "You cannot select a region that is not owned by your faction.");
 
     private final String text;
     private final String header =

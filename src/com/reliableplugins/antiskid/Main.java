@@ -14,6 +14,7 @@ import com.google.common.collect.Table;
 import com.reliableplugins.antiskid.commands.CmdAntiSkid;
 import com.reliableplugins.antiskid.items.AntiSkidTool;
 import com.reliableplugins.antiskid.listeners.*;
+import com.reliableplugins.antiskid.runnables.TaskProtectRepeaters;
 import javafx.util.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -29,15 +30,20 @@ import java.util.Set;
 
 public class Main extends JavaPlugin
 {
-    public volatile Map<Player, Set<Block>> diodeMap = new LinkedHashMap<>();
     public volatile Set<Player> executors = new HashSet<>();
+
+    public volatile Map<Player, Set<Block>> diodeMap = new LinkedHashMap<>();
+    public volatile Map<Player, Set<Player>> whitelists = new LinkedHashMap<>();
     public volatile Map<Player, Pair<Location, Location>> toolPoints = new LinkedHashMap<>();
+
     public static final PluginManager plugMan = Bukkit.getPluginManager();
     public static final ProtocolManager protMan = ProtocolLibrary.getProtocolManager();
+
     public PacketAdapter blockChangeListener = new ListenBlockChangePacket(this, PacketType.Play.Server.BLOCK_CHANGE);
 
     public void onEnable()
     {
+        loadTasks();
         loadItems();
         loadCommands();
         loadListeners();
@@ -48,6 +54,13 @@ public class Main extends JavaPlugin
 
     }
 
+    /**
+     * Loads tasks
+     */
+    private void loadTasks()
+    {
+        new TaskProtectRepeaters(this);
+    }
 
     /**
      * Loads item handlers
@@ -72,7 +85,6 @@ public class Main extends JavaPlugin
     {
         protMan.addPacketListener(blockChangeListener);
 
-        plugMan.registerEvents(new ListenRepeaterAlter(this), this);
         plugMan.registerEvents(new ListenRepeaterBreak(this), this);
     }
 }
