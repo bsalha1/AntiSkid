@@ -1,8 +1,8 @@
-/*******************************************************************************
+/*
  * Project: AntiSkid
  * Copyright (C) 2019 Bilal Salha <bsalha1@gmail.com>
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
- ******************************************************************************/
+ */
 
 package com.reliableplugins.antiskid.commands;
 
@@ -20,16 +20,19 @@ import org.bukkit.entity.Player;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @CommandBuilder(label = "whitelist", permission = "antiskid.whitelist")
 public class CommandWhitelist extends AbstractCommand
 {
     private Player executor;
+    private UUID executorId;
 
     @Override
     public void execute(CommandSender sender, String[] args)
     {
         this.executor = (Player) sender;
+        this.executorId = executor.getUniqueId();
 
         // If /antiskid whitelist <add/del> <player>
         if(args.length == 2)
@@ -69,7 +72,7 @@ public class CommandWhitelist extends AbstractCommand
      */
     private void printWhitelist()
     {
-        Set<Player> whitelist = plugin.whitelists.get(executor);
+        Set<Player> whitelist = plugin.whitelists.get(executorId);
 
         // If whitelist isn't initialized, throw error
         if(whitelist == null)
@@ -79,18 +82,18 @@ public class CommandWhitelist extends AbstractCommand
         // Else print the whitelist (not including the executor)
         else
         {
-            String message = "";
+            StringBuilder message = new StringBuilder();
             for(Player p : whitelist)
             {
                 if(p.equals(executor)) continue;
-                message = message + p.getName() + ", ";
+                message.append(p.getName()).append(", ");
             }
 
             // Trim off trailing comma
-            if(message.contains(", "))
+            if(message.toString().contains(", "))
             {
-                message = message.substring(0, message.lastIndexOf(", "));
-                executor.sendMessage(String.format(Message.LIST_WHITELISTED.toString(), message));
+                message = new StringBuilder(message.substring(0, message.lastIndexOf(", ")));
+                executor.sendMessage(String.format(Message.LIST_WHITELISTED.toString(), message.toString()));
                 return;
             }
             executor.sendMessage(Message.ERROR_NO_WHITELIST.toString());
@@ -104,8 +107,8 @@ public class CommandWhitelist extends AbstractCommand
      */
     private void whitelistPlayer(Player player)
     {
-        Set<Player> whitelist = plugin.whitelists.get(executor);
-        Set<Block> diodes = plugin.diodeMap.get(executor);
+        Set<Player> whitelist = plugin.whitelists.get(executorId);
+        Set<Block> diodes = plugin.diodeMap.get(executorId);
 
         // If invalid player... throw error
         if(player == null)
@@ -117,7 +120,7 @@ public class CommandWhitelist extends AbstractCommand
         // If the whitelist isn't initialized, initialize it
         if(whitelist == null)
         {
-            plugin.whitelists.put(executor, new HashSet<>(Arrays.asList(executor, player)));
+            plugin.whitelists.put(executorId, new HashSet<>(Arrays.asList(executor, player)));
         }
         // If the whitelist already contains the player, throw error
         else if(whitelist.contains(player))
@@ -150,8 +153,8 @@ public class CommandWhitelist extends AbstractCommand
      */
     private void unWhitelistPlayer(Player player)
     {
-        Set<Player> whitelist = plugin.whitelists.get(executor);
-        Set<Block> diodes = plugin.diodeMap.get(executor);
+        Set<Player> whitelist = plugin.whitelists.get(executorId);
+        Set<Block> diodes = plugin.diodeMap.get(executorId);
 
         // If invalid player... throw error
         if(player == null)

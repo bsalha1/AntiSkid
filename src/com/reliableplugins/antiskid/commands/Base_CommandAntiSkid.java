@@ -1,8 +1,8 @@
-/*******************************************************************************
+/*
  * Project: AntiSkid
  * Copyright (C) 2019 Bilal Salha <bsalha1@gmail.com>
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
- ******************************************************************************/
+ */
 
 package com.reliableplugins.antiskid.commands;
 
@@ -19,10 +19,8 @@ import java.util.*;
 
 public class Base_CommandAntiSkid implements CommandExecutor
 {
-    public Map<String, AbstractCommand> subcommands = new HashMap<>();
-
+    private Map<String, AbstractCommand> subcommands = new HashMap<>();
     private CommandHelp commandHelp;
-
     private AntiSkid plugin;
 
     public Base_CommandAntiSkid(AntiSkid plugin)
@@ -86,7 +84,7 @@ public class Base_CommandAntiSkid implements CommandExecutor
         return true;
     }
 
-    public void addCommand(AbstractCommand command)
+    private void addCommand(AbstractCommand command)
     {
         command.setPlugin(plugin);
         this.subcommands.put(command.getLabel().toLowerCase(), command);

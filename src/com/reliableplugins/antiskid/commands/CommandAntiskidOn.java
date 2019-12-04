@@ -1,8 +1,8 @@
-/*******************************************************************************
+/*
  * Project: AntiSkid
  * Copyright (C) 2019 Bilal Salha <bsalha1@gmail.com>
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
- ******************************************************************************/
+ */
 
 package com.reliableplugins.antiskid.commands;
 
@@ -22,14 +22,25 @@ import org.bukkit.entity.Player;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Executors;
 
-@CommandBuilder(label = "on", alias = {}, permission = "antiskid.on", description = "Turns on antiskid protection", playerRequired = true)
+@CommandBuilder(label = "on", permission = "antiskid.on", description = "Turns on antiskid protection", playerRequired = true)
 public class CommandAntiskidOn extends AbstractCommand
 {
+    private Player executor;
+    private UUID executorId;
+
     @Override
     public void execute(CommandSender sender, String[] args)
     {
-        Player executor = (Player) sender;
+        executor = (Player) sender;
+        executorId = executor.getUniqueId();
+        Executors.newSingleThreadExecutor().submit(this::antiskidOn);
+    }
+
+    private void antiskidOn()
+    {
         int count = 0;
         int x1;
         int z1;
@@ -44,14 +55,14 @@ public class CommandAntiskidOn extends AbstractCommand
         }
 
         // If player already has protected chunks
-        if(plugin.chunkMap.containsKey(executor))
+        if(plugin.chunkMap.containsKey(executorId))
         {
-            plugin.chunkMap.get(executor).addAll(chunks);
+            plugin.chunkMap.get(executorId).addAll(chunks);
         }
         // If player doesn't have protected chunks
         else
         {
-            plugin.chunkMap.put(executor, chunks);
+            plugin.chunkMap.put(executorId, chunks);
         }
 
         World world = chunks.iterator().next().getWorld();
@@ -75,20 +86,20 @@ public class CommandAntiskidOn extends AbstractCommand
         }
 
         // If whitelist hasn't already been populated, populate it with the executor
-        if(!plugin.whitelists.containsKey(executor))
+        if(!plugin.whitelists.containsKey(executorId))
         {
-            plugin.whitelists.put(executor, new HashSet<>(Collections.singletonList(executor)));
+            plugin.whitelists.put(executorId, new HashSet<>(Collections.singletonList(executor)));
         }
+
+        Set<Player> whitelist = plugin.whitelists.get(executorId);
 
         // Change diodes to carpets for all players not in whitelist
-        for(Block b : diodes)
-        {
-            new RepeaterHidePacket(b).broadcastPacket(plugin.whitelists.get(executor));
-        }
+        for(Block b : diodes) new RepeaterHidePacket(b).broadcastPacket(whitelist);
 
         // Store diodes
-        plugin.diodeMap.put(executor, diodes);
+        plugin.diodeMap.put(executorId, diodes);
 
         executor.sendMessage(String.format(Message.ANTISKID_ON.toString(), count));
     }
+
 }
