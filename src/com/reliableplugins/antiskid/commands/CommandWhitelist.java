@@ -17,10 +17,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @CommandBuilder(label = "whitelist", permission = "antiskid.whitelist")
 public class CommandWhitelist extends AbstractCommand
@@ -72,31 +69,33 @@ public class CommandWhitelist extends AbstractCommand
      */
     private void printWhitelist()
     {
-        Set<Player> whitelist = plugin.whitelists.get(executorId);
+        TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
+        Player player;
 
         // If whitelist isn't initialized, throw error
         if(whitelist == null)
         {
-            executor.sendMessage(Message.ERROR_NO_WHITELIST.toString());
+            executor.sendMessage(Message.ERROR_EMPTY_WHITELIST.toString());
         }
         // Else print the whitelist (not including the executor)
         else
         {
             StringBuilder message = new StringBuilder();
-            for(Player p : whitelist)
+            for(UUID id : whitelist)
             {
-                if(p.equals(executor)) continue;
-                message.append(p.getName()).append(", ");
+                player = Bukkit.getPlayer(id);
+                if(player.equals(executor)) continue;
+                message.append(player.getName()).append(", ");
             }
 
             // Trim off trailing comma
             if(message.toString().contains(", "))
             {
                 message = new StringBuilder(message.substring(0, message.lastIndexOf(", ")));
-                executor.sendMessage(String.format(Message.LIST_WHITELISTED.toString(), message.toString()));
+                executor.sendMessage(Message.WHITELIST_LIST.toString().replace("{LIST}", message));
                 return;
             }
-            executor.sendMessage(Message.ERROR_NO_WHITELIST.toString());
+            executor.sendMessage(Message.ERROR_EMPTY_WHITELIST.toString());
         }
     }
 
@@ -107,7 +106,7 @@ public class CommandWhitelist extends AbstractCommand
      */
     private void whitelistPlayer(Player player)
     {
-        Set<Player> whitelist = plugin.whitelists.get(executorId);
+        TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
         Set<Block> diodes = plugin.diodeMap.get(executorId);
 
         // If invalid player... throw error
@@ -117,21 +116,30 @@ public class CommandWhitelist extends AbstractCommand
             return;
         }
 
+        // If self... throw error
+        if(player.equals(executor))
+        {
+            executor.sendMessage(Message.ERROR_WHITELIST_SELF.toString());
+            return;
+        }
+
         // If the whitelist isn't initialized, initialize it
         if(whitelist == null)
         {
-            plugin.whitelists.put(executorId, new HashSet<>(Arrays.asList(executor, player)));
+            plugin.whitelists.put(executorId, new TreeSet<>());
+            plugin.whitelists.get(executorId).add(executor.getUniqueId());
+            plugin.whitelists.get(executorId).add(player.getUniqueId());
         }
         // If the whitelist already contains the player, throw error
-        else if(whitelist.contains(player))
+        else if(whitelist.contains(player.getUniqueId()))
         {
-            executor.sendMessage(String.format(Message.ERROR_PLAYER_ALREADY_WHITELISTED.toString(), player.getName()));
+            executor.sendMessage(Message.ERROR_PLAYER_ALREADY_WHITELISTED.toString().replace("{PLAYER}", player.getName()));
             return;
         }
         // Else, append player onto whitelist
         else
         {
-            whitelist.add(player);
+            whitelist.add(player.getUniqueId());
         }
 
 
@@ -143,7 +151,7 @@ public class CommandWhitelist extends AbstractCommand
         }
         AntiSkid.protMan.addPacketListener(plugin.blockChangeListener);
 
-        executor.sendMessage(String.format(Message.WHITELISTED.toString(), player.getName()));
+        executor.sendMessage(Message.WHITELIST_ADD.toString().replace("{PLAYER}", player.getName()));
     }
 
 
@@ -153,7 +161,7 @@ public class CommandWhitelist extends AbstractCommand
      */
     private void unWhitelistPlayer(Player player)
     {
-        Set<Player> whitelist = plugin.whitelists.get(executorId);
+        TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
         Set<Block> diodes = plugin.diodeMap.get(executorId);
 
         // If invalid player... throw error
@@ -163,15 +171,22 @@ public class CommandWhitelist extends AbstractCommand
             return;
         }
 
+        // If self... throw error
+        if(player.equals(executor))
+        {
+            executor.sendMessage(Message.ERROR_UNWHITELIST_SELF.toString());
+            return;
+        }
+
         // If executor has no whitelist... throw error
         if(whitelist == null)
         {
-            executor.sendMessage(Message.ERROR_NO_WHITELIST.toString());
+            executor.sendMessage(Message.ERROR_PLAYER_NOT_WHITELISTED.toString().replace("{PLAYER}", player.getName()));
         }
         // If whitelist contains player... remove them
-        else if(whitelist.contains(player))
+        else if(whitelist.contains(player.getUniqueId()))
         {
-            whitelist.remove(player);
+            whitelist.remove(player.getUniqueId());
 
             // If executor has protected diodes, hide them from the removed player
             if(diodes != null)
@@ -179,12 +194,12 @@ public class CommandWhitelist extends AbstractCommand
                 for(Block b : diodes) new RepeaterHidePacket(b).sendPacket(player); // Hide repeaters
             }
 
-            executor.sendMessage(String.format(Message.UNWHITELISTED.toString(), player.getName()));
+            executor.sendMessage(Message.WHITELIST_REM.toString().replace("{PLAYER}", player.getName()));
         }
         // If whitelist doesn't contain player... throw error
         else
         {
-            executor.sendMessage(String.format(Message.ERROR_PLAYER_NOT_WHITELISTED.toString(), player.getName()));
+            executor.sendMessage(Message.ERROR_PLAYER_NOT_WHITELISTED.toString().replace("{PLAYER}", player.getName()));
         }
     }
 }

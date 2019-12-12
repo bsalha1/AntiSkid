@@ -6,49 +6,65 @@
 
 package com.reliableplugins.antiskid.enums;
 
+import com.reliableplugins.antiskid.AntiSkid;
+import com.reliableplugins.antiskid.annotation.MessageFormat;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public enum Message
 {
-    /* INFO */
-    ANTISKID_ON(ChatColor.AQUA + "Antiskid protection has been turned on (%d repeaters protected)"),
-    ANTISKID_OFF(ChatColor.AQUA + "Antiskid protection has been turned off."),
-    WHITELISTED(ChatColor.AQUA + "%s added to whitelist."),
-    UNWHITELISTED(ChatColor.AQUA + "%s removed from whitelist."),
-    LIST_WHITELISTED(ChatColor.GRAY + "Whitelist: %s"),
+    // {NUM}
+    @MessageFormat(formats = Format.NUM)
+    ANTISKID_ON("antiskid-on"),
 
-    /* HELP */
-    HELP_ANTISKID(ChatColor.RED + "/antiskid <whitelist/on/off> <add/del> <player>"),
-    HELP_WHITELIST(ChatColor.RED + "/antiskid whitelist <add/del> <player>"),
+    // {PLAYER}
+    @MessageFormat(formats = Format.PLAYER)
+    WHITELIST_ADD("whitelist-add"),
 
-    /* ERROR */
-    ERROR_NO_PERMS(ChatColor.RED + "You do not have access to this command!"),
-    ERROR_NOT_PLAYER(ChatColor.RED + "Only players may execute this command."),
+    @MessageFormat(formats = Format.PLAYER)
+    WHITELIST_REM("whitelist-remove"),
 
-    ERROR_NO_PROTECTED(ChatColor.RED + "You have not turned on antiskid yet."),
+    @MessageFormat(formats = Format.PLAYER)
+    ERROR_PLAYER_NOT_WHITELISTED("err-not-whitelisted"),
 
-    ERROR_NO_WHITELIST(ChatColor.RED + "You have no players in your whitelist."),
-    ERROR_PLAYER_NOT_WHITELISTED(ChatColor.RED + "%s is not in your whitelist."),
-    ERROR_PLAYER_ALREADY_WHITELISTED(ChatColor.RED + "%s is already in your whitelist."),
-    ERROR_INVALID_PLAYER(ChatColor.RED + "Invalid player."),
+    @MessageFormat(formats = Format.PLAYER)
+    ERROR_PLAYER_ALREADY_WHITELISTED("err-already-whitelisted"),
 
-    ERROR_NOT_TERRITORY(ChatColor.RED + "You can only protect your faction's claims!");
+    // {LIST}
+    @MessageFormat(formats = Format.WHITELIST)
+    WHITELIST_LIST("whitelist-list"),
 
+    ANTISKID_OFF("antiskid-off"),
+    HELP_ANTISKID("antiskid-help"),
+    HELP_WHITELIST("antiskid-whitelist-help"),
+    ERROR_NO_PERMS("err-no-perms"),
+    ERROR_NOT_PLAYER("err-not-player"),
+    ERROR_NOT_PROTECTED("err-not-protected"),
+    ERROR_EMPTY_WHITELIST("err-empty-whitelist"),
+    ERROR_WHITELIST_SELF("err-whitelist-self"),
+    ERROR_UNWHITELIST_SELF("err-whitelist-remove-self"),
+    ERROR_INVALID_PLAYER("err-invalid-player"),
+    ERROR_NOT_TERRITORY("err-not-territory");
 
     private final String text;
-    private final String header =
-            ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "(" +
-            ChatColor.BLUE + "" + ChatColor.BOLD + "AntiSkid" +
-            ChatColor.DARK_GRAY + "" + ChatColor.BOLD + ")";
+    private final String header;
+    private FileConfiguration config = AntiSkid.mainConfig.getFileConfiguration();
 
-    Message(final String text)
+    private String getMessage(String key)
     {
-        this.text = header + " " + text;
+        return ChatColor.translateAlternateColorCodes('&', config.getString(key));
+    }
+
+    Message(final String key)
+    {
+        this.header = getMessage("message-header");
+        this.text = getMessage(key);
     }
 
     @Override
     public String toString()
     {
-        return text;
+        return header + text;
     }
 }
+

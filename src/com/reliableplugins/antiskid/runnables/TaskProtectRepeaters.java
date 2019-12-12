@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 public class TaskProtectRepeaters extends AbstractTask
@@ -26,7 +27,7 @@ public class TaskProtectRepeaters extends AbstractTask
     @Override
     public void run()
     {
-        Set<Player> whitelist;
+        TreeSet<UUID> whitelist;
 
         // For all diode maps
         for(Map.Entry<UUID, Set<Block>> entry : antiSkid.diodeMap.entrySet())

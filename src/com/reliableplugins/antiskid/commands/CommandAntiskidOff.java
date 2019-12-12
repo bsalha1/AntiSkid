@@ -16,6 +16,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
@@ -36,16 +37,17 @@ public class CommandAntiskidOff extends AbstractCommand
     private void antiskidOff()
     {
         Set<Block> diodes = plugin.diodeMap.get(executorId);
-        Set<Player> whitelist = plugin.whitelists.get(executorId);
+        TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
 
-        if(diodes == null) // If there are no diodes registered
+        if (diodes == null) // If there are no diodes registered
         {
-            executor.sendMessage(Message.ERROR_NO_PROTECTED.toString());
+            executor.sendMessage(Message.ERROR_NOT_PROTECTED.toString());
             return;
         }
 
         AntiSkid.protMan.removePacketListener(plugin.blockChangeListener);
-        for(Block b : diodes) new RepeaterRevealPacket(b).broadcastPacket(whitelist); // Revert the diode for all blacklisted players
+        for (Block b : diodes)
+            new RepeaterRevealPacket(b).broadcastPacket(whitelist); // Revert the diode for all blacklisted players
         AntiSkid.protMan.addPacketListener(plugin.blockChangeListener);
 
         plugin.diodeMap.remove(executorId);

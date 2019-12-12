@@ -13,7 +13,8 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 
 public abstract class AbstractPacket
 {
@@ -38,12 +39,12 @@ public abstract class AbstractPacket
         }
     }
 
-    public void broadcastPacket(Set<Player> whitelist)
+    public void broadcastPacket(TreeSet<UUID> whitelist)
     {
         Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
         for(Player p : onlinePlayers)
         {
-            if(whitelist.contains(p)) continue;
+            if(whitelist.contains(p.getUniqueId())) continue;
             sendPacket(p);
         }
     }

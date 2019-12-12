@@ -72,7 +72,6 @@ public class ListenUnclaim implements Listener
     {
         int x1 = chunk.getX() << 4;
         int z1 = chunk.getZ() << 4;
-        Collection<? extends Player> online = Bukkit.getOnlinePlayers();
         Block block;
         World world = chunk.getWorld();
 

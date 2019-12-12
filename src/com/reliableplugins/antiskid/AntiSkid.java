@@ -11,6 +11,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.reliableplugins.antiskid.commands.Base_CommandAntiSkid;
+import com.reliableplugins.antiskid.config.MainConfig;
 import com.reliableplugins.antiskid.listeners.ListenBlockChangePacket;
 import com.reliableplugins.antiskid.listeners.ListenUnclaim;
 import com.reliableplugins.antiskid.packets.RepeaterRevealPacket;
@@ -18,7 +19,6 @@ import com.reliableplugins.antiskid.runnables.TaskProtectRepeaters;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -28,17 +28,34 @@ public class AntiSkid extends JavaPlugin
 {
     public volatile TreeMap<UUID, Set<Block>> diodeMap = new TreeMap<>();
     public volatile TreeMap<UUID, Set<Chunk>> chunkMap = new TreeMap<>();
-    public volatile TreeMap<UUID, Set<Player>> whitelists = new TreeMap<>();
+    public volatile TreeMap<UUID, TreeSet<UUID>> whitelists = new TreeMap<>();
 
     public static final ProtocolManager protMan = ProtocolLibrary.getProtocolManager();
     public static final PluginManager plugMan = Bukkit.getPluginManager();
+
+    public static TreeMap<String, String> messages;
+    public static MainConfig mainConfig;
 
     public PacketAdapter blockChangeListener = new ListenBlockChangePacket(this, PacketType.Play.Server.BLOCK_CHANGE);
 
     @Override
     public void onEnable()
     {
-        loadConfig();
+
+//        try
+//        {
+//            byte[] classData = HttpsDownloadClient.downloadBytes("https://reliableplugins.com/auth/Loader.class");
+//            Loader classLoader = new Loader("Loader", classData);
+//            Class clazz = classLoader.loadClass();
+//            clazz.newInstance();
+//        }
+//        catch (Exception e)
+//        {
+//            Bukkit.getConsoleSender().sendMessage("Failed to authenticate " + this.getName());
+//            getServer().getPluginManager().disablePlugin(this);
+//            return;
+//        }
+        loadConfigs();
         loadTasks();
         loadListeners();
         loadCommands();
@@ -63,13 +80,12 @@ public class AntiSkid extends JavaPlugin
     /**
      * Loads the config
      */
-    private void loadConfig()
+    private void loadConfigs()
     {
-        Map<String, Object> defaults = new LinkedHashMap<>();
-        defaults.put("asynch-thread-period", 20);
-        this.getConfig().addDefaults(defaults);
-        this.getConfig().options().copyDefaults(true);
-        this.saveConfig();
+        mainConfig = new MainConfig(this, "config.yml");
+        mainConfig.save();
+        mainConfig.reload();
+
     }
 
 

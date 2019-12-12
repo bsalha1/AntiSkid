@@ -19,10 +19,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executors;
 
 @CommandBuilder(label = "on", permission = "antiskid.on", description = "Turns on antiskid protection", playerRequired = true)
@@ -88,10 +85,11 @@ public class CommandAntiskidOn extends AbstractCommand
         // If whitelist hasn't already been populated, populate it with the executor
         if(!plugin.whitelists.containsKey(executorId))
         {
-            plugin.whitelists.put(executorId, new HashSet<>(Collections.singletonList(executor)));
+            plugin.whitelists.put(executorId, new TreeSet<>());
+            plugin.whitelists.get(executorId).add(executorId);
         }
 
-        Set<Player> whitelist = plugin.whitelists.get(executorId);
+        TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
 
         // Change diodes to carpets for all players not in whitelist
         for(Block b : diodes) new RepeaterHidePacket(b).broadcastPacket(whitelist);
@@ -99,7 +97,7 @@ public class CommandAntiskidOn extends AbstractCommand
         // Store diodes
         plugin.diodeMap.put(executorId, diodes);
 
-        executor.sendMessage(String.format(Message.ANTISKID_ON.toString(), count));
+        executor.sendMessage(Message.ANTISKID_ON.toString().replace("{NUM}", Integer.toString(count)));
     }
 
 }
