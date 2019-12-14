@@ -92,7 +92,7 @@ public class CommandWhitelist extends AbstractCommand
             if(message.toString().contains(", "))
             {
                 message = new StringBuilder(message.substring(0, message.lastIndexOf(", ")));
-                executor.sendMessage(Message.WHITELIST_LIST.toString().replace("{LIST}", message));
+                executor.sendMessage(Message.WHITELIST_LIST.toString().replace("{WHITELIST}", message));
                 return;
             }
             executor.sendMessage(Message.ERROR_EMPTY_WHITELIST.toString());
