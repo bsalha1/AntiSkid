@@ -12,20 +12,20 @@ import org.bukkit.Bukkit;
 public abstract class AbstractTask implements Runnable
 {
     protected int id;
-    protected AntiSkid antiSkid;
+    protected AntiSkid plugin;
 
     // Set delayed task
-    public AbstractTask(AntiSkid antiSkid, long delay)
+    public AbstractTask(AntiSkid plugin, long delay)
     {
-        this.antiSkid = antiSkid;
-        this.id = Bukkit.getScheduler().scheduleSyncDelayedTask(antiSkid, this, delay);
+        this.plugin = plugin;
+        this.id = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, this, delay);
     }
 
     // Set delayed repeating task
-    public AbstractTask(AntiSkid antiSkid, long delay, long period)
+    public AbstractTask(AntiSkid plugin, long delay, long period)
     {
-        this.antiSkid = antiSkid;
-        this.id = Bukkit.getScheduler().scheduleSyncRepeatingTask(antiSkid, this, delay, period);
+        this.plugin = plugin;
+        this.id = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, delay, period);
     }
 
     public int getId()

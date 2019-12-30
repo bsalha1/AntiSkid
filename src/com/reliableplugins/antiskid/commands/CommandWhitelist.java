@@ -13,6 +13,7 @@ import com.reliableplugins.antiskid.enums.Message;
 import com.reliableplugins.antiskid.packets.RepeaterHidePacket;
 import com.reliableplugins.antiskid.packets.RepeaterRevealPacket;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -107,7 +108,7 @@ public class CommandWhitelist extends AbstractCommand
     private void whitelistPlayer(Player player)
     {
         TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
-        Set<Block> diodes = plugin.diodeMap.get(executorId);
+        Set<Location> diodes = plugin.diodeMap.get(executorId);
 
         // If invalid player... throw error
         if(player == null)
@@ -144,12 +145,15 @@ public class CommandWhitelist extends AbstractCommand
 
 
         // Reveal the hidden repeaters
-        AntiSkid.protMan.removePacketListener(plugin.blockChangeListener);
+//        AntiSkid.protMan.removePacketListener(plugin.blockChangeListener);
         if(diodes != null)
         {
-            for(Block b : diodes) new RepeaterRevealPacket(b).sendPacket(player); // Reveal repeaters
+            for(Location loc : diodes)
+            {
+                new RepeaterRevealPacket(loc).sendPacket(player); // Reveal repeaters
+            }
         }
-        AntiSkid.protMan.addPacketListener(plugin.blockChangeListener);
+//        AntiSkid.protMan.addPacketListener(plugin.blockChangeListener);
 
         executor.sendMessage(Message.WHITELIST_ADD.toString().replace("{PLAYER}", player.getName()));
     }
@@ -162,7 +166,7 @@ public class CommandWhitelist extends AbstractCommand
     private void unWhitelistPlayer(Player player)
     {
         TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
-        Set<Block> diodes = plugin.diodeMap.get(executorId);
+        Set<Location> diodes = plugin.diodeMap.get(executorId);
 
         // If invalid player... throw error
         if(player == null)
@@ -191,7 +195,10 @@ public class CommandWhitelist extends AbstractCommand
             // If executor has protected diodes, hide them from the removed player
             if(diodes != null)
             {
-                for(Block b : diodes) new RepeaterHidePacket(b).sendPacket(player); // Hide repeaters
+                for(Location loc : diodes)
+                {
+                    new RepeaterHidePacket(loc).sendPacket(player); // Hide repeaters
+                }
             }
 
             executor.sendMessage(Message.WHITELIST_REM.toString().replace("{PLAYER}", player.getName()));

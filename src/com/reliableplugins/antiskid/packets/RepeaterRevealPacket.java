@@ -13,7 +13,6 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutBlockChange;
 import net.minecraft.server.v1_8_R3.WorldServer;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
@@ -21,18 +20,18 @@ import org.bukkit.entity.Player;
 
 public class RepeaterRevealPacket extends AbstractPacket
 {
-    private Block block;
     private Location location;
 
-    public RepeaterRevealPacket(Block block)
+    public RepeaterRevealPacket(Location location)
     {
-        this.block = block;
-        this.location = block.getLocation();
+        this.location = location;
         this.packet = new PacketPlayOutBlockChange(
                 ((CraftWorld) location.getWorld()).getHandle(),
                 new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
 
-        ((PacketPlayOutBlockChange) this.packet).block = CraftMagicNumbers.getBlock(block.getType()).fromLegacyData(block.getData());
+        ((PacketPlayOutBlockChange) this.packet).block = CraftMagicNumbers
+                .getBlock(location.getBlock().getType())
+                .fromLegacyData(location.getBlock().getData());
     }
 
     @Override
@@ -40,11 +39,11 @@ public class RepeaterRevealPacket extends AbstractPacket
     {
         EntityPlayer eReceiver = ((CraftPlayer) receiver).getHandle();
         WorldServer worldServer = ((CraftWorld) receiver.getWorld()).getHandle();
-        Chunk chunk = this.block.getChunk();
+        Chunk chunk = location.getChunk();
 
         // If the player doesn't have the chunk loaded... don't send the packet
         if(!worldServer.getPlayerChunkMap().a(eReceiver, chunk.getX(), chunk.getZ())) return;
 
-        eReceiver.playerConnection.sendPacket(this.packet);
+        super.sendPacket(eReceiver);
     }
 }

@@ -82,9 +82,9 @@ public class ListenUnclaim implements Listener
                     block = world.getBlockAt(x, y, z);
                     if(block.getType().equals(Material.DIODE_BLOCK_OFF))
                     {
-                        AntiSkid.protMan.removePacketListener(plugin.blockChangeListener);
-                        new RepeaterRevealPacket(block).broadcastPacket();
-                        AntiSkid.protMan.addPacketListener(plugin.blockChangeListener);
+//                        AntiSkid.protMan.removePacketListener(plugin.blockChangeListener);
+                        new RepeaterRevealPacket(block.getLocation()).broadcastPacket();
+//                        AntiSkid.protMan.addPacketListener(plugin.blockChangeListener);
 
                         plugin.diodeMap.get(player.getUniqueId()).remove(block);
                     }

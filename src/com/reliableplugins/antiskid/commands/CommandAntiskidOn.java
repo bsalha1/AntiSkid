@@ -11,16 +11,15 @@ import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.enums.Message;
 import com.reliableplugins.antiskid.hook.impl.FactionHook;
 import com.reliableplugins.antiskid.packets.RepeaterHidePacket;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @CommandBuilder(label = "on", permission = "antiskid.on", description = "Turns on antiskid protection", playerRequired = true)
 public class CommandAntiskidOn extends AbstractCommand
@@ -51,19 +50,9 @@ public class CommandAntiskidOn extends AbstractCommand
             return;
         }
 
-        // If player already has protected chunks
-        if(plugin.chunkMap.containsKey(executorId))
-        {
-            plugin.chunkMap.get(executorId).addAll(chunks);
-        }
-        // If player doesn't have protected chunks
-        else
-        {
-            plugin.chunkMap.put(executorId, chunks);
-        }
-
         World world = chunks.iterator().next().getWorld();
-        Set<Block> diodes = new HashSet<>();
+        Set<Location> diodeLocations = new HashSet<>();
+        Map<Chunk, Set<Location>> diodes = new HashMap<>();
 
         for(Chunk c : chunks)
         {
@@ -76,11 +65,16 @@ public class CommandAntiskidOn extends AbstractCommand
                         block = world.getBlockAt(x, y, z);
                         if(block.getType().equals(Material.DIODE_BLOCK_OFF))
                         {
-                            diodes.add(block);
+                            diodeLocations.add(block.getLocation());
                             count++;
                         }
                     }
+            diodes.put(c, diodeLocations);
+            diodeLocations.clear();
         }
+
+        // This will overwrite the chunk keys with new locations
+        plugin.diodes.get(executorId).putAll(diodes);
 
         // If whitelist hasn't already been populated, populate it with the executor
         if(!plugin.whitelists.containsKey(executorId))
@@ -92,10 +86,13 @@ public class CommandAntiskidOn extends AbstractCommand
         TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
 
         // Change diodes to carpets for all players not in whitelist
-        for(Block b : diodes) new RepeaterHidePacket(b).broadcastPacket(whitelist);
-
-        // Store diodes
-        plugin.diodeMap.put(executorId, diodes);
+        for(Map.Entry<Chunk, Set<Location>> entry : diodes.entrySet())
+        {
+            for(Location loc : entry.getValue())
+            {
+                new RepeaterHidePacket(loc).broadcastPacket(whitelist);
+            }
+        }
 
         executor.sendMessage(Message.ANTISKID_ON.toString().replace("{NUM}", Integer.toString(count)));
     }

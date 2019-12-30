@@ -1,44 +1,29 @@
-/*
- * Project: AntiSkid
- * Copyright (C) 2019 Bilal Salha <bsalha1@gmail.com>
- * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
- */
-
 package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
-import com.reliableplugins.antiskid.packets.RepeaterHidePacket;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
+import com.reliableplugins.antiskid.utils.PacketUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class ListenPlayerJoin implements Listener
 {
-    private AntiSkid antiSkid;
-
-    public ListenPlayerJoin(AntiSkid antiSkid)
+    private AntiSkid plugin;
+    public ListenPlayerJoin(AntiSkid plugin)
     {
-        this.antiSkid = antiSkid;
+        this.plugin = plugin;
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event)
     {
-        Player player = event.getPlayer();
-
-        for(Map.Entry<UUID, Set<Block>> entry : antiSkid.diodeMap.entrySet())
-        {
-            for(Block b : entry.getValue())
-            {
-                new RepeaterHidePacket(b).sendPacket(player);
-            }
-        }
+        PacketUtil.loadPacketListener(new ListenBlockChangePacket(plugin, event.getPlayer()), event.getPlayer());
     }
 
+    @EventHandler
+    public void onLeave(PlayerQuitEvent event)
+    {
+        PacketUtil.unloadPacketListeners(event.getPlayer());
+    }
 }

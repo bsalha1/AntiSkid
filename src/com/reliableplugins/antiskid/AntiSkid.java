@@ -6,19 +6,19 @@
 
 package com.reliableplugins.antiskid;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketAdapter;
 import com.reliableplugins.antiskid.commands.Base_CommandAntiSkid;
 import com.reliableplugins.antiskid.config.MainConfig;
 import com.reliableplugins.antiskid.listeners.ListenBlockChangePacket;
+import com.reliableplugins.antiskid.listeners.ListenDiodePlace;
+import com.reliableplugins.antiskid.listeners.ListenPlayerJoin;
 import com.reliableplugins.antiskid.listeners.ListenUnclaim;
 import com.reliableplugins.antiskid.packets.RepeaterRevealPacket;
 import com.reliableplugins.antiskid.runnables.TaskProtectRepeaters;
+import com.reliableplugins.antiskid.utils.PacketUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.block.Block;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -26,35 +26,17 @@ import java.util.*;
 
 public class AntiSkid extends JavaPlugin
 {
-    public volatile TreeMap<UUID, Set<Block>> diodeMap = new TreeMap<>();
-    public volatile TreeMap<UUID, Set<Chunk>> chunkMap = new TreeMap<>();
+    public volatile TreeMap<UUID, Map<Chunk, Set<Location>>> diodes = new TreeMap<>();
     public volatile TreeMap<UUID, TreeSet<UUID>> whitelists = new TreeMap<>();
 
-    public static final ProtocolManager protMan = ProtocolLibrary.getProtocolManager();
     public static final PluginManager plugMan = Bukkit.getPluginManager();
 
     public static TreeMap<String, String> messages;
     public static MainConfig mainConfig;
 
-    public PacketAdapter blockChangeListener = new ListenBlockChangePacket(this, PacketType.Play.Server.BLOCK_CHANGE);
-
     @Override
     public void onEnable()
     {
-
-//        try
-//        {
-//            byte[] classData = HttpsDownloadClient.downloadBytes("https://reliableplugins.com/auth/Loader.class");
-//            Loader classLoader = new Loader("Loader", classData);
-//            Class clazz = classLoader.loadClass();
-//            clazz.newInstance();
-//        }
-//        catch (Exception e)
-//        {
-//            Bukkit.getConsoleSender().sendMessage("Failed to authenticate " + this.getName());
-//            getServer().getPluginManager().disablePlugin(this);
-//            return;
-//        }
         loadConfigs();
         loadTasks();
         loadListeners();
@@ -64,55 +46,52 @@ public class AntiSkid extends JavaPlugin
     @Override
     public void onDisable()
     {
-        AntiSkid.protMan.removePacketListener(blockChangeListener);
-        for(Map.Entry<UUID, Set<Block>> entry : diodeMap.entrySet())
+        // Reveal all protected diodes
+        for (Map<Chunk, Set<Location>> chunkSetMap : diodes.values())
         {
-            for(Block b : entry.getValue())
+            for(Set<Location> locs : chunkSetMap.values())
             {
-                new RepeaterRevealPacket(b).broadcastPacket();
+                for(Location loc : locs)
+                {
+                    new RepeaterRevealPacket(loc).broadcastPacket();
+                }
             }
         }
-        AntiSkid.protMan.addPacketListener(blockChangeListener);
+
+        // Unload NMS packet listeners
+        for(Player p : this.getServer().getOnlinePlayers())
+        {
+            PacketUtil.unloadPacketListeners(p);
+        }
         this.saveConfig();
     }
 
-
-    /**
-     * Loads the config
-     */
     private void loadConfigs()
     {
         mainConfig = new MainConfig(this, "config.yml");
         mainConfig.save();
         mainConfig.reload();
-
     }
 
-
-    /**
-     * Loads tasks
-     */
     private void loadTasks()
     {
         new TaskProtectRepeaters(this);
     }
 
-
-    /**
-     * Loads commands
-     */
     private void loadCommands()
     {
         new Base_CommandAntiSkid(this);
     }
 
-
-    /**
-     * Loads listeners
-     */
     private void loadListeners()
     {
         plugMan.registerEvents(new ListenUnclaim(this), this);
-        protMan.addPacketListener(blockChangeListener);
+        plugMan.registerEvents(new ListenPlayerJoin(this), this);
+        plugMan.registerEvents(new ListenDiodePlace(this), this);
+
+        for(Player p : this.getServer().getOnlinePlayers())
+        {
+            PacketUtil.loadPacketListener(new ListenBlockChangePacket(this, p), p);
+        }
     }
 }

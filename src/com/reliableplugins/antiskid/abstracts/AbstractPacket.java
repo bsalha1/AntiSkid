@@ -6,6 +6,7 @@
 
 package com.reliableplugins.antiskid.abstracts;
 
+import com.reliableplugins.antiskid.runnables.TaskProtectRepeaters;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.Packet;
 import org.bukkit.Bukkit;
