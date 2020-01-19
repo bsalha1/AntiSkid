@@ -54,7 +54,7 @@ public class ListenPlayerJoin implements Listener
         catch(Exception ignored) { }
         for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
         {
-            if(plugin.whitelists.get(entry.getKey()).contains(player.getUniqueId())) continue;
+            if(plugin.whitelists.get(entry.getKey()).containsPlayer(player.getUniqueId())) continue;
 
             for(Set<Location> locs : entry.getValue().values())
                 for(Location loc : locs)

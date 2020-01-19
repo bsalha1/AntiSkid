@@ -65,7 +65,7 @@ public class ListenBlockChangePacket extends PacketListener
             for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
                 if(entry.getValue().containsKey(world.getChunkAt(location)))
                 {
-                    if(plugin.whitelists.get(entry.getKey()).contains(player.getUniqueId())) continue;
+                    if(plugin.whitelists.get(entry.getKey()).containsPlayer(player.getUniqueId())) continue;
 
                     new AbstractTask(plugin, 1)
                     {

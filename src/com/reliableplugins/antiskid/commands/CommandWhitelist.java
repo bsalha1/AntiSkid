@@ -9,6 +9,7 @@ package com.reliableplugins.antiskid.commands;
 import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.enums.Message;
+import com.reliableplugins.antiskid.type.Whitelist;
 import com.reliableplugins.antiskid.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -17,10 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 @CommandBuilder(label = "whitelist", permission = "antiskid.whitelist", playerRequired = true, description = "Manage the whitelist for the executor's protection.\nIf they are added, they can see the repeaters.")
 public class CommandWhitelist extends AbstractCommand
@@ -90,31 +88,15 @@ public class CommandWhitelist extends AbstractCommand
      */
     private void printWhitelist()
     {
-        TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
-        Player player;
+        Whitelist whitelist = plugin.whitelists.get(executorId);
 
-        if(whitelist == null)
+        if(whitelist != null && (whitelist.size() != 0))
         {
-            executor.sendMessage(Message.HELP_WHITELIST.toString());
+            executor.sendMessage(Message.WHITELIST_LIST.toString().replace("{LIST}", whitelist.getListString()));
         }
         else
         {
-            StringBuilder whitelistMsg = new StringBuilder();
-            for(UUID id : whitelist)
-            {
-                player = Bukkit.getPlayer(id);
-                if(player.equals(executor)) continue;
-                whitelistMsg.append(player.getName()).append(", ");
-            }
-
-            // Trim off trailing comma
-            if(whitelistMsg.toString().contains(", "))
-            {
-                whitelistMsg = new StringBuilder(whitelistMsg.substring(0, whitelistMsg.lastIndexOf(", ")));
-                executor.sendMessage(Message.WHITELIST_LIST.toString().replace("{LIST}", whitelistMsg));
-                return;
-            }
-            executor.sendMessage(Message.ERROR_EMPTY_WHITELIST.toString());
+            executor.sendMessage(Message.HELP_WHITELIST.toString());
         }
     }
 
@@ -125,7 +107,7 @@ public class CommandWhitelist extends AbstractCommand
      */
     private void whitelistPlayer(Player player)
     {
-        TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
+        Whitelist whitelist = plugin.whitelists.get(executorId);
 
         if(player == null)
         {
@@ -141,31 +123,24 @@ public class CommandWhitelist extends AbstractCommand
         // If the whitelist isn't initialized, initialize it
         if(whitelist == null)
         {
-            plugin.whitelists.put(executorId, new TreeSet<>());
-            plugin.whitelists.get(executorId).add(executor.getUniqueId());
-            plugin.whitelists.get(executorId).add(player.getUniqueId());
+            plugin.whitelists.put(executorId, new Whitelist(executorId));
+            plugin.whitelists.get(executorId).addPlayer(player.getUniqueId());
         }
-        else if(whitelist.contains(player.getUniqueId()))
+        else if(!whitelist.addPlayer(player.getUniqueId()))
         {
             executor.sendMessage(Message.ERROR_PLAYER_ALREADY_WHITELISTED.toString().replace("{PLAYER}", player.getName()));
             return;
         }
-        else
-        {
-            whitelist.add(player.getUniqueId());
-        }
         executor.sendMessage(Message.WHITELIST_ADD.toString().replace("{PLAYER}", player.getName()));
 
-        if(!plugin.diodes.containsKey(executorId))
+        // If executor has protection, reveal to whitelisted
+        if(plugin.diodes.containsKey(executorId))
         {
-            return;
-        }
-
-        // Reveal hidden repeaters
-        Set<Chunk> chunks = plugin.diodes.get(executorId).keySet();
-        for(Chunk chunk : chunks)
-        {
-            Util.reloadChunk(chunk);
+            Set<Chunk> chunks = plugin.diodes.get(executorId).keySet();
+            for(Chunk chunk : chunks)
+            {
+                Util.reloadChunk(chunk);
+            }
         }
     }
 
@@ -176,45 +151,43 @@ public class CommandWhitelist extends AbstractCommand
      */
     private void unWhitelistPlayer(Player player)
     {
-        TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
-        Collection<Set<Location>> diodes = plugin.diodes.get(executorId).values();
+        Whitelist whitelist = plugin.whitelists.get(executorId);
+        Map<Chunk, Set<Location>> chunkSetMap = plugin.diodes.get(executorId);
 
-        // If invalid player... throw error
         if(player == null)
         {
             executor.sendMessage(Message.ERROR_INVALID_PLAYER.toString());
             return;
         }
 
-        // If self... throw error
         if(player.equals(executor))
         {
             executor.sendMessage(Message.ERROR_UNWHITELIST_SELF.toString());
             return;
         }
 
-        // If executor has no whitelist... throw error
-        if(whitelist == null)
-        {
-            executor.sendMessage(Message.ERROR_PLAYER_NOT_WHITELISTED.toString().replace("{PLAYER}", player.getName()));
-        }
-        // If whitelist contains player... remove them
-        else if(whitelist.contains(player.getUniqueId()))
-        {
-            whitelist.remove(player.getUniqueId());
 
-            // If executor has protected diodes, hide them from the removed player
-            for(Set<Location> locs : diodes)
+        if(whitelist != null)
+        {
+            if(!whitelist.removePlayer(player.getUniqueId()))
             {
-                for(Location loc : locs)
-                {
-                    plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, loc);
-                }
+                executor.sendMessage(Message.ERROR_PLAYER_NOT_WHITELISTED.toString().replace("{PLAYER}", player.getName()));
+                return;
             }
 
+            if(chunkSetMap != null)
+            {
+                Collection<Set<Location>> diodeLocations = chunkSetMap.values();
+                for(Set<Location> locations : diodeLocations)
+                {
+                    for(Location location : locations)
+                    {
+                        plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, location);
+                    }
+                }
+            }
             executor.sendMessage(Message.WHITELIST_REM.toString().replace("{PLAYER}", player.getName()));
         }
-        // If whitelist doesn't contain player... throw error
         else
         {
             executor.sendMessage(Message.ERROR_PLAYER_NOT_WHITELISTED.toString().replace("{PLAYER}", player.getName()));

@@ -8,6 +8,7 @@ package com.reliableplugins.antiskid.runnables;
 
 import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.abstracts.AbstractTask;
+import com.reliableplugins.antiskid.type.Whitelist;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -28,7 +29,7 @@ public class TaskProtectRepeaters extends AbstractTask
     @Override
     public void run()
     {
-        TreeSet<UUID> whitelist;
+        Whitelist whitelist;
 
         // Replace all protected repeaters
         try
@@ -43,7 +44,7 @@ public class TaskProtectRepeaters extends AbstractTask
             {
                 for(Location loc : locs)
                 {
-                    plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, loc, whitelist);
+                    plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, loc, whitelist.getUUIDs());
                 }
             }
         }

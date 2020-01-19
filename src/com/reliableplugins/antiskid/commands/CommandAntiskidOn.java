@@ -10,6 +10,7 @@ import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.enums.Message;
 import com.reliableplugins.antiskid.hook.impl.FactionHook;
+import com.reliableplugins.antiskid.type.Whitelist;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
@@ -88,17 +89,16 @@ public class CommandAntiskidOn extends AbstractCommand
         // If whitelist hasn't already been populated, populate it with the executor
         if(!plugin.whitelists.containsKey(executorId))
         {
-            plugin.whitelists.put(executorId, new TreeSet<>());
-            plugin.whitelists.get(executorId).add(executorId);
+            plugin.whitelists.put(executorId, new Whitelist(executorId));
         }
 
-        TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
+        Whitelist whitelist = plugin.whitelists.get(executorId);
 
         // Change diodes to carpets for all players not in whitelist
         for(Set<Location> locs : diodes.values())
             for(Location loc : locs)
             {
-                plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, loc, whitelist);
+                plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, loc, whitelist.getUUIDs());
             }
         plugin.lock.release();
 

@@ -16,6 +16,7 @@ import com.reliableplugins.antiskid.listeners.ListenUnclaim;
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.nms.NMSManager;
 import com.reliableplugins.antiskid.runnables.TaskProtectRepeaters;
+import com.reliableplugins.antiskid.type.Whitelist;
 import com.reliableplugins.antiskid.utils.PacketManager;
 import com.reliableplugins.antiskid.utils.Util;
 import org.bukkit.Bukkit;
@@ -31,7 +32,7 @@ import java.util.logging.Level;
 public class AntiSkid extends JavaPlugin
 {
     public volatile TreeMap<UUID, Map<Chunk, Set<Location>>> diodes = new TreeMap<>();
-    public volatile TreeMap<UUID, TreeSet<UUID>> whitelists = new TreeMap<>();
+    public volatile TreeMap<UUID, Whitelist> whitelists = new TreeMap<>();
 
     public volatile Semaphore lock = new Semaphore(1);
     private boolean isFactions;
