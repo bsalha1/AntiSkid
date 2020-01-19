@@ -1,6 +1,6 @@
 /*
  * Project: AntiSkid
- * Copyright (C) 2019 Bilal Salha <bsalha1@gmail.com>
+ * Copyright (C) 2020 Bilal Salha <bsalha1@gmail.com>
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
@@ -31,6 +31,11 @@ public class TaskProtectRepeaters extends AbstractTask
         TreeSet<UUID> whitelist;
 
         // Replace all protected repeaters
+        try
+        {
+            plugin.lock.acquire();
+        }
+        catch(Exception ignored) { }
         for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
         {
             whitelist = plugin.whitelists.get(entry.getKey());
@@ -42,5 +47,6 @@ public class TaskProtectRepeaters extends AbstractTask
                 }
             }
         }
+        plugin.lock.release();
     }
 }

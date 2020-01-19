@@ -1,6 +1,6 @@
 /*
  * Project: AntiSkid
- * Copyright (C) 2019 Bilal Salha <bsalha1@gmail.com>
+ * Copyright (C) 2020 Bilal Salha <bsalha1@gmail.com>
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
@@ -30,11 +30,6 @@ public class CommandAntiskidOn extends AbstractCommand
         executor = (Player) sender;
         executorId = executor.getUniqueId();
 
-        if(!plugin.diodes.containsKey(executorId))
-        {
-            plugin.diodes.put(executorId, new HashMap<>());
-        }
-
         Executors.newSingleThreadExecutor().submit(this::antiskidOn);
     }
 
@@ -44,6 +39,17 @@ public class CommandAntiskidOn extends AbstractCommand
         int x1;
         int z1;
         Block block;
+
+        try
+        {
+            plugin.lock.acquire();
+        }
+        catch(Exception ignored) { }
+
+        if(!plugin.diodes.containsKey(executorId))
+        {
+            plugin.diodes.put(executorId, new HashMap<>());
+        }
 
         Set<Chunk> chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
         if(chunks.isEmpty())
@@ -57,7 +63,6 @@ public class CommandAntiskidOn extends AbstractCommand
         Map<Chunk, Set<Location>> diodes = new HashMap<>();
 
         // For each claimed chunk, put the diode locations associated with that chunk
-        long start = System.currentTimeMillis();
         for(Chunk c : chunks)
         {
             diodeLocations = new HashSet<>();
@@ -76,9 +81,6 @@ public class CommandAntiskidOn extends AbstractCommand
                     }
             diodes.put(c, diodeLocations);
         }
-        long end = System.currentTimeMillis();
-
-        Bukkit.broadcastMessage("Scan took " + (end - start) + " ms");
 
         // This will overwrite the chunk keys with new locations
         plugin.diodes.get(executorId).putAll(diodes);
@@ -98,6 +100,7 @@ public class CommandAntiskidOn extends AbstractCommand
             {
                 plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, loc, whitelist);
             }
+        plugin.lock.release();
 
         executor.sendMessage(Message.ANTISKID_ON.toString().replace("{NUM}", Integer.toString(count)));
     }

@@ -1,9 +1,8 @@
-///*
-// * Project: AntiSkid
-// * Copyright (C) 2019 Bilal Salha <bsalha1@gmail.com>
-// * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
-// */
-//
+/*
+ * Project: AntiSkid
+ * Copyright (C) 2020 Bilal Salha <bsalha1@gmail.com>
+ * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
+ */
 package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
@@ -58,6 +57,11 @@ public class ListenBlockChangePacket extends PacketListener
 
             World world = player.getWorld();
             Location location = new Location(world, packetLocation.getX(), packetLocation.getY(), packetLocation.getZ());
+            try
+            {
+                plugin.lock.acquire();
+            }
+            catch(Exception ignored) { }
             for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
                 if(entry.getValue().containsKey(world.getChunkAt(location)))
                 {
@@ -72,6 +76,7 @@ public class ListenBlockChangePacket extends PacketListener
                         }
                     };
                 }
+            plugin.lock.release();
         }
 
         exit(context, packet, promise);

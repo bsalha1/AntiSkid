@@ -1,6 +1,6 @@
 /*
  * Project: AntiSkid
- * Copyright (C) 2019 Bilal Salha <bsalha1@gmail.com>
+ * Copyright (C) 2020 Bilal Salha <bsalha1@gmail.com>
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
@@ -52,7 +52,7 @@ public enum Message
 
     private final String text;
     private final String header;
-    private FileConfiguration config = AntiSkid.mainConfig.getFileConfiguration();
+    private FileConfiguration config = AntiSkid.messageConfig.getFileConfiguration();
 
     private String getMessage(String key)
     {

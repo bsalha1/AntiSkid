@@ -1,7 +1,14 @@
+/*
+ * Project: AntiSkid
+ * Copyright (C) 2020 Bilal Salha <bsalha1@gmail.com>
+ * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
+ */
+
 package com.reliableplugins.antiskid.nms.impl;
 
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.Vector;
+import io.netty.channel.Channel;
 import net.minecraft.server.v1_14_R1.BlockDiodeAbstract;
 import net.minecraft.server.v1_14_R1.BlockPosition;
 import net.minecraft.server.v1_14_R1.PacketPlayOutBlockChange;
@@ -24,6 +31,12 @@ public class Version_1_14_R1 implements INMSHandler
     public String getVersion()
     {
         return "v1_14_R1";
+    }
+
+    @Override
+    public Channel getSocketChannel(Player player)
+    {
+        return ((CraftPlayer) player).getHandle().playerConnection.networkManager.channel;
     }
 
     @Override

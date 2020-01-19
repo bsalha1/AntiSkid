@@ -1,6 +1,6 @@
 /*
  * Project: AntiSkid
- * Copyright (C) 2019 Bilal Salha <bsalha1@gmail.com>
+ * Copyright (C) 2020 Bilal Salha <bsalha1@gmail.com>
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
@@ -40,14 +40,26 @@ public class CommandWhitelist extends AbstractCommand
             Player player = Bukkit.getPlayer(args[1]);
             if(args[0].equalsIgnoreCase("add")) // If adding player
             {
+                try
+                {
+                    plugin.lock.acquire();
+                }
+                catch(Exception ignored) { }
                 whitelistPlayer(player);
+                plugin.lock.release();
             }
             else if(args[0].equalsIgnoreCase("del")
             || args[0].equalsIgnoreCase("delete")
             || args[0].equalsIgnoreCase("rem")
             || args[0].equalsIgnoreCase("remove")) // If deleting player
             {
+                try
+                {
+                    plugin.lock.acquire();
+                }
+                catch(Exception ignored) { }
                 unWhitelistPlayer(player);
+                plugin.lock.release();
             }
             else // If invalid whitelist argument
             {
@@ -57,7 +69,13 @@ public class CommandWhitelist extends AbstractCommand
         // If /antiskid whitelist
         else if(args.length == 0)
         {
+            try
+            {
+                plugin.lock.acquire();
+            }
+            catch(Exception ignored) { }
             printWhitelist();
+            plugin.lock.release();
         }
         // If /antiskid whitelist <invalid arguments>
         else

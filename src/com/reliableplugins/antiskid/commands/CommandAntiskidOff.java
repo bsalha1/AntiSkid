@@ -1,6 +1,6 @@
 /*
  * Project: AntiSkid
- * Copyright (C) 2019 Bilal Salha <bsalha1@gmail.com>
+ * Copyright (C) 2020 Bilal Salha <bsalha1@gmail.com>
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
@@ -14,8 +14,8 @@ import org.bukkit.Chunk;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Executors;
 
 @CommandBuilder(label = "off", permission = "antiskid.off", playerRequired = true, description = "Turns off protection for the executor.\nRepeaters will be revealed to all players.")
 public class CommandAntiskidOff extends AbstractCommand
@@ -35,17 +35,21 @@ public class CommandAntiskidOff extends AbstractCommand
         }
         else
         {
-            Executors.newSingleThreadExecutor().submit(this::antiskidOff);
-        }
-    }
+            try
+            {
+                plugin.lock.acquire();
+            }
+            catch(Exception ignored) { }
 
-    private void antiskidOff()
-    {
-        for(Chunk chunk : plugin.diodes.get(executorId).keySet())
-        {
-            Util.reloadChunk(chunk);
+            Set<Chunk> chunks = plugin.diodes.get(executorId).keySet();
+            for(Chunk chunk : chunks)
+            {
+                Util.reloadChunk(chunk);
+            }
+            plugin.diodes.remove(executorId);
+            plugin.lock.release();
+
+            executor.sendMessage(Message.ANTISKID_OFF.toString());
         }
-        plugin.diodes.remove(executorId);
-        executor.sendMessage(Message.ANTISKID_OFF.toString());
     }
 }

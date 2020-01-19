@@ -1,3 +1,9 @@
+/*
+ * Project: AntiSkid
+ * Copyright (C) 2020 Bilal Salha <bsalha1@gmail.com>
+ * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
+ */
+
 package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
@@ -41,9 +47,13 @@ public class ListenPlayerJoin implements Listener
         }
         catch(Exception ignored){}
 
+        try
+        {
+            plugin.lock.acquire();
+        }
+        catch(Exception ignored) { }
         for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
         {
-            // If whitelisted, skip
             if(plugin.whitelists.get(entry.getKey()).contains(player.getUniqueId())) continue;
 
             for(Set<Location> locs : entry.getValue().values())
@@ -52,6 +62,7 @@ public class ListenPlayerJoin implements Listener
                     plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, loc);
                 }
         }
+        plugin.lock.release();
     }
 
     @EventHandler

@@ -1,6 +1,6 @@
 /*
  * Project: AntiSkid
- * Copyright (C) 2019 Bilal Salha <bsalha1@gmail.com>
+ * Copyright (C) 2020 Bilal Salha <bsalha1@gmail.com>
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 public abstract class AbstractConfig
 {
@@ -38,14 +39,13 @@ public abstract class AbstractConfig
                 e.printStackTrace();
             }
         }
-        this.config = YamlConfiguration.loadConfiguration(file);
+        config = YamlConfiguration.loadConfiguration(file);
     }
 
     public void loadDefaults()
     {
         config.addDefaults(defaults);
         config.options().copyDefaults(true);
-        this.save();
     }
 
 
@@ -54,6 +54,7 @@ public abstract class AbstractConfig
         try
         {
             config.save(file);
+            plugin.getLogger().log(Level.INFO, file.getName() + " has been saved");
         }
         catch (IOException e)
         {
@@ -61,9 +62,10 @@ public abstract class AbstractConfig
         }
     }
 
-    public void reload()
+    public void load()
     {
-        this.config = YamlConfiguration.loadConfiguration(file);
+        config = YamlConfiguration.loadConfiguration(file);
+        plugin.getLogger().log(Level.INFO, file.getName() + " has been loaded");
     }
 
     protected void addDefault(String key, Object value)

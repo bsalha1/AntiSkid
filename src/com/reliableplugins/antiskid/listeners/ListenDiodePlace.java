@@ -1,3 +1,9 @@
+/*
+ * Project: AntiSkid
+ * Copyright (C) 2020 Bilal Salha <bsalha1@gmail.com>
+ * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
+ */
+
 package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
@@ -23,17 +29,21 @@ public class ListenDiodePlace implements Listener
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event)
     {
-        // If not a diode, return
         if(!(event.getBlock() instanceof Diode)) return;
 
         Chunk chunk = event.getBlock().getChunk();
+        try
+        {
+            plugin.lock.acquire();
+        }
+        catch(Exception ignored) { }
         for (Map<Chunk, Set<Location>> chunkSetMap : plugin.diodes.values())
         {
-            // If chunk is protected, add the new diode to the list
             if(chunkSetMap.containsKey(chunk))
             {
                 chunkSetMap.get(chunk).add(event.getBlock().getLocation());
             }
         }
+        plugin.lock.release();
     }
 }
