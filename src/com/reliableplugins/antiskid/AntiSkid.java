@@ -6,6 +6,7 @@
 
 package com.reliableplugins.antiskid;
 
+import com.avaje.ebeaninternal.server.core.Message;
 import com.reliableplugins.antiskid.commands.Base_CommandAntiSkid;
 import com.reliableplugins.antiskid.config.MainConfig;
 import com.reliableplugins.antiskid.config.MessageConfig;
@@ -14,6 +15,7 @@ import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.nms.NMSManager;
 import com.reliableplugins.antiskid.runnables.TaskProtectRepeaters;
 import com.reliableplugins.antiskid.type.Whitelist;
+import com.reliableplugins.antiskid.utils.MessageManager;
 import com.reliableplugins.antiskid.utils.PacketManager;
 import com.reliableplugins.antiskid.utils.Util;
 import org.bukkit.Bukkit;
@@ -31,32 +33,54 @@ public class AntiSkid extends JavaPlugin
     public volatile TreeMap<UUID, Map<Chunk, Set<Location>>> diodes = new TreeMap<>();
     public volatile TreeMap<UUID, Whitelist> whitelists = new TreeMap<>();
 
-    public volatile Semaphore lock = new Semaphore(1);
+    public volatile Semaphore lock;
     private boolean isFactions;
-    private INMSHandler nmsHandler;
-    private NMSManager nmsManager = new NMSManager(this);
-    public static final PluginManager plugMan = Bukkit.getPluginManager();
-    public final PacketManager packMan = new PacketManager(this);
 
-    public static MessageConfig messageConfig;
-    public static MainConfig mainConfig;
+    private INMSHandler nmsHandler;
+    private NMSManager nmsManager;
+    private PluginManager plugMan;
+    private PacketManager packMan;
+    private MessageManager messageManager;
+
+    private MessageConfig messageConfig;
+    private MainConfig mainConfig;
 
     @Override
     public void onEnable()
     {
-        messageConfig = new MessageConfig(this, "messages.yml");
-        messageConfig.save();
-        messageConfig.load();
-
-        mainConfig = new MainConfig(this, "config.yml");
-        mainConfig.save();
-        messageConfig.load();
-
-        isFactions = mainConfig.getFileConfiguration().getBoolean("factions-support");
+        lock = new Semaphore(1);
+        plugMan = Bukkit.getPluginManager();
+        packMan = new PacketManager(this);
+        nmsManager = new NMSManager(this);
+        loadConfigs();
 
         new TaskProtectRepeaters(this);
         new Base_CommandAntiSkid(this);
 
+        plugMan.registerEvents(new ListenPlayerJoin(this), this);
+        plugMan.registerEvents(new ListenDiodePlace(this), this);
+        plugMan.registerEvents(new ListenDiodeBreak(this), this);
+        packMan.loadPacketListener(new ListenBlockChangePacket(this));
+
+        this.getLogger().log(Level.INFO, "AntiSkid v1.0 has been loaded");
+    }
+
+    public void loadConfigs()
+    {
+        mainConfig = new MainConfig(this, "config.yml");
+        messageConfig = new MessageConfig(this, "messages.yml");
+
+        if(mainConfig.isNew())
+        {
+            this.getLogger().log(Level.INFO, mainConfig.getFileName() + " has been created");
+        }
+
+        if(messageConfig.isNew())
+        {
+            this.getLogger().log(Level.INFO, messageConfig.getFileName() + " has been created.");
+        }
+
+        isFactions = mainConfig.getFileConfiguration().getBoolean("factions-support");
         if(isFactions)
         {
             plugMan.registerEvents(new ListenUnclaim(this), this);
@@ -66,12 +90,15 @@ public class AntiSkid extends JavaPlugin
         {
             this.getLogger().log(Level.WARNING, "Factions support is disabled. Go to plugins/AntiSkid/config.yml and set factions-support = true if this was a mistake");
         }
-        plugMan.registerEvents(new ListenPlayerJoin(this), this);
-        plugMan.registerEvents(new ListenDiodePlace(this), this);
-        plugMan.registerEvents(new ListenDiodeBreak(this), this);
-        packMan.loadPacketListener(new ListenBlockChangePacket(this));
 
-        this.getLogger().log(Level.INFO, "AntiSkid v1.0 has been loaded");
+        try
+        {
+            messageManager = new MessageManager(messageConfig);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -99,6 +126,26 @@ public class AntiSkid extends JavaPlugin
     public boolean isFactions()
     {
         return isFactions;
+    }
+
+    public MainConfig getMainConfig()
+    {
+        return mainConfig;
+    }
+
+    public MessageConfig getMessageConfig()
+    {
+        return messageConfig;
+    }
+
+    public PacketManager getPacketManager()
+    {
+        return packMan;
+    }
+
+    public MessageManager getMessageManager()
+    {
+        return this.messageManager;
     }
 
     public INMSHandler getNMS()

@@ -39,7 +39,10 @@ public class PacketManager
         Channel channel = plugin.getNMS().getSocketChannel(player);
         for(String handlerName : playerHandlers)
         {
-            channel.pipeline().remove(handlerName);
+            if(channel.pipeline().get(handlerName) != null)
+            {
+                channel.pipeline().remove(handlerName);
+            }
         }
         playerHandlers.clear();
     }

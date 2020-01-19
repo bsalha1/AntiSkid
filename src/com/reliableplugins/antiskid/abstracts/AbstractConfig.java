@@ -7,8 +7,10 @@
 package com.reliableplugins.antiskid.abstracts;
 
 import com.reliableplugins.antiskid.AntiSkid;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +21,7 @@ import java.util.logging.Level;
 public abstract class AbstractConfig
 {
     protected AntiSkid plugin;
+    private boolean isNew = false;
     private File file;
     protected FileConfiguration config;
     protected Map<String, Object> defaults = new LinkedHashMap<>();
@@ -30,6 +33,7 @@ public abstract class AbstractConfig
 
         if (!file.exists())
         {
+            isNew = true;
             try
             {
                 file.createNewFile();
@@ -46,13 +50,23 @@ public abstract class AbstractConfig
     {
         config.addDefaults(defaults);
         config.options().copyDefaults(true);
-    }
 
+        try
+        {
+            config.save(file);
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+
+    }
 
     public void save()
     {
         try
         {
+            config = YamlConfiguration.loadConfiguration(file);
             config.save(file);
             plugin.getLogger().log(Level.INFO, file.getName() + " has been saved");
         }
@@ -62,15 +76,24 @@ public abstract class AbstractConfig
         }
     }
 
-    public void load()
+    public String getFileName()
     {
-        config = YamlConfiguration.loadConfiguration(file);
-        plugin.getLogger().log(Level.INFO, file.getName() + " has been loaded");
+        return file.getName();
+    }
+
+    public boolean isNew()
+    {
+        return isNew;
     }
 
     protected void addDefault(String key, Object value)
     {
         this.defaults.put(key, value);
+    }
+
+    public Map<String, Object> getDefaults()
+    {
+        return defaults;
     }
 
     public FileConfiguration getFileConfiguration()

@@ -35,7 +35,7 @@ public class ListenPlayerJoin implements Listener
     public void onPlayerJoin(PlayerJoinEvent event)
     {
         this.player = event.getPlayer();
-        plugin.packMan.loadPacketListener(new ListenBlockChangePacket(plugin), player);
+        plugin.getPacketManager().loadPacketListener(new ListenBlockChangePacket(plugin), player);
         Executors.newSingleThreadExecutor().submit(this::hideRepeaters);
     }
 
@@ -68,6 +68,6 @@ public class ListenPlayerJoin implements Listener
     @EventHandler
     public void onLeave(PlayerQuitEvent event)
     {
-        plugin.packMan.unloadAllPacketListeners(event.getPlayer());
+        plugin.getPacketManager().unloadAllPacketListeners(event.getPlayer());
     }
 }

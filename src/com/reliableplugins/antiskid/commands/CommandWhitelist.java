@@ -8,7 +8,6 @@ package com.reliableplugins.antiskid.commands;
 
 import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
-import com.reliableplugins.antiskid.enums.Message;
 import com.reliableplugins.antiskid.type.Whitelist;
 import com.reliableplugins.antiskid.utils.Util;
 import org.bukkit.Bukkit;
@@ -61,7 +60,7 @@ public class CommandWhitelist extends AbstractCommand
             }
             else // If invalid whitelist argument
             {
-                executor.sendMessage(Message.HELP_WHITELIST.toString());
+                executor.sendMessage(plugin.getMessageManager().HELP_WHITELIST);
             }
         }
         // If /antiskid whitelist
@@ -78,7 +77,7 @@ public class CommandWhitelist extends AbstractCommand
         // If /antiskid whitelist <invalid arguments>
         else
         {
-            executor.sendMessage(Message.HELP_WHITELIST.toString());
+            executor.sendMessage(plugin.getMessageManager().HELP_WHITELIST);
         }
     }
 
@@ -92,11 +91,11 @@ public class CommandWhitelist extends AbstractCommand
 
         if(whitelist != null && (whitelist.size() != 0))
         {
-            executor.sendMessage(Message.WHITELIST_LIST.toString().replace("{LIST}", whitelist.getListString()));
+            executor.sendMessage(plugin.getMessageManager().WHITELIST_LIST.replace("{LIST}", whitelist.getListString()));
         }
         else
         {
-            executor.sendMessage(Message.HELP_WHITELIST.toString());
+            executor.sendMessage(plugin.getMessageManager().HELP_WHITELIST);
         }
     }
 
@@ -111,12 +110,12 @@ public class CommandWhitelist extends AbstractCommand
 
         if(player == null)
         {
-            executor.sendMessage(Message.ERROR_INVALID_PLAYER.toString());
+            executor.sendMessage(plugin.getMessageManager().ERROR_INVALID_PLAYER);
             return;
         }
         if(player.equals(executor))
         {
-            executor.sendMessage(Message.ERROR_WHITELIST_SELF.toString());
+            executor.sendMessage(plugin.getMessageManager().ERROR_WHITELIST_SELF);
             return;
         }
 
@@ -128,10 +127,10 @@ public class CommandWhitelist extends AbstractCommand
         }
         else if(!whitelist.addPlayer(player.getUniqueId()))
         {
-            executor.sendMessage(Message.ERROR_PLAYER_ALREADY_WHITELISTED.toString().replace("{PLAYER}", player.getName()));
+            executor.sendMessage(plugin.getMessageManager().ERROR_PLAYER_ALREADY_WHITELISTED.replace("{PLAYER}", player.getName()));
             return;
         }
-        executor.sendMessage(Message.WHITELIST_ADD.toString().replace("{PLAYER}", player.getName()));
+        executor.sendMessage(plugin.getMessageManager().WHITELIST_ADD.replace("{PLAYER}", player.getName()));
 
         // If executor has protection, reveal to whitelisted
         if(plugin.diodes.containsKey(executorId))
@@ -156,13 +155,13 @@ public class CommandWhitelist extends AbstractCommand
 
         if(player == null)
         {
-            executor.sendMessage(Message.ERROR_INVALID_PLAYER.toString());
+            executor.sendMessage(plugin.getMessageManager().ERROR_INVALID_PLAYER);
             return;
         }
 
         if(player.equals(executor))
         {
-            executor.sendMessage(Message.ERROR_UNWHITELIST_SELF.toString());
+            executor.sendMessage(plugin.getMessageManager().ERROR_UNWHITELIST_SELF);
             return;
         }
 
@@ -171,7 +170,7 @@ public class CommandWhitelist extends AbstractCommand
         {
             if(!whitelist.removePlayer(player.getUniqueId()))
             {
-                executor.sendMessage(Message.ERROR_PLAYER_NOT_WHITELISTED.toString().replace("{PLAYER}", player.getName()));
+                executor.sendMessage(plugin.getMessageManager().ERROR_PLAYER_NOT_WHITELISTED.replace("{PLAYER}", player.getName()));
                 return;
             }
 
@@ -186,11 +185,11 @@ public class CommandWhitelist extends AbstractCommand
                     }
                 }
             }
-            executor.sendMessage(Message.WHITELIST_REM.toString().replace("{PLAYER}", player.getName()));
+            executor.sendMessage(plugin.getMessageManager().WHITELIST_REM.replace("{PLAYER}", player.getName()));
         }
         else
         {
-            executor.sendMessage(Message.ERROR_PLAYER_NOT_WHITELISTED.toString().replace("{PLAYER}", player.getName()));
+            executor.sendMessage(plugin.getMessageManager().ERROR_PLAYER_NOT_WHITELISTED.replace("{PLAYER}", player.getName()));
         }
     }
 }

@@ -8,7 +8,6 @@ package com.reliableplugins.antiskid.commands;
 
 import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.abstracts.AbstractCommand;
-import com.reliableplugins.antiskid.enums.Message;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -27,10 +26,11 @@ public class Base_CommandAntiSkid implements CommandExecutor
         this.plugin = plugin;
         this.commandHelp = new CommandHelp(this);
 
-        addCommand(new CommandAntiskidOn());
-        addCommand(new CommandAntiskidOff());
+        addCommand(new CommandOn());
+        addCommand(new CommandOff());
         addCommand(new CommandWhitelist());
-        addCommand(new CommandAntiskidReload());
+        addCommand(new CommandReload());
+        addCommand(new CommandClear());
         plugin.getCommand("antiskid").setExecutor(this);
     }
 
@@ -45,7 +45,7 @@ public class Base_CommandAntiSkid implements CommandExecutor
             }
             else
             {
-                commandSender.sendMessage(Message.ERROR_NO_PERMS.toString());
+                commandSender.sendMessage(plugin.getMessageManager().ERROR_NO_PERMS);
             }
             return true;
         }
@@ -58,7 +58,7 @@ public class Base_CommandAntiSkid implements CommandExecutor
             // If player is required and they're not a player, throw error
             if(subcommand.isPlayerRequired() && !(commandSender instanceof Player))
             {
-                commandSender.sendMessage(Message.ERROR_NOT_PLAYER.toString());
+                commandSender.sendMessage(plugin.getMessageManager().ERROR_NOT_PLAYER);
                 return true;
             }
 
@@ -69,13 +69,12 @@ public class Base_CommandAntiSkid implements CommandExecutor
                 if(!subcommand.hasPermission() || commandSender.hasPermission(subcommand.getPermission()) || commandSender.isOp())
                 {
                     subcommand.execute(commandSender, Arrays.copyOfRange(args, 1, args.length));
-                    return true;
                 }
                 else
                 {
-                    commandSender.sendMessage(Message.ERROR_NO_PERMS.toString());
-                    return true;
+                    commandSender.sendMessage(plugin.getMessageManager().ERROR_NO_PERMS);
                 }
+                return true;
             }
         }
 

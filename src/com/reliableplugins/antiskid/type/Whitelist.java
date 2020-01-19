@@ -6,7 +6,6 @@
 
 package com.reliableplugins.antiskid.type;
 
-import com.reliableplugins.antiskid.enums.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

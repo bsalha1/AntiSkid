@@ -8,18 +8,21 @@ package com.reliableplugins.antiskid.commands;
 
 import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
-import com.reliableplugins.antiskid.enums.Message;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 @CommandBuilder(label = "reload", alias = "r", permission = "antiskid.reload", playerRequired = false, description = "Reload the AntiSkid config files")
-public class CommandAntiskidReload extends AbstractCommand
+public class CommandReload extends AbstractCommand
 {
     @Override
     public void execute(CommandSender executor, String[] args)
     {
-        executor.sendMessage(Message.ANTISKID_RELOAD_START.toString());
-        plugin.getServer().getPluginManager().disablePlugin(plugin);
-        plugin.getServer().getPluginManager().enablePlugin(plugin);
-        executor.sendMessage(Message.ANTISKID_RELOAD_FINISH.toString());
+        plugin.getMessageConfig().save();
+        plugin.getMainConfig().save();
+
+        plugin.loadConfigs();
+
+        executor.sendMessage(ChatColor.AQUA + "AntiSkid has been reloaded");
     }
 }

@@ -8,7 +8,6 @@ package com.reliableplugins.antiskid.commands;
 
 import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
-import com.reliableplugins.antiskid.enums.Message;
 import com.reliableplugins.antiskid.hook.impl.FactionHook;
 import com.reliableplugins.antiskid.type.Whitelist;
 import org.bukkit.*;
@@ -20,7 +19,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 
 @CommandBuilder(label = "on", permission = "antiskid.on", description = "Turns on protection for the chunk group the executor is in.\nAnyone besides the executor and the people on their whitelist\ncan see the repeaters in this chunk group.", playerRequired = true)
-public class CommandAntiskidOn extends AbstractCommand
+public class CommandOn extends AbstractCommand
 {
     private Player executor;
     private UUID executorId;
@@ -56,7 +55,7 @@ public class CommandAntiskidOn extends AbstractCommand
         if(chunks.isEmpty())
         {
             plugin.lock.release();
-            executor.sendMessage(Message.ERROR_NOT_TERRITORY.toString());
+            executor.sendMessage(plugin.getMessageManager().ERROR_NOT_TERRITORY);
             return;
         }
 
@@ -103,6 +102,6 @@ public class CommandAntiskidOn extends AbstractCommand
             }
         plugin.lock.release();
 
-        executor.sendMessage(Message.ANTISKID_ON.toString().replace("{NUM}", Integer.toString(count)));
+        executor.sendMessage(plugin.getMessageManager().ANTISKID_ON.replace("{NUM}", Integer.toString(count)));
     }
 }
