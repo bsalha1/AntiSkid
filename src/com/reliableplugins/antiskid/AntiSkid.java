@@ -9,10 +9,7 @@ package com.reliableplugins.antiskid;
 import com.reliableplugins.antiskid.commands.Base_CommandAntiSkid;
 import com.reliableplugins.antiskid.config.MainConfig;
 import com.reliableplugins.antiskid.config.MessageConfig;
-import com.reliableplugins.antiskid.listeners.ListenBlockChangePacket;
-import com.reliableplugins.antiskid.listeners.ListenDiodePlace;
-import com.reliableplugins.antiskid.listeners.ListenPlayerJoin;
-import com.reliableplugins.antiskid.listeners.ListenUnclaim;
+import com.reliableplugins.antiskid.listeners.*;
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.nms.NMSManager;
 import com.reliableplugins.antiskid.runnables.TaskProtectRepeaters;
@@ -67,10 +64,11 @@ public class AntiSkid extends JavaPlugin
         }
         else
         {
-            this.getLogger().log(Level.WARNING, "Factions support is disabled. Go to plugins/AntiSkid/config.yml and set factions-support = true");
+            this.getLogger().log(Level.WARNING, "Factions support is disabled. Go to plugins/AntiSkid/config.yml and set factions-support = true if this was a mistake");
         }
         plugMan.registerEvents(new ListenPlayerJoin(this), this);
         plugMan.registerEvents(new ListenDiodePlace(this), this);
+        plugMan.registerEvents(new ListenDiodeBreak(this), this);
         packMan.loadPacketListener(new ListenBlockChangePacket(this));
 
         this.getLogger().log(Level.INFO, "AntiSkid v1.0 has been loaded");

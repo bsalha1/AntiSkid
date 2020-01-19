@@ -55,6 +55,7 @@ public class CommandAntiskidOn extends AbstractCommand
         Set<Chunk> chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
         if(chunks.isEmpty())
         {
+            plugin.lock.release();
             executor.sendMessage(Message.ERROR_NOT_TERRITORY.toString());
             return;
         }

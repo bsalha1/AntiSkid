@@ -15,7 +15,6 @@ import org.bukkit.Material;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 
 public class TaskProtectRepeaters extends AbstractTask
@@ -23,7 +22,6 @@ public class TaskProtectRepeaters extends AbstractTask
     public TaskProtectRepeaters(AntiSkid antiSkid)
     {
         super(antiSkid, 0, antiSkid.getConfig().getInt("asynch-thread-period"));
-//        super(antiSkid, 1);
     }
 
     @Override

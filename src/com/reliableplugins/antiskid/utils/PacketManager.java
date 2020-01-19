@@ -9,23 +9,20 @@ package com.reliableplugins.antiskid.utils;
 import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.abstracts.PacketListener;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandler;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 public class PacketManager
 {
     private AntiSkid plugin;
+    private Map<Player, Set<String>> handlers = new LinkedHashMap<>();
 
     public PacketManager(AntiSkid plugin)
     {
         this.plugin = plugin;
     }
-
-
 
     /**
      * Removes all packet handlers from the player
@@ -33,18 +30,18 @@ public class PacketManager
      */
     public void unloadAllPacketListeners(Player player)
     {
-        Channel channel = plugin.getNMS().getSocketChannel(player);
-        channel.eventLoop().submit(() ->
+        Set<String> playerHandlers = handlers.get(player);
+        if(playerHandlers.isEmpty())
         {
-            for(Map.Entry<String, ChannelHandler> entry : channel.pipeline().toMap().entrySet())
-            {
-                if(entry.getValue() instanceof ChannelDuplexHandler)
-                {
-                    channel.pipeline().remove(entry.getKey());
-                }
-            }
-            return null;
-        });
+            return;
+        }
+
+        Channel channel = plugin.getNMS().getSocketChannel(player);
+        for(String handlerName : playerHandlers)
+        {
+            channel.pipeline().remove(handlerName);
+        }
+        playerHandlers.clear();
     }
 
 
@@ -54,7 +51,7 @@ public class PacketManager
      */
     public void unloadAllPacketListeners()
     {
-        Collection<? extends Player> onlinePlayers = this.plugin.getServer().getOnlinePlayers();
+        Collection<? extends Player> onlinePlayers = plugin.getServer().getOnlinePlayers();
         for(Player player : onlinePlayers)
             unloadAllPacketListeners(player);
     }
@@ -69,11 +66,9 @@ public class PacketManager
     private void unloadPacketListener(PacketListener listener, Player player)
     {
         Channel channel = plugin.getNMS().getSocketChannel(player);
-        channel.eventLoop().submit(() ->
-        {
-            channel.pipeline().remove(listener);
-            return null;
-        });
+        channel.pipeline().remove(listener.getClass().getName());
+        handlers.computeIfAbsent(player, k -> new HashSet<>());
+        handlers.get(player).remove(listener.getClass().getName());
     }
 
 
@@ -102,8 +97,10 @@ public class PacketManager
         {
             PacketListener listenerCopy = (PacketListener) listener.clone();
             listenerCopy.setPlayer(player);
-            plugin.getNMS().getSocketChannel(player).pipeline()
-                    .addBefore("packet_handler", listener.getClass().getName(), listenerCopy);
+            plugin.getNMS().getSocketChannel(player).pipeline().addBefore("packet_handler", listenerCopy.getClass().getName(), listenerCopy);
+
+            handlers.computeIfAbsent(player, k -> new HashSet<>());
+            handlers.get(player).add(listenerCopy.getClass().getName());
         }
         catch(Exception e)
         {
@@ -119,7 +116,7 @@ public class PacketManager
      */
     public void loadPacketListener(PacketListener listener)
     {
-        Collection<? extends Player> onlinePlayers = this.plugin.getServer().getOnlinePlayers();
+        Collection<? extends Player> onlinePlayers = plugin.getServer().getOnlinePlayers();
         for(Player player : onlinePlayers)
             loadPacketListener(listener, player);
     }
