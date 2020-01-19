@@ -60,11 +60,6 @@ public abstract class AbstractCommand
         this.plugin = plugin;
     }
 
-    public AntiSkid getPlugin()
-    {
-        return plugin;
-    }
-
     public boolean hasPermission()
     {
         return permission.length() != 0;

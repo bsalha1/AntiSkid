@@ -8,9 +8,9 @@ package com.reliableplugins.antiskid.runnables;
 
 import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.abstracts.AbstractTask;
-import com.reliableplugins.antiskid.packets.RepeaterHidePacket;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 
 import java.util.Map;
 import java.util.Set;
@@ -21,8 +21,8 @@ public class TaskProtectRepeaters extends AbstractTask
 {
     public TaskProtectRepeaters(AntiSkid antiSkid)
     {
-//        super(antiSkid, 0, antiSkid.getConfig().getInt("asynch-thread-period"));
-        super(antiSkid, 1);
+        super(antiSkid, 0, antiSkid.getConfig().getInt("asynch-thread-period"));
+//        super(antiSkid, 1);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class TaskProtectRepeaters extends AbstractTask
             {
                 for(Location loc : locs)
                 {
-                    new RepeaterHidePacket(loc).broadcastPacket(whitelist);
+                    plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, loc, whitelist);
                 }
             }
         }

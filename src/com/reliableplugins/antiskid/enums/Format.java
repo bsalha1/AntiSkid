@@ -9,7 +9,7 @@ package com.reliableplugins.antiskid.enums;
 public enum Format
 {
     PLAYER("{PLAYER}"),
-    WHITELIST("{WHITELIST}"),
+    LIST("{WHITELIST}"),
     NUM("{NUM}");
 
     private final String format;

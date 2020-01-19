@@ -24,10 +24,7 @@ public class ListenDiodePlace implements Listener
     public void onBlockPlace(BlockPlaceEvent event)
     {
         // If not a diode, return
-        if(!(event.getBlock() instanceof Diode))
-        {
-            return;
-        }
+        if(!(event.getBlock() instanceof Diode)) return;
 
         Chunk chunk = event.getBlock().getChunk();
         for (Map<Chunk, Set<Location>> chunkSetMap : plugin.diodes.values())

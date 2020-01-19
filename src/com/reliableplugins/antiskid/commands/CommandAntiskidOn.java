@@ -10,7 +10,6 @@ import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.enums.Message;
 import com.reliableplugins.antiskid.hook.impl.FactionHook;
-import com.reliableplugins.antiskid.packets.RepeaterHidePacket;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
@@ -18,10 +17,8 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-@CommandBuilder(label = "on", permission = "antiskid.on", description = "Turns on antiskid protection", playerRequired = true)
+@CommandBuilder(label = "on", permission = "antiskid.on", description = "Turns on protection for the chunk group the executor is in.\nAnyone besides the executor and the people on their whitelist\ncan see the repeaters in this chunk group.", playerRequired = true)
 public class CommandAntiskidOn extends AbstractCommand
 {
     private Player executor;
@@ -32,6 +29,12 @@ public class CommandAntiskidOn extends AbstractCommand
     {
         executor = (Player) sender;
         executorId = executor.getUniqueId();
+
+        if(!plugin.diodes.containsKey(executorId))
+        {
+            plugin.diodes.put(executorId, new HashMap<>());
+        }
+
         Executors.newSingleThreadExecutor().submit(this::antiskidOn);
     }
 
@@ -41,9 +44,8 @@ public class CommandAntiskidOn extends AbstractCommand
         int x1;
         int z1;
         Block block;
-        Set<Chunk> chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
 
-        // If the chunks are not the executors...
+        Set<Chunk> chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
         if(chunks.isEmpty())
         {
             executor.sendMessage(Message.ERROR_NOT_TERRITORY.toString());
@@ -51,11 +53,14 @@ public class CommandAntiskidOn extends AbstractCommand
         }
 
         World world = chunks.iterator().next().getWorld();
-        Set<Location> diodeLocations = new HashSet<>();
+        Set<Location> diodeLocations;
         Map<Chunk, Set<Location>> diodes = new HashMap<>();
 
+        // For each claimed chunk, put the diode locations associated with that chunk
+        long start = System.currentTimeMillis();
         for(Chunk c : chunks)
         {
+            diodeLocations = new HashSet<>();
             x1 = c.getX() << 4;
             z1 = c.getZ() << 4;
             for(int x = x1; x < x1 + 16; x++)
@@ -70,8 +75,10 @@ public class CommandAntiskidOn extends AbstractCommand
                         }
                     }
             diodes.put(c, diodeLocations);
-            diodeLocations.clear();
         }
+        long end = System.currentTimeMillis();
+
+        Bukkit.broadcastMessage("Scan took " + (end - start) + " ms");
 
         // This will overwrite the chunk keys with new locations
         plugin.diodes.get(executorId).putAll(diodes);
@@ -86,15 +93,12 @@ public class CommandAntiskidOn extends AbstractCommand
         TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
 
         // Change diodes to carpets for all players not in whitelist
-        for(Map.Entry<Chunk, Set<Location>> entry : diodes.entrySet())
-        {
-            for(Location loc : entry.getValue())
+        for(Set<Location> locs : diodes.values())
+            for(Location loc : locs)
             {
-                new RepeaterHidePacket(loc).broadcastPacket(whitelist);
+                plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, loc, whitelist);
             }
-        }
 
         executor.sendMessage(Message.ANTISKID_ON.toString().replace("{NUM}", Integer.toString(count)));
     }
-
 }

@@ -12,15 +12,15 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class AbstractConfig
 {
     protected AntiSkid plugin;
-    protected Map<String, Object> defaults = new HashMap<>();
     private File file;
     protected FileConfiguration config;
+    protected Map<String, Object> defaults = new LinkedHashMap<>();
 
     public AbstractConfig(AntiSkid plugin, String fileName)
     {
@@ -41,6 +41,14 @@ public abstract class AbstractConfig
         this.config = YamlConfiguration.loadConfiguration(file);
     }
 
+    public void loadDefaults()
+    {
+        config.addDefaults(defaults);
+        config.options().copyDefaults(true);
+        this.save();
+    }
+
+
     public void save()
     {
         try
@@ -53,30 +61,14 @@ public abstract class AbstractConfig
         }
     }
 
-    public void loadDefaults()
-    {
-        this.config.addDefaults(defaults);
-        this.config.options().copyDefaults(true);
-    }
-
-    public void addDefault(String path, Object value)
-    {
-        this.defaults.put(path, value);
-    }
-
-    public void remDefault(String path)
-    {
-        this.defaults.remove(path);
-    }
-
     public void reload()
     {
         this.config = YamlConfiguration.loadConfiguration(file);
     }
 
-    public File getFile()
+    protected void addDefault(String key, Object value)
     {
-        return this.file;
+        this.defaults.put(key, value);
     }
 
     public FileConfiguration getFileConfiguration()

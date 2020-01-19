@@ -31,12 +31,16 @@ public enum Message
     ERROR_PLAYER_ALREADY_WHITELISTED("err-already-whitelisted"),
 
     // {LIST}
-    @MessageFormat(formats = Format.WHITELIST)
+    @MessageFormat(formats = Format.LIST)
     WHITELIST_LIST("whitelist-list"),
 
+    ANTISKID_RELOAD_START("antiskid-reload-start"),
+    ANTISKID_RELOAD_FINISH("antiskid-reload-finish"),
     ANTISKID_OFF("antiskid-off"),
     HELP_ANTISKID("antiskid-help"),
     HELP_WHITELIST("antiskid-whitelist-help"),
+
+    ERROR_PROTECTED_DIODE("err-protected-diode"),
     ERROR_NO_PERMS("err-no-perms"),
     ERROR_NOT_PLAYER("err-not-player"),
     ERROR_NOT_PROTECTED("err-not-protected"),

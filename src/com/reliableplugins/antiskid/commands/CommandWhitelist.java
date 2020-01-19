@@ -6,21 +6,23 @@
 
 package com.reliableplugins.antiskid.commands;
 
-import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.enums.Message;
-import com.reliableplugins.antiskid.packets.RepeaterHidePacket;
-import com.reliableplugins.antiskid.packets.RepeaterRevealPacket;
+import com.reliableplugins.antiskid.utils.Util;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 
-@CommandBuilder(label = "whitelist", permission = "antiskid.whitelist")
+@CommandBuilder(label = "whitelist", permission = "antiskid.whitelist", playerRequired = true, description = "Manage the whitelist for the executor's protection.\nIf they are added, they can see the repeaters.")
 public class CommandWhitelist extends AbstractCommand
 {
     private Player executor;
@@ -73,27 +75,25 @@ public class CommandWhitelist extends AbstractCommand
         TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
         Player player;
 
-        // If whitelist isn't initialized, throw error
         if(whitelist == null)
         {
-            executor.sendMessage(Message.ERROR_EMPTY_WHITELIST.toString());
+            executor.sendMessage(Message.HELP_WHITELIST.toString());
         }
-        // Else print the whitelist (not including the executor)
         else
         {
-            StringBuilder message = new StringBuilder();
+            StringBuilder whitelistMsg = new StringBuilder();
             for(UUID id : whitelist)
             {
                 player = Bukkit.getPlayer(id);
                 if(player.equals(executor)) continue;
-                message.append(player.getName()).append(", ");
+                whitelistMsg.append(player.getName()).append(", ");
             }
 
             // Trim off trailing comma
-            if(message.toString().contains(", "))
+            if(whitelistMsg.toString().contains(", "))
             {
-                message = new StringBuilder(message.substring(0, message.lastIndexOf(", ")));
-                executor.sendMessage(Message.WHITELIST_LIST.toString().replace("{WHITELIST}", message));
+                whitelistMsg = new StringBuilder(whitelistMsg.substring(0, whitelistMsg.lastIndexOf(", ")));
+                executor.sendMessage(Message.WHITELIST_LIST.toString().replace("{LIST}", whitelistMsg));
                 return;
             }
             executor.sendMessage(Message.ERROR_EMPTY_WHITELIST.toString());
@@ -108,16 +108,12 @@ public class CommandWhitelist extends AbstractCommand
     private void whitelistPlayer(Player player)
     {
         TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
-        Set<Location> diodes = plugin.diodeMap.get(executorId);
 
-        // If invalid player... throw error
         if(player == null)
         {
             executor.sendMessage(Message.ERROR_INVALID_PLAYER.toString());
             return;
         }
-
-        // If self... throw error
         if(player.equals(executor))
         {
             executor.sendMessage(Message.ERROR_WHITELIST_SELF.toString());
@@ -131,31 +127,28 @@ public class CommandWhitelist extends AbstractCommand
             plugin.whitelists.get(executorId).add(executor.getUniqueId());
             plugin.whitelists.get(executorId).add(player.getUniqueId());
         }
-        // If the whitelist already contains the player, throw error
         else if(whitelist.contains(player.getUniqueId()))
         {
             executor.sendMessage(Message.ERROR_PLAYER_ALREADY_WHITELISTED.toString().replace("{PLAYER}", player.getName()));
             return;
         }
-        // Else, append player onto whitelist
         else
         {
             whitelist.add(player.getUniqueId());
         }
-
-
-        // Reveal the hidden repeaters
-//        AntiSkid.protMan.removePacketListener(plugin.blockChangeListener);
-        if(diodes != null)
-        {
-            for(Location loc : diodes)
-            {
-                new RepeaterRevealPacket(loc).sendPacket(player); // Reveal repeaters
-            }
-        }
-//        AntiSkid.protMan.addPacketListener(plugin.blockChangeListener);
-
         executor.sendMessage(Message.WHITELIST_ADD.toString().replace("{PLAYER}", player.getName()));
+
+        if(!plugin.diodes.containsKey(executorId))
+        {
+            return;
+        }
+
+        // Reveal hidden repeaters
+        Set<Chunk> chunks = plugin.diodes.get(executorId).keySet();
+        for(Chunk chunk : chunks)
+        {
+            Util.reloadChunk(chunk);
+        }
     }
 
 
@@ -166,7 +159,7 @@ public class CommandWhitelist extends AbstractCommand
     private void unWhitelistPlayer(Player player)
     {
         TreeSet<UUID> whitelist = plugin.whitelists.get(executorId);
-        Set<Location> diodes = plugin.diodeMap.get(executorId);
+        Collection<Set<Location>> diodes = plugin.diodes.get(executorId).values();
 
         // If invalid player... throw error
         if(player == null)
@@ -193,11 +186,11 @@ public class CommandWhitelist extends AbstractCommand
             whitelist.remove(player.getUniqueId());
 
             // If executor has protected diodes, hide them from the removed player
-            if(diodes != null)
+            for(Set<Location> locs : diodes)
             {
-                for(Location loc : diodes)
+                for(Location loc : locs)
                 {
-                    new RepeaterHidePacket(loc).sendPacket(player); // Hide repeaters
+                    plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, loc);
                 }
             }
 

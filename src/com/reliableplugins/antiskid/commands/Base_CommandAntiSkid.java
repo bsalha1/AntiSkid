@@ -13,7 +13,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 
@@ -26,11 +25,12 @@ public class Base_CommandAntiSkid implements CommandExecutor
     public Base_CommandAntiSkid(AntiSkid plugin)
     {
         this.plugin = plugin;
-        this.commandHelp = new CommandHelp();
+        this.commandHelp = new CommandHelp(this);
 
         addCommand(new CommandAntiskidOn());
         addCommand(new CommandAntiskidOff());
         addCommand(new CommandWhitelist());
+        addCommand(new CommandAntiskidReload());
         plugin.getCommand("antiskid").setExecutor(this);
     }
 
@@ -41,7 +41,7 @@ public class Base_CommandAntiSkid implements CommandExecutor
         {
             if(commandSender.hasPermission(commandHelp.getPermission()))
             {
-                commandHelp.execute(commandSender, null);
+                commandHelp.execute(commandSender, args);
             }
             else
             {
@@ -80,7 +80,7 @@ public class Base_CommandAntiSkid implements CommandExecutor
         }
 
         // By here, the command entered isn't valid
-        commandHelp.execute(commandSender, null);
+        commandHelp.execute(commandSender, args);
         return true;
     }
 
@@ -88,11 +88,6 @@ public class Base_CommandAntiSkid implements CommandExecutor
     {
         command.setPlugin(plugin);
         this.subcommands.put(command.getLabel().toLowerCase(), command);
-    }
-
-    public JavaPlugin getPlugin()
-    {
-        return plugin;
     }
 
     public Collection<AbstractCommand> getCommands()
