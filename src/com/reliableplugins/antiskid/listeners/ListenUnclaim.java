@@ -36,14 +36,14 @@ public class ListenUnclaim implements Listener
         try
         {
             plugin.lock.acquire();
-        }
-        catch(Exception ignored) { }
+        } catch(Exception ignored) { }
         for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
         {
             if(entry.getValue().containsKey(chunk))
             {
                 plugin.diodes.get(entry.getKey()).remove(chunk);
                 Util.reloadChunk(chunk);
+                plugin.lock.release();
                 return;
             }
         }
@@ -54,6 +54,10 @@ public class ListenUnclaim implements Listener
     public void onUnclaimAll(LandUnclaimAllEvent event)
     {
         Chunk chunk;
+        try
+        {
+            plugin.lock.acquire();
+        } catch(Exception ignored) { }
         for(FLocation floc : event.getFaction().getAllClaims())
         {
             chunk = floc.getChunk();
@@ -63,5 +67,6 @@ public class ListenUnclaim implements Listener
                 Util.reloadChunk(chunk);
             }
         }
+        plugin.lock.release();
     }
 }

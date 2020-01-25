@@ -8,6 +8,9 @@ package com.reliableplugins.antiskid.nms.impl;
 
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.Vector;
+import com.reliableplugins.antiskid.type.packet.BlockChangePacket;
+import com.reliableplugins.antiskid.type.packet.MapChunkBulkPacket;
+import com.reliableplugins.antiskid.utils.Util;
 import io.netty.channel.Channel;
 import net.minecraft.server.v1_13_R2.BlockDiodeAbstract;
 import net.minecraft.server.v1_13_R2.BlockPosition;
@@ -63,16 +66,32 @@ public class Version_1_13_R2 implements INMSHandler
     }
 
     @Override
-    public Vector getLocation(Object packet) throws IllegalAccessException, NoSuchFieldException
+    public Vector getLocation(Object packet)
     {
+        if(!(packet instanceof PacketPlayOutBlockChange))
+        {
+            return null;
+        }
+
         PacketPlayOutBlockChange blockChange = (PacketPlayOutBlockChange) packet;
         BlockPosition bpos;
-
-        Field field = PacketPlayOutBlockChange.class.getDeclaredField("a");
-        field.setAccessible(true);
-        bpos = (BlockPosition) field.get(blockChange);
+        try
+        {
+            bpos = Util.getPrivateField("a", blockChange);
+        }
+        catch(Exception e)
+        {
+            return null;
+        }
 
         return new Vector(bpos.getX(), bpos.getY(), bpos.getZ());
+    }
+
+
+    @Override
+    public int[][] getChunkCoordinates(Object packet)
+    {
+        return new int[0][];
     }
 
     @Override
@@ -86,6 +105,42 @@ public class Version_1_13_R2 implements INMSHandler
     public boolean isBlockChangePacket(Object packet)
     {
         return packet instanceof PacketPlayOutBlockChange;
+    }
+
+    @Override
+    public BlockChangePacket getBlockChangePacket(Object packet)
+    {
+        if(!(packet instanceof PacketPlayOutBlockChange))
+        {
+            return null;
+        }
+
+        PacketPlayOutBlockChange blockChange = (PacketPlayOutBlockChange) packet;
+        BlockPosition bpos;
+        try
+        {
+            bpos = Util.getPrivateField("a", blockChange);
+        }
+        catch(Exception e)
+        {
+            return null;
+        }
+
+        return new BlockChangePacket(
+                new Vector(bpos.getX(), bpos.getY(), bpos.getZ()),
+                CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
+    }
+
+    @Override
+    public MapChunkBulkPacket getMapChunkBulkPacket(Object packet)
+    {
+        return null;
+    }
+
+    @Override
+    public boolean isMapChunkBulkPacket(Object packet)
+    {
+        return false;
     }
 
 }

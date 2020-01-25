@@ -20,7 +20,6 @@ public class CommandReload extends AbstractCommand
     {
         plugin.getMessageConfig().save();
         plugin.getMainConfig().save();
-
         plugin.loadConfigs();
 
         executor.sendMessage(ChatColor.AQUA + "AntiSkid has been reloaded");

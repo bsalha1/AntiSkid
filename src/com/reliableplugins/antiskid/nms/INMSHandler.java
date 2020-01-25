@@ -7,6 +7,8 @@
 package com.reliableplugins.antiskid.nms;
 
 import com.reliableplugins.antiskid.type.Vector;
+import com.reliableplugins.antiskid.type.packet.BlockChangePacket;
+import com.reliableplugins.antiskid.type.packet.MapChunkBulkPacket;
 import io.netty.channel.Channel;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,5 +31,13 @@ public interface INMSHandler
 
     boolean isBlockChangePacket(Object packet);
 
-    Vector getLocation(Object packet) throws IllegalAccessException, NoSuchFieldException;
+    BlockChangePacket getBlockChangePacket(Object packet);
+
+    MapChunkBulkPacket getMapChunkBulkPacket(Object packet);
+
+    boolean isMapChunkBulkPacket(Object packet);
+
+    Vector getLocation(Object packet);
+
+    int[][] getChunkCoordinates(Object packet);
 }

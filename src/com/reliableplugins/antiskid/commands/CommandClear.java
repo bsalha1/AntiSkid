@@ -21,6 +21,10 @@ public class CommandClear extends AbstractCommand
     @Override
     public void execute(CommandSender executor, String[] args)
     {
+        try
+        {
+            plugin.lock.acquire();
+        } catch(Exception ignored) { }
         TreeMap<UUID, Map<Chunk, Set<Location>>> diodes = (TreeMap<UUID, Map<Chunk, Set<Location>>>) plugin.diodes.clone();
         plugin.diodes.clear();
         int i = 0;
@@ -32,6 +36,7 @@ public class CommandClear extends AbstractCommand
                 i++;
             }
         }
+        plugin.lock.release();
         executor.sendMessage(plugin.getMessageManager().ANTISKID_CLEAR.replace("{NUM}", Integer.toString(i)));
     }
 }

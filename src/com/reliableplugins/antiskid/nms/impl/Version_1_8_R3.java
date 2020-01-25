@@ -8,10 +8,11 @@ package com.reliableplugins.antiskid.nms.impl;
 
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.Vector;
+import com.reliableplugins.antiskid.type.packet.BlockChangePacket;
+import com.reliableplugins.antiskid.type.packet.MapChunkBulkPacket;
+import com.reliableplugins.antiskid.utils.Util;
 import io.netty.channel.Channel;
-import net.minecraft.server.v1_8_R3.BlockDiodeAbstract;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.PacketPlayOutBlockChange;
+import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,9 +22,7 @@ import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 public class Version_1_8_R3 implements INMSHandler
 {
@@ -63,14 +62,70 @@ public class Version_1_8_R3 implements INMSHandler
     }
 
     @Override
-    public Vector getLocation(Object packet) throws IllegalAccessException, NoSuchFieldException
+    public MapChunkBulkPacket getMapChunkBulkPacket(Object packet)
     {
+        if(!(packet instanceof PacketPlayOutMapChunkBulk))
+        {
+            return null;
+        }
+
+        PacketPlayOutMapChunkBulk mapChunkBulk = (PacketPlayOutMapChunkBulk) packet;
+        try
+        {
+            int[] x = Util.getPrivateField("a", mapChunkBulk);
+            int[] z = Util.getPrivateField("b", mapChunkBulk);
+            World world = Util.getPrivateField("world", mapChunkBulk);
+            return new MapChunkBulkPacket(x, z, world.getWorld());
+        }
+        catch(Exception e)
+        {
+            return null;
+        }
+
+    }
+
+    @Override
+    public BlockChangePacket getBlockChangePacket(Object packet)
+    {
+        if(!(packet instanceof PacketPlayOutBlockChange))
+        {
+            return null;
+        }
+
         PacketPlayOutBlockChange blockChange = (PacketPlayOutBlockChange) packet;
         BlockPosition bpos;
+        try
+        {
+            bpos = Util.getPrivateField("a", blockChange);
+        }
+        catch(Exception e)
+        {
+            return null;
+        }
 
-        Field field = PacketPlayOutBlockChange.class.getDeclaredField("a");
-        field.setAccessible(true);
-        bpos = (BlockPosition) field.get(blockChange);
+        return new BlockChangePacket(
+                new Vector(bpos.getX(), bpos.getY(), bpos.getZ()),
+                CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
+    }
+
+    @Override
+    public Vector getLocation(Object packet)
+    {
+        if(!(packet instanceof PacketPlayOutBlockChange))
+        {
+            return null;
+        }
+
+        PacketPlayOutBlockChange blockChange = (PacketPlayOutBlockChange) packet;
+        BlockPosition bpos;
+        try
+        {
+            bpos = Util.getPrivateField("a", blockChange);
+        }
+        catch(Exception e)
+        {
+            return null;
+        }
 
         return new Vector(bpos.getX(), bpos.getY(), bpos.getZ());
     }
@@ -86,5 +141,36 @@ public class Version_1_8_R3 implements INMSHandler
     public boolean isBlockChangePacket(Object packet)
     {
         return packet instanceof PacketPlayOutBlockChange;
+    }
+
+    @Override
+    public boolean isMapChunkBulkPacket(Object packet)
+    {
+        return packet instanceof PacketPlayOutMapChunkBulk;
+    }
+
+    @Override
+    public int[][] getChunkCoordinates(Object packet)
+    {
+        if(!(packet instanceof PacketPlayOutMapChunkBulk))
+        {
+            return null;
+        }
+
+        HashMap<Integer, Integer> chunkCoords = new HashMap<>();
+        PacketPlayOutMapChunkBulk mapChunkBulk = (PacketPlayOutMapChunkBulk) packet;
+        int[][] coords;
+        try
+        {
+            int[] x = Util.getPrivateField("a", mapChunkBulk);
+            int[] y = Util.getPrivateField("b", mapChunkBulk);
+            coords = new int[][]{x, y};
+        }
+        catch(Exception e)
+        {
+            return null;
+        }
+
+        return coords;
     }
 }

@@ -15,7 +15,7 @@ public class MessageConfig extends AbstractConfig
     {
         super(plugin, fileName);
         addDefault("message-header", "&8(&9AntiSkid&8) ");
-        addDefault("antiskid-on", "&bAntiskid protection has been turned on ({NUM} repeaters protected)");
+        addDefault("antiskid-on", "&bAntiskid protection has been turned on ({NUM} chunks protected)");
         addDefault("antiskid-off", "&bAntiskid protection has been turned off.");
         addDefault("antiskid-clear", "&bAntiskid protection has been cleared. {NUM} chunks freed");
         addDefault("antiskid-reload-start", "&bAntiskid is reloading.");

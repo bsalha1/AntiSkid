@@ -16,6 +16,7 @@ public class MainConfig extends AbstractConfig
         super(plugin, fileName);
 
         addDefault("factions-support", true);
+        addDefault("fast-scan", true);
         addDefault("asynch-thread-period", 20);
 
         loadDefaults();

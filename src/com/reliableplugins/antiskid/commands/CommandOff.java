@@ -35,8 +35,7 @@ public class CommandOff extends AbstractCommand
             try
             {
                 plugin.lock.acquire();
-            }
-            catch(Exception ignored) { }
+            } catch(Exception ignored) { }
 
             Set<Chunk> chunks = plugin.diodes.get(executorId).keySet();
             for(Chunk chunk : chunks)

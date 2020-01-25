@@ -10,8 +10,12 @@ import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.hook.impl.FactionHook;
 import com.reliableplugins.antiskid.type.Whitelist;
-import org.bukkit.*;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -35,73 +39,105 @@ public class CommandOn extends AbstractCommand
 
     private void antiskidOn()
     {
-        int count = 0;
-        int x1;
-        int z1;
-        Block block;
+        Set<Chunk> chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
+        if(chunks.isEmpty())
+        {
+            executor.sendMessage(plugin.getMessageManager().ERROR_NOT_TERRITORY);
+            return;
+        }
 
         try
         {
             plugin.lock.acquire();
-        }
-        catch(Exception ignored) { }
+        } catch(Exception ignored) { }
 
         if(!plugin.diodes.containsKey(executorId))
         {
             plugin.diodes.put(executorId, new HashMap<>());
         }
-
-        Set<Chunk> chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
-        if(chunks.isEmpty())
-        {
-            plugin.lock.release();
-            executor.sendMessage(plugin.getMessageManager().ERROR_NOT_TERRITORY);
-            return;
-        }
-
-        World world = chunks.iterator().next().getWorld();
-        Set<Location> diodeLocations;
-        Map<Chunk, Set<Location>> diodes = new HashMap<>();
-
-        // For each claimed chunk, put the diode locations associated with that chunk
-        for(Chunk c : chunks)
-        {
-            diodeLocations = new HashSet<>();
-            x1 = c.getX() << 4;
-            z1 = c.getZ() << 4;
-            for(int x = x1; x < x1 + 16; x++)
-                for(int z = z1; z < z1 + 16; z++)
-                    for(int y = 0; y < 256; y++)
-                    {
-                        block = world.getBlockAt(x, y, z);
-                        if(block.getType().equals(Material.DIODE_BLOCK_OFF))
-                        {
-                            diodeLocations.add(block.getLocation());
-                            count++;
-                        }
-                    }
-            diodes.put(c, diodeLocations);
-        }
-
-        // This will overwrite the chunk keys with new locations
-        plugin.diodes.get(executorId).putAll(diodes);
-
-        // If whitelist hasn't already been populated, populate it with the executor
         if(!plugin.whitelists.containsKey(executorId))
         {
             plugin.whitelists.put(executorId, new Whitelist(executorId));
         }
-
         Whitelist whitelist = plugin.whitelists.get(executorId);
 
-        // Change diodes to carpets for all players not in whitelist
-        for(Set<Location> locs : diodes.values())
-            for(Location loc : locs)
-            {
-                plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, loc, whitelist.getUUIDs());
-            }
+        /* Cache Diodes */
+        Map<Chunk, Set<Location>> diodes;
+        if(plugin.getMainConfig().getFileConfiguration().getBoolean("fast-scan"))
+        {
+            diodes = fastScan(chunks, whitelist);
+        }
+        else
+        {
+            diodes = regularScan(chunks, whitelist);
+        }
+        plugin.diodes.get(executorId).putAll(diodes);
+
         plugin.lock.release();
 
-        executor.sendMessage(plugin.getMessageManager().ANTISKID_ON.replace("{NUM}", Integer.toString(count)));
+        executor.sendMessage(plugin.getMessageManager().ANTISKID_ON.replace("{NUM}", Integer.toString(diodes.keySet().size())));
+    }
+
+    /**
+     * Scan chunks with dispensers in them for diodes
+     * @param chunks to scan
+     * @param whitelist players who shouldn't receive blockchange
+     * @return map of chunk to locations of diodes
+     */
+    private Map<Chunk, Set<Location>> fastScan(Set<Chunk> chunks, Whitelist whitelist)
+    {
+        Map<Chunk, Set<Location>> diodes = new HashMap<>();
+        for(Chunk chunk : chunks)
+        {
+            for(BlockState state : chunk.getTileEntities())
+            {
+                if(state.getType().equals(Material.DISPENSER))
+                {
+                    diodes.put(chunk, findAndProtectDiodes(chunk, whitelist));
+                    break;
+                }
+            }
+        }
+        return diodes;
+    }
+
+    /**
+     * Scan all chunks for diodes
+     * @param chunks to scan
+     * @param whitelist players who shouldn't receive blockchange
+     * @return map of chunk to locations of diodes
+     */
+    private Map<Chunk, Set<Location>> regularScan(Set<Chunk> chunks, Whitelist whitelist)
+    {
+        Map<Chunk, Set<Location>> diodes = new HashMap<>();
+        for(Chunk chunk : chunks)
+        {
+            diodes.put(chunk, findAndProtectDiodes(chunk, whitelist));
+        }
+        return diodes;
+    }
+
+    private HashSet<Location> findAndProtectDiodes(Chunk chunk, Whitelist whitelist)
+    {
+        HashSet<Location> diodeLocations = new HashSet<>();
+        int x1 = chunk.getX() << 4;
+        int z1 = chunk.getZ() << 4;
+        World world = chunk.getWorld();
+        Block block;
+        Location location;
+
+        for(int x = x1; x < x1 + 16; x++)
+            for(int z = z1; z < z1 + 16; z++)
+                for(int y = 0; y < 256; y++)
+                {
+                    block = world.getBlockAt(x, y, z);
+                    if(block.getType().equals(Material.DIODE_BLOCK_OFF))
+                    {
+                        location = block.getLocation();
+                        diodeLocations.add(location);
+                        plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, location, whitelist.getUUIDs());
+                    }
+                }
+        return diodeLocations;
     }
 }

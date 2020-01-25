@@ -6,14 +6,12 @@
 
 package com.reliableplugins.antiskid;
 
-import com.avaje.ebeaninternal.server.core.Message;
 import com.reliableplugins.antiskid.commands.Base_CommandAntiSkid;
 import com.reliableplugins.antiskid.config.MainConfig;
 import com.reliableplugins.antiskid.config.MessageConfig;
 import com.reliableplugins.antiskid.listeners.*;
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.nms.NMSManager;
-import com.reliableplugins.antiskid.runnables.TaskProtectRepeaters;
 import com.reliableplugins.antiskid.type.Whitelist;
 import com.reliableplugins.antiskid.utils.MessageManager;
 import com.reliableplugins.antiskid.utils.PacketManager;
@@ -54,13 +52,13 @@ public class AntiSkid extends JavaPlugin
         nmsManager = new NMSManager(this);
         loadConfigs();
 
-        new TaskProtectRepeaters(this);
+//        new TaskProtectRepeaters(this);
         new Base_CommandAntiSkid(this);
 
         plugMan.registerEvents(new ListenPlayerJoin(this), this);
         plugMan.registerEvents(new ListenDiodePlace(this), this);
         plugMan.registerEvents(new ListenDiodeBreak(this), this);
-        packMan.loadPacketListener(new ListenBlockChangePacket(this));
+        packMan.loadPacketListener(new ListenPacket(this));
 
         this.getLogger().log(Level.INFO, "AntiSkid v1.0 has been loaded");
     }
