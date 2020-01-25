@@ -13,6 +13,7 @@ import com.reliableplugins.antiskid.listeners.*;
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.nms.NMSManager;
 import com.reliableplugins.antiskid.type.Whitelist;
+import com.reliableplugins.antiskid.utils.Cache;
 import com.reliableplugins.antiskid.utils.MessageManager;
 import com.reliableplugins.antiskid.utils.PacketManager;
 import com.reliableplugins.antiskid.utils.Util;
@@ -30,6 +31,7 @@ public class AntiSkid extends JavaPlugin
 {
     public volatile TreeMap<UUID, Map<Chunk, Set<Location>>> diodes = new TreeMap<>();
     public volatile TreeMap<UUID, Whitelist> whitelists = new TreeMap<>();
+    public Cache cache;
 
     public volatile Semaphore lock;
     private boolean isFactions;
@@ -57,9 +59,10 @@ public class AntiSkid extends JavaPlugin
 
         plugMan.registerEvents(new ListenPlayerJoin(this), this);
         plugMan.registerEvents(new ListenDiodePlace(this), this);
-        plugMan.registerEvents(new ListenDiodeBreak(this), this);
+        plugMan.registerEvents(new ListenDiodeOn(this), this);
         packMan.loadPacketListener(new ListenPacket(this));
 
+        cache = new Cache(this);
         this.getLogger().log(Level.INFO, "AntiSkid v1.0 has been loaded");
     }
 

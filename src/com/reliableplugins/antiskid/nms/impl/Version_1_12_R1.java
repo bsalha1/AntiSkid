@@ -49,7 +49,7 @@ public class Version_1_12_R1 implements INMSHandler
                 ((CraftWorld) location.getWorld()).getHandle(),
                 new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
 
-        packet.block = CraftMagicNumbers.getBlock(material).fromLegacyData((byte) 0);
+        packet.block = CraftMagicNumbers.getBlock(material).getBlockData();
 
         ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
     }
