@@ -10,18 +10,14 @@ import com.reliableplugins.antiskid.abstracts.AbstractTask;
 import com.reliableplugins.antiskid.abstracts.PacketListener;
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.Vector;
-import com.reliableplugins.antiskid.type.packet.BlockChangePacket;
-import com.reliableplugins.antiskid.type.packet.MapChunkBulkPacket;
-import com.reliableplugins.antiskid.utils.Util;
+import com.reliableplugins.antiskid.type.packet.Packet;
+import com.reliableplugins.antiskid.type.packet.PacketClientLeftClickBlock;
+import com.reliableplugins.antiskid.type.packet.PacketServerBlockChange;
+import com.reliableplugins.antiskid.type.packet.PacketServerMapChunkBulk;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.*;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 
 import java.util.Map;
 import java.util.Set;
@@ -47,42 +43,12 @@ public class ListenPacket extends PacketListener
     public void write(ChannelHandlerContext context, Object packet, ChannelPromise promise)
     {
         INMSHandler nmsHandler = plugin.getNMS();
+        Packet temp = nmsHandler.getPacket(packet);
 
-//        if(packet instanceof PacketPlayOutMultiBlockChange)
-//        {
-//            PacketPlayOutMultiBlockChange pack = (PacketPlayOutMultiBlockChange) packet;
-//            try
-//            {
-//                PacketPlayOutMultiBlockChange.MultiBlockChangeInfo[] bInfos = Util.getPrivateField("b", pack);
-//                for(PacketPlayOutMultiBlockChange.MultiBlockChangeInfo b : bInfos)
-//                {
-//                    BlockPosition bpos = b.a();
-//                    Bukkit.broadcastMessage("Short: " + b.b());
-//
-//                    Location location = new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ());
-//                    Chunk chunk = location.getChunk();
-//                    if(location.getBlock().getType().equals(Material.DIODE_BLOCK_OFF) || location.getBlock().getType().equals(Material.DIODE_BLOCK_ON))
-//                    {
-//
-//                    }
-//                }
-//                PacketPlayOutMultiBlockChange toSend = new PacketPlayOutMultiBlockChange(clone.length, );
-//
-//            }
-//            catch(Exception e)
-//            {
-//                e.printStackTrace();
-//            }
-//        }
         /* MAP CHUNK BULK PACKET */
-        if(nmsHandler.isMapChunkBulkPacket(packet))
+        if(temp instanceof PacketServerMapChunkBulk)
         {
-            MapChunkBulkPacket pack = nmsHandler.getMapChunkBulkPacket(packet);
-            if(pack == null)
-            {
-                exit(context, packet, promise);
-                return;
-            }
+            PacketServerMapChunkBulk pack = (PacketServerMapChunkBulk) temp;
             int[] chunksX = pack.getX();
             int[] chunksZ = pack.getZ();
             World world = pack.getWorld();
@@ -124,12 +90,13 @@ public class ListenPacket extends PacketListener
 
 
         /* BLOCK CHANGE PACKET */
-        if(nmsHandler.isBlockChangePacket(packet))
+        if(temp instanceof PacketServerBlockChange)
         {
-            BlockChangePacket pack = nmsHandler.getBlockChangePacket(packet);
+            PacketServerBlockChange pack = (PacketServerBlockChange) temp;
+            Material material = pack.getMaterial();
 
             // If packet is null or is not a diode blockchange, return
-            if(pack == null || (!pack.getMaterial().equals(Material.DIODE_BLOCK_OFF) && !pack.getMaterial().equals(Material.DIODE_BLOCK_ON) && !pack.getMaterial().equals(Material.DIODE)))
+            if(!material.equals(Material.DIODE_BLOCK_OFF) && !material.equals(Material.DIODE_BLOCK_ON) && !material.equals(Material.DIODE))
             {
                 exit(context, packet, promise);
                 return;
@@ -144,9 +111,17 @@ public class ListenPacket extends PacketListener
                 plugin.lock.acquire();
             } catch(Exception ignored) {}
 
-            // If this chunk is protected and the player isn't whitelisted. Don't send blockchange
-            if(plugin.cache.isProtected(chunk) && !plugin.cache.isWhitelisted(player, chunk))
+            // If this block is protected and the player isn't whitelisted. Don't send blockchange
+            if(plugin.cache.isProtected(chunk, location) && !plugin.cache.isWhitelisted(player, chunk))
             {
+                plugin.lock.release();
+                return;
+            }
+            // If new repeater and player owns this chunk
+            else if(plugin.cache.ownsChunk(player, chunk) && !plugin.cache.isProtected(chunk, location, player))
+            {
+                plugin.diodes.get(player.getUniqueId()).get(chunk).add(location);
+                plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, location, plugin.whitelists.get(player.getUniqueId()).getUUIDs());
                 plugin.lock.release();
                 return;
             }
@@ -164,42 +139,15 @@ public class ListenPacket extends PacketListener
     @Override
     public void channelRead(ChannelHandlerContext channelHandlerContext, Object packet) throws Exception
     {
-        /* ON CLIENTSIDE RIGHT CLICK BLOCK */
-        if(packet instanceof PacketPlayInBlockPlace)
-        {
-            PacketPlayInBlockPlace pack = (PacketPlayInBlockPlace) packet;
-            BlockPosition bpos = pack.a();
-            Location location = new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ());
-            Material material = location.getBlock().getType();
-
-            if(!(material.equals(Material.DIODE_BLOCK_OFF) || material.equals(Material.DIODE_BLOCK_ON) || material.equals(Material.DIODE)))
-            {
-                super.channelRead(channelHandlerContext, packet);
-                return;
-            }
-
-            Chunk chunk = location.getChunk();
-            try
-            {
-                plugin.lock.acquire();
-            } catch(Exception ignored) {}
-
-            // Do not update the block if the player isn't whitelisted to this protected chunk
-            if(plugin.cache.isProtected(chunk) && !plugin.cache.isWhitelisted(player, chunk))
-            {
-                player.sendMessage(plugin.getMessageManager().ERROR_PROTECTED_DIODE);
-                plugin.lock.release();
-                return;
-            }
-            plugin.lock.release();
-        }
+        INMSHandler nmsHandler = plugin.getNMS();
+        Packet temp = nmsHandler.getPacket(packet);
 
         /* ON CLIENTSIDE LEFT CLICK BLOCK */
-        if(packet instanceof PacketPlayInBlockDig)
+        if(temp instanceof PacketClientLeftClickBlock)
         {
-            PacketPlayInBlockDig pack = (PacketPlayInBlockDig) packet;
-            BlockPosition bpos = pack.a();
-            Location location = new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ());
+            PacketClientLeftClickBlock pack = (PacketClientLeftClickBlock) temp;
+            Vector position = pack.getLocation();
+            Location location = new Location(player.getWorld(), position.getX(), position.getY(), position.getZ());
             Material material = location.getBlock().getType();
             if(!(material.equals(Material.DIODE_BLOCK_OFF) || material.equals(Material.DIODE_BLOCK_ON) || material.equals(Material.DIODE)))
             {
@@ -216,8 +164,8 @@ public class ListenPacket extends PacketListener
             // Send carpet if the player isn't whitelisted to this protected chunk
             if(plugin.cache.isProtected(chunk) && !plugin.cache.isWhitelisted(player, chunk))
             {
-                plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, location);
                 plugin.lock.release();
+                plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, location);
                 player.sendMessage(plugin.getMessageManager().ERROR_PROTECTED_DIODE);
                 return;
             }

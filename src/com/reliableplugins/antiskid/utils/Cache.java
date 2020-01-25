@@ -56,6 +56,33 @@ public class Cache
         return false;
     }
 
+    public boolean isProtected(Chunk chunk, Location location)
+    {
+        for(Map<Chunk, Set<Location>> map : plugin.diodes.values())
+        {
+            if(map.containsKey(chunk))
+            {
+                return map.get(chunk).contains(location);
+            }
+        }
+        return false;
+    }
+
+    public boolean isProtected(Chunk chunk, Location location, Player player)
+    {
+        Map<Chunk, Set<Location>> map = plugin.diodes.get(player.getUniqueId());
+        if(map == null)
+        {
+            return false;
+        }
+
+        if(map.containsKey(chunk))
+        {
+            return map.get(chunk).contains(location);
+        }
+        return false;
+    }
+
     public Set<Location> getLocations(Chunk chunk)
     {
         for(Map<Chunk, Set<Location>> map : plugin.diodes.values())

@@ -2,13 +2,13 @@ package com.reliableplugins.antiskid.type.packet;
 
 import org.bukkit.World;
 
-public class MapChunkBulkPacket
+public class PacketServerMapChunkBulk extends Packet
 {
     private int[] x;
     private int[] z;
     private World world;
 
-    public MapChunkBulkPacket(int[] x, int[] z, World world)
+    public PacketServerMapChunkBulk(int[] x, int[] z, World world)
     {
         this.x = x;
         this.z = z;

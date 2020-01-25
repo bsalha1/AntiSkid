@@ -6,7 +6,6 @@
 
 package com.reliableplugins.antiskid.utils;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 
@@ -30,10 +29,5 @@ public class Util
         Field field = instance.getClass().getDeclaredField(fieldName);
         field.setAccessible(true);
         return (T) field.get(instance);
-    }
-
-    public static void debug(int i)
-    {
-        Bukkit.broadcastMessage(Integer.toString(i));
     }
 }

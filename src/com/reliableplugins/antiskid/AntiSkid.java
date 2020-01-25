@@ -58,7 +58,6 @@ public class AntiSkid extends JavaPlugin
         new Base_CommandAntiSkid(this);
 
         plugMan.registerEvents(new ListenPlayerJoin(this), this);
-        plugMan.registerEvents(new ListenDiodePlace(this), this);
         plugMan.registerEvents(new ListenDiodeOn(this), this);
         packMan.loadPacketListener(new ListenPacket(this));
 

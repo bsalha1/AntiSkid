@@ -7,8 +7,10 @@
 package com.reliableplugins.antiskid.nms;
 
 import com.reliableplugins.antiskid.type.Vector;
-import com.reliableplugins.antiskid.type.packet.BlockChangePacket;
-import com.reliableplugins.antiskid.type.packet.MapChunkBulkPacket;
+import com.reliableplugins.antiskid.type.packet.Packet;
+import com.reliableplugins.antiskid.type.packet.PacketClientLeftClickBlock;
+import com.reliableplugins.antiskid.type.packet.PacketServerBlockChange;
+import com.reliableplugins.antiskid.type.packet.PacketServerMapChunkBulk;
 import io.netty.channel.Channel;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,17 +29,5 @@ public interface INMSHandler
 
     void broadcastBlockChangePacket(Material material, Location location, TreeSet<UUID> whitelist);
 
-    boolean isDiodeBlockChangePacket(Object packet);
-
-    boolean isBlockChangePacket(Object packet);
-
-    BlockChangePacket getBlockChangePacket(Object packet);
-
-    MapChunkBulkPacket getMapChunkBulkPacket(Object packet);
-
-    boolean isMapChunkBulkPacket(Object packet);
-
-    Vector getLocation(Object packet);
-
-    int[][] getChunkCoordinates(Object packet);
+    Packet getPacket(Object packet);
 }

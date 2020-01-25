@@ -8,12 +8,13 @@ package com.reliableplugins.antiskid.nms.impl;
 
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.Vector;
-import com.reliableplugins.antiskid.type.packet.BlockChangePacket;
-import com.reliableplugins.antiskid.type.packet.MapChunkBulkPacket;
+import com.reliableplugins.antiskid.type.packet.Packet;
+import com.reliableplugins.antiskid.type.packet.PacketClientLeftClickBlock;
+import com.reliableplugins.antiskid.type.packet.PacketServerBlockChange;
 import com.reliableplugins.antiskid.utils.Util;
 import io.netty.channel.Channel;
-import net.minecraft.server.v1_13_R2.BlockDiodeAbstract;
 import net.minecraft.server.v1_13_R2.BlockPosition;
+import net.minecraft.server.v1_13_R2.PacketPlayInBlockDig;
 import net.minecraft.server.v1_13_R2.PacketPlayOutBlockChange;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -23,7 +24,6 @@ import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R2.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -66,82 +66,46 @@ public class Version_1_13_R2 implements INMSHandler
     }
 
     @Override
-    public Vector getLocation(Object packet)
+    public Packet getPacket(Object packet)
     {
-        if(!(packet instanceof PacketPlayOutBlockChange))
+        if(packet instanceof PacketPlayOutBlockChange)
         {
-            return null;
+            PacketPlayOutBlockChange blockChange = (PacketPlayOutBlockChange) packet;
+            BlockPosition bpos;
+            try
+            {
+                bpos = Util.getPrivateField("a", blockChange);
+            }
+            catch(Exception e)
+            {
+                return null;
+            }
+
+            return new PacketServerBlockChange(new Vector(bpos.getX(), bpos.getY(), bpos.getZ()), CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
+        }
+//        else if(packet instanceof PacketPlayOutMapChunkBulk)
+//        {
+//            PacketPlayOutMapChunkBulk mapChunkBulk = (PacketPlayOutMapChunkBulk) packet;
+//            try
+//            {
+//                int[] x = Util.getPrivateField("a", mapChunkBulk);
+//                int[] z = Util.getPrivateField("b", mapChunkBulk);
+//                World world = Util.getPrivateField("world", mapChunkBulk);
+//                return new PacketServerMapChunkBulk(x, z, world.getWorld());
+//            }
+//            catch(Exception e)
+//            {
+//                return null;
+//            }
+//        }
+        else if(packet instanceof PacketPlayInBlockDig)
+        {
+            PacketPlayInBlockDig pack = (PacketPlayInBlockDig) packet;
+            BlockPosition bpos = pack.b();
+            return new PacketClientLeftClickBlock(new Vector(bpos.getX(), bpos.getY(), bpos.getZ()));
         }
 
-        PacketPlayOutBlockChange blockChange = (PacketPlayOutBlockChange) packet;
-        BlockPosition bpos;
-        try
-        {
-            bpos = Util.getPrivateField("a", blockChange);
-        }
-        catch(Exception e)
-        {
-            return null;
-        }
-
-        return new Vector(bpos.getX(), bpos.getY(), bpos.getZ());
-    }
-
-
-    @Override
-    public int[][] getChunkCoordinates(Object packet)
-    {
-        return new int[0][];
-    }
-
-    @Override
-    public boolean isDiodeBlockChangePacket(Object packet)
-    {
-        PacketPlayOutBlockChange blockChange = (PacketPlayOutBlockChange) packet;
-        return blockChange.block.getBlock() instanceof BlockDiodeAbstract;
-    }
-
-    @Override
-    public boolean isBlockChangePacket(Object packet)
-    {
-        return packet instanceof PacketPlayOutBlockChange;
-    }
-
-    @Override
-    public BlockChangePacket getBlockChangePacket(Object packet)
-    {
-        if(!(packet instanceof PacketPlayOutBlockChange))
-        {
-            return null;
-        }
-
-        PacketPlayOutBlockChange blockChange = (PacketPlayOutBlockChange) packet;
-        BlockPosition bpos;
-        try
-        {
-            bpos = Util.getPrivateField("a", blockChange);
-        }
-        catch(Exception e)
-        {
-            return null;
-        }
-
-        return new BlockChangePacket(
-                new Vector(bpos.getX(), bpos.getY(), bpos.getZ()),
-                CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
-    }
-
-    @Override
-    public MapChunkBulkPacket getMapChunkBulkPacket(Object packet)
-    {
         return null;
     }
-
-    @Override
-    public boolean isMapChunkBulkPacket(Object packet)
-    {
-        return false;
-    }
-
 }
 
