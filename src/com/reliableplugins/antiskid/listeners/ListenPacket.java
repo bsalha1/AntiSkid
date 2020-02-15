@@ -8,12 +8,11 @@ package com.reliableplugins.antiskid.listeners;
 import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.abstracts.AbstractTask;
 import com.reliableplugins.antiskid.abstracts.PacketListener;
+import com.reliableplugins.antiskid.hook.impl.FactionHook;
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.Vector;
-import com.reliableplugins.antiskid.type.packet.Packet;
-import com.reliableplugins.antiskid.type.packet.PacketClientLeftClickBlock;
-import com.reliableplugins.antiskid.type.packet.PacketServerBlockChange;
-import com.reliableplugins.antiskid.type.packet.PacketServerMapChunkBulk;
+import com.reliableplugins.antiskid.type.Whitelist;
+import com.reliableplugins.antiskid.type.packet.*;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -21,7 +20,6 @@ import org.bukkit.*;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 @ChannelHandler.Sharable
 public class ListenPacket extends PacketListener
@@ -40,47 +38,69 @@ public class ListenPacket extends PacketListener
      * @param promise promise
      */
     @Override
-    public void write(ChannelHandlerContext context, Object packet, ChannelPromise promise)
+    public void write(ChannelHandlerContext context, Object packet, ChannelPromise promise) throws Exception
     {
         INMSHandler nmsHandler = plugin.getNMS();
         Packet temp = nmsHandler.getPacket(packet);
 
-        /* MAP CHUNK BULK PACKET */
-        if(temp instanceof PacketServerMapChunkBulk)
+        // MAP CHUNK PACKET
+        if(temp instanceof PacketServerMapChunk)
         {
-            PacketServerMapChunkBulk pack = (PacketServerMapChunkBulk) temp;
-            int[] chunksX = pack.getX();
-            int[] chunksZ = pack.getZ();
-            World world = pack.getWorld();
+            PacketServerMapChunk pack = (PacketServerMapChunk) temp;
+            Chunk chunk = player.getWorld().getChunkAt(pack.getX(), pack.getZ());
 
             try
             {
                 plugin.lock.acquire();
-            } catch(Exception ignored) { }
-            for(int i = 0; i < chunksX.length; i++)
+            } catch(Exception ignored) {}
+
+            // If player not whitelisted, send carpet instead of diode
+            if(!plugin.cache.isWhitelisted(player, chunk))
             {
-                for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
+                for(Location location : plugin.cache.getLocations(chunk))
                 {
-                    if(plugin.whitelists.get(entry.getKey()) != null && plugin.whitelists.get(entry.getKey()).containsPlayer(player.getUniqueId()))
+                    new AbstractTask(plugin, 1)
                     {
-                        continue;
-                    }
-                    for(Chunk chunk : entry.getValue().keySet())
-                    {
-                        if(chunk.getX() == chunksX[i] && chunk.getZ() == chunksZ[i] && world.equals(chunk.getWorld()))
+                        @Override
+                        public void run()
                         {
-                            for(Location location : entry.getValue().get(chunk))
-                            {
-                                new AbstractTask(plugin, 1)
-                                {
-                                    @Override
-                                    public void run()
-                                    {
-                                        plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, location);
-                                    }
-                                };
-                            }
+                            plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, location);
                         }
+                    };
+                }
+            }
+
+            plugin.lock.release();
+        }
+
+
+
+        // MAP CHUNK BULK PACKET
+        if(temp instanceof PacketServerMapChunkBulk)
+        {
+            PacketServerMapChunkBulk pack = (PacketServerMapChunkBulk) temp;
+            Chunk[] chunks = pack.getChunks();
+
+            try
+            {
+                plugin.lock.acquire();
+            } catch(Exception ignored) {}
+
+            for(Chunk chunk : chunks)
+            {
+                // If player not whitelisted, send carpet instead of diode
+                if(!plugin.cache.isWhitelisted(player, chunk))
+                {
+                    for(Location location : plugin.cache.getLocations(chunk))
+                    {
+                        new AbstractTask(plugin, 1)
+                        {
+                            @Override
+                            public void run()
+                            {
+                                plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, location);
+                            }
+                        };
                     }
                 }
             }
@@ -89,16 +109,16 @@ public class ListenPacket extends PacketListener
 
 
 
-        /* BLOCK CHANGE PACKET */
+        // BLOCK CHANGE PACKET
         if(temp instanceof PacketServerBlockChange)
         {
             PacketServerBlockChange pack = (PacketServerBlockChange) temp;
             Material material = pack.getMaterial();
 
-            // If packet is null or is not a diode blockchange, return
+            // If is not a diode blockchange continue transmission
             if(!material.equals(Material.DIODE_BLOCK_OFF) && !material.equals(Material.DIODE_BLOCK_ON) && !material.equals(Material.DIODE))
             {
-                exit(context, packet, promise);
+                super.write(context, packet, promise);
                 return;
             }
 
@@ -111,23 +131,23 @@ public class ListenPacket extends PacketListener
                 plugin.lock.acquire();
             } catch(Exception ignored) {}
 
-            // If this block is protected and the player isn't whitelisted. Don't send blockchange
-            if(plugin.cache.isProtected(chunk, location) && !plugin.cache.isWhitelisted(player, chunk))
+            // Do not transmit diode blockchange (keep carpet)
+            if(!plugin.cache.isWhitelisted(player, chunk))
             {
                 plugin.lock.release();
                 return;
             }
-            // If new repeater and player owns this chunk
-            else if(plugin.cache.ownsChunk(player, chunk) && !plugin.cache.isProtected(chunk, location, player))
+
+            // If diode isn't already protected, add it
+            Map<Chunk, Set<Location>> diodes = plugin.diodes.get(player.getUniqueId());
+            if(diodes != null && diodes.containsKey(chunk) && !diodes.get(chunk).contains(location))
             {
-                plugin.diodes.get(player.getUniqueId()).get(chunk).add(location);
-                plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, location, plugin.whitelists.get(player.getUniqueId()).getUUIDs());
-                plugin.lock.release();
-                return;
+                diodes.get(chunk).add(location);
+                plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, location, plugin.cache.getWhitelist(chunk).getUUIDs());
             }
             plugin.lock.release();
         }
-        exit(context, packet, promise);
+        super.write(context, packet, promise);
     }
 
     /**
@@ -142,14 +162,16 @@ public class ListenPacket extends PacketListener
         INMSHandler nmsHandler = plugin.getNMS();
         Packet temp = nmsHandler.getPacket(packet);
 
-        /* ON CLIENTSIDE LEFT CLICK BLOCK */
+        // CLIENTSIDE LEFT CLICK BLOCK
         if(temp instanceof PacketClientLeftClickBlock)
         {
             PacketClientLeftClickBlock pack = (PacketClientLeftClickBlock) temp;
             Vector position = pack.getLocation();
             Location location = new Location(player.getWorld(), position.getX(), position.getY(), position.getZ());
             Material material = location.getBlock().getType();
-            if(!(material.equals(Material.DIODE_BLOCK_OFF) || material.equals(Material.DIODE_BLOCK_ON) || material.equals(Material.DIODE)))
+            if(!(material.equals(Material.DIODE_BLOCK_OFF)
+                    || material.equals(Material.DIODE_BLOCK_ON)
+                    || material.equals(Material.DIODE)))
             {
                 super.channelRead(channelHandlerContext, packet);
                 return;
@@ -161,8 +183,8 @@ public class ListenPacket extends PacketListener
                 plugin.lock.acquire();
             } catch(Exception ignored) {}
 
-            // Send carpet if the player isn't whitelisted to this protected chunk
-            if(plugin.cache.isProtected(chunk) && !plugin.cache.isWhitelisted(player, chunk))
+            // Cancel repeater reveal if not whitelisted
+            if(!plugin.cache.isWhitelisted(player, chunk) && !FactionHook.canBuild(player, chunk))
             {
                 plugin.lock.release();
                 plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, location);
@@ -173,17 +195,5 @@ public class ListenPacket extends PacketListener
         }
 
         super.channelRead(channelHandlerContext, packet);
-    }
-
-    private void exit(ChannelHandlerContext context, Object packet, ChannelPromise promise)
-    {
-        try
-        {
-            super.write(context, packet, promise);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
     }
 }

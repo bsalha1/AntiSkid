@@ -2,6 +2,7 @@ package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.abstracts.AbstractTask;
+import com.reliableplugins.antiskid.hook.impl.FactionHook;
 import com.reliableplugins.antiskid.type.Whitelist;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -9,18 +10,18 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class ListenDiodeOn implements Listener
+public class ListenDiodeAction implements Listener
 {
     private AntiSkid plugin;
 
-    public ListenDiodeOn(AntiSkid plugin)
+    public ListenDiodeAction(AntiSkid plugin)
     {
         this.plugin = plugin;
     }
@@ -55,7 +56,31 @@ public class ListenDiodeOn implements Listener
                 }
             }
         }
+    }
 
+    @EventHandler
+    public void onDiodeBreak(BlockBreakEvent event)
+    {
+        Material material = event.getBlock().getType();
+        if((!material.equals(Material.DIODE_BLOCK_OFF)
+                && !material.equals(Material.DIODE_BLOCK_ON)
+                && !material.equals(Material.DIODE))
+                || !plugin.cache.isProtected(event.getBlock().getChunk()))
+        {
+            return;
+        }
 
+        Location location = event.getBlock().getLocation();
+        if(plugin.isFactions())
+        {
+            if(FactionHook.canBuild(event.getPlayer(), location.getChunk()))
+            {
+                plugin.cache.unprotectLocation(location);
+            }
+        }
+        else
+        {
+            plugin.cache.unprotectLocation(location);
+        }
     }
 }

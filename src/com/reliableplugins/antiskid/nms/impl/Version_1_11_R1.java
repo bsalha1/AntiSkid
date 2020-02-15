@@ -8,16 +8,11 @@ package com.reliableplugins.antiskid.nms.impl;
 
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.Vector;
+import com.reliableplugins.antiskid.type.packet.*;
 import com.reliableplugins.antiskid.type.packet.Packet;
-import com.reliableplugins.antiskid.type.packet.PacketClientLeftClickBlock;
-import com.reliableplugins.antiskid.type.packet.PacketServerBlockChange;
-import com.reliableplugins.antiskid.type.packet.PacketServerMapChunkBulk;
 import com.reliableplugins.antiskid.utils.Util;
 import io.netty.channel.Channel;
-import net.minecraft.server.v1_11_R1.BlockPosition;
-import net.minecraft.server.v1_11_R1.PacketPlayInBlockDig;
-import net.minecraft.server.v1_11_R1.PacketPlayOutBlockChange;
-import net.minecraft.server.v1_11_R1.World;
+import net.minecraft.server.v1_11_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -85,27 +80,26 @@ public class Version_1_11_R1 implements INMSHandler
 
             return new PacketServerBlockChange(new Vector(bpos.getX(), bpos.getY(), bpos.getZ()), CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
         }
-//        else if(packet instanceof PacketPlayOutMapChunkBulk)
-//        {
-//            PacketPlayOutMapChunkBulk mapChunkBulk = (PacketPlayOutMapChunkBulk) packet;
-//            try
-//            {
-//                int[] x = Util.getPrivateField("a", mapChunkBulk);
-//                int[] z = Util.getPrivateField("b", mapChunkBulk);
-//                World world = Util.getPrivateField("world", mapChunkBulk);
-//                return new PacketServerMapChunkBulk(x, z, world.getWorld());
-//            }
-//            catch(Exception e)
-//            {
-//                return null;
-//            }
-//        }
-        else if(packet instanceof PacketPlayInBlockDig)
+        else if(packet instanceof PacketPlayOutMapChunk)
+        {
+            PacketPlayOutMapChunk mapChunk = (PacketPlayOutMapChunk) packet;
+            try
             {
-                PacketPlayInBlockDig pack = (PacketPlayInBlockDig) packet;
-                BlockPosition bpos = pack.a();
-                return new PacketClientLeftClickBlock(new Vector(bpos.getX(), bpos.getY(), bpos.getZ()));
+                int x = Util.getPrivateField("a", mapChunk);
+                int z = Util.getPrivateField("b", mapChunk);
+                return new PacketServerMapChunk(x, z);
             }
+            catch(Exception e)
+            {
+                return null;
+            }
+        }
+        else if(packet instanceof PacketPlayInBlockDig)
+        {
+            PacketPlayInBlockDig pack = (PacketPlayInBlockDig) packet;
+            BlockPosition bpos = pack.a();
+            return new PacketClientLeftClickBlock(new Vector(bpos.getX(), bpos.getY(), bpos.getZ()));
+        }
 
         return null;
     }

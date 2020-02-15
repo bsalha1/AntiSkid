@@ -1,11 +1,11 @@
 package com.reliableplugins.antiskid.utils;
 
 import com.reliableplugins.antiskid.AntiSkid;
+import com.reliableplugins.antiskid.type.Whitelist;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -27,6 +27,19 @@ public class Cache
         return plugin.diodes.get(player.getUniqueId()).containsKey(chunk);
     }
 
+    public Whitelist getWhitelist(Chunk chunk)
+    {
+        for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
+        {
+            if(entry.getValue().containsKey(chunk))
+            {
+                return plugin.whitelists.get(entry.getKey());
+            }
+        }
+
+        return null;
+    }
+
     public boolean isWhitelisted(Player player, Chunk chunk)
     {
         for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
@@ -37,6 +50,25 @@ public class Cache
             }
         }
         return true;
+    }
+
+    public void unprotectChunk(Chunk chunk)
+    {
+        for(Map<Chunk, Set<Location>> entry : plugin.diodes.values())
+        {
+            entry.remove(chunk);
+        }
+    }
+
+    public void unprotectLocation(Location location)
+    {
+        for(Map<Chunk, Set<Location>> entry : plugin.diodes.values())
+        {
+            for(Set<Location> locs : entry.values())
+            {
+                locs.remove(location);
+            }
+        }
     }
 
     public boolean isPlayerProtected(Player player)

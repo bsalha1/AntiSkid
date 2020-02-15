@@ -11,11 +11,13 @@ import com.reliableplugins.antiskid.type.Vector;
 import com.reliableplugins.antiskid.type.packet.Packet;
 import com.reliableplugins.antiskid.type.packet.PacketClientLeftClickBlock;
 import com.reliableplugins.antiskid.type.packet.PacketServerBlockChange;
+import com.reliableplugins.antiskid.type.packet.PacketServerMapChunk;
 import com.reliableplugins.antiskid.utils.Util;
 import io.netty.channel.Channel;
 import net.minecraft.server.v1_14_R1.BlockPosition;
 import net.minecraft.server.v1_14_R1.PacketPlayInBlockDig;
 import net.minecraft.server.v1_14_R1.PacketPlayOutBlockChange;
+import net.minecraft.server.v1_14_R1.PacketPlayOutMapChunk;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -83,21 +85,20 @@ public class Version_1_14_R1 implements INMSHandler
 
             return new PacketServerBlockChange(new Vector(bpos.getX(), bpos.getY(), bpos.getZ()), CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
         }
-//        else if(packet instanceof PacketPlayOutMapChunkBulk)
-//        {
-//            PacketPlayOutMapChunkBulk mapChunkBulk = (PacketPlayOutMapChunkBulk) packet;
-//            try
-//            {
-//                int[] x = Util.getPrivateField("a", mapChunkBulk);
-//                int[] z = Util.getPrivateField("b", mapChunkBulk);
-//                World world = Util.getPrivateField("world", mapChunkBulk);
-//                return new PacketServerMapChunkBulk(x, z, world.getWorld());
-//            }
-//            catch(Exception e)
-//            {
-//                return null;
-//            }
-//        }
+        else if(packet instanceof PacketPlayOutMapChunk)
+        {
+            PacketPlayOutMapChunk mapChunk = (PacketPlayOutMapChunk) packet;
+            try
+            {
+                int x = Util.getPrivateField("a", mapChunk);
+                int z = Util.getPrivateField("b", mapChunk);
+                return new PacketServerMapChunk(x, z);
+            }
+            catch(Exception e)
+            {
+                return null;
+            }
+        }
         else if(packet instanceof PacketPlayInBlockDig)
         {
             PacketPlayInBlockDig pack = (PacketPlayInBlockDig) packet;

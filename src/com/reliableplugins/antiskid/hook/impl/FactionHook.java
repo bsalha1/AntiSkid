@@ -7,12 +7,17 @@
 package com.reliableplugins.antiskid.hook.impl;
 
 import com.massivecraft.factions.*;
+import com.massivecraft.factions.struct.Role;
+import com.massivecraft.factions.zcore.fperms.Access;
+import com.massivecraft.factions.zcore.fperms.Permissable;
+import com.massivecraft.factions.zcore.fperms.PermissableAction;
 import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.hook.PluginHook;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class FactionHook implements PluginHook<FactionHook>
