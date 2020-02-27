@@ -6,17 +6,16 @@
 package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
-import com.reliableplugins.antiskid.abstracts.AbstractTask;
-import com.reliableplugins.antiskid.abstracts.PacketListener;
-import com.reliableplugins.antiskid.hook.impl.FactionHook;
+import com.reliableplugins.antiskid.task.AbstractTask;
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.Vector;
-import com.reliableplugins.antiskid.type.Whitelist;
 import com.reliableplugins.antiskid.type.packet.*;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import org.bukkit.*;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Material;
 
 import java.util.Map;
 import java.util.Set;
@@ -184,7 +183,7 @@ public class ListenPacket extends PacketListener
             } catch(Exception ignored) {}
 
             // Cancel repeater reveal if not whitelisted
-            if(!plugin.cache.isWhitelisted(player, chunk) && !FactionHook.canBuild(player, chunk))
+            if(!plugin.cache.isWhitelisted(player, chunk))
             {
                 plugin.lock.release();
                 plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, location);

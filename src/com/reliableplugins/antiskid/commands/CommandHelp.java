@@ -6,7 +6,6 @@
 
 package com.reliableplugins.antiskid.commands;
 
-import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.utils.Util;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -17,7 +16,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 @CommandBuilder(label = "help", alias = {"h"}, permission = "antiskid.help")
-public class CommandHelp extends AbstractCommand
+public class CommandHelp extends Command
 {
     private Base_CommandAntiSkid baseCommand;
 
@@ -29,7 +28,7 @@ public class CommandHelp extends AbstractCommand
     @Override
     public void execute(CommandSender sender, String[] args)
     {
-        AbstractCommand[] commands = baseCommand.getCommands().toArray(new AbstractCommand[baseCommand.getCommands().size()]);
+        Command[] commands = baseCommand.getCommands().toArray(new Command[baseCommand.getCommands().size()]);
         Player player = Bukkit.getPlayer(sender.getName());
 
         int page = 0;
@@ -57,7 +56,7 @@ public class CommandHelp extends AbstractCommand
         {
             if (i > commands.length - 1) continue;
 
-            AbstractCommand command = commands[i];
+            Command command = commands[i];
 
             String entry = String.format(line, command.getLabel(), command.getPermission());
             TextComponent message = new TextComponent(Util.color(entry));

@@ -7,17 +7,36 @@
 package com.reliableplugins.antiskid.config;
 
 import com.reliableplugins.antiskid.AntiSkid;
-import com.reliableplugins.antiskid.abstracts.AbstractConfig;
+import org.bukkit.World;
 
-public class MainConfig extends AbstractConfig
+import javax.print.DocFlavor;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class MainConfig extends Config
 {
     public MainConfig(AntiSkid plugin, String fileName)
     {
         super(plugin, fileName);
 
-        addDefault("factions-support", true);
         addDefault("fast-scan", true);
-        addDefault("asynch-thread-period", 20);
+        if(this.isNew())
+        {
+            this.getFileConfiguration().createSection("factions");
+            this.getFileConfiguration().createSection("plotsquared");
+        }
+        addDefault("factions.support", true);
+        addDefault("factions.minimum-rank", "moderator");
+        List<String> worlds = new ArrayList<>();
+        for(World world : plugin.getServer().getWorlds())
+        {
+            worlds.add(world.getName());
+        }
+        addDefault("factions.worlds", worlds);
+
+        addDefault("plotsquared.support", true);
+        addDefault("plotsquared.worlds", worlds);
 
         loadDefaults();
     }

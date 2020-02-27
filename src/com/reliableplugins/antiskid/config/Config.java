@@ -4,7 +4,7 @@
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
-package com.reliableplugins.antiskid.abstracts;
+package com.reliableplugins.antiskid.config;
 
 import com.reliableplugins.antiskid.AntiSkid;
 import org.bukkit.Bukkit;
@@ -18,7 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-public abstract class AbstractConfig
+public abstract class Config
 {
     protected AntiSkid plugin;
     private boolean isNew = false;
@@ -26,7 +26,7 @@ public abstract class AbstractConfig
     protected FileConfiguration config;
     protected Map<String, Object> defaults = new LinkedHashMap<>();
 
-    public AbstractConfig(AntiSkid plugin, String fileName)
+    public Config(AntiSkid plugin, String fileName)
     {
         this.plugin = plugin;
         this.file = new File(plugin.getDataFolder(), fileName);

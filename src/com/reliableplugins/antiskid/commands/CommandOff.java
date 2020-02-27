@@ -6,7 +6,6 @@
 
 package com.reliableplugins.antiskid.commands;
 
-import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.utils.Util;
 import org.bukkit.Chunk;
@@ -17,7 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @CommandBuilder(label = "off", permission = "antiskid.off", playerRequired = true, description = "Turns off protection for the executor.\nRepeaters will be revealed to all players.")
-public class CommandOff extends AbstractCommand
+public class CommandOff extends Command
 {
 
     @Override

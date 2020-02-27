@@ -6,14 +6,12 @@
 
 package com.reliableplugins.antiskid.commands;
 
-import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 @CommandBuilder(label = "reload", alias = "r", permission = "antiskid.reload", playerRequired = false, description = "Reload the AntiSkid config files")
-public class CommandReload extends AbstractCommand
+public class CommandReload extends Command
 {
     @Override
     public void execute(CommandSender executor, String[] args)

@@ -6,7 +6,6 @@
 
 package com.reliableplugins.antiskid.commands;
 
-import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.type.Whitelist;
 import com.reliableplugins.antiskid.utils.Util;
@@ -20,7 +19,7 @@ import org.bukkit.entity.Player;
 import java.util.*;
 
 @CommandBuilder(label = "whitelist", permission = "antiskid.whitelist", playerRequired = true, description = "Manage the whitelist for the executor's protection.\nIf they are added, they can see the repeaters.")
-public class CommandWhitelist extends AbstractCommand
+public class CommandWhitelist extends Command
 {
     private Player executor;
     private UUID executorId;

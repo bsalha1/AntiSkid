@@ -6,9 +6,7 @@
 
 package com.reliableplugins.antiskid.utils;
 
-import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.config.MessageConfig;
-import org.bukkit.configuration.file.FileConfiguration;
 
 public class MessageManager
 {
@@ -43,6 +41,7 @@ public class MessageManager
     public String ERROR_UNWHITELIST_SELF;
     public String ERROR_INVALID_PLAYER;
     public String ERROR_NOT_TERRITORY;
+    public String ERROR_NOT_PLOT_OWNER;
 
     public MessageManager(MessageConfig config)
     {
@@ -69,12 +68,12 @@ public class MessageManager
         ERROR_UNWHITELIST_SELF = getMessage("err-whitelist-remove-self");
         ERROR_INVALID_PLAYER = getMessage("err-invalid-player");
         ERROR_NOT_TERRITORY = getMessage("err-not-territory");
+        ERROR_NOT_PLOT_OWNER = getMessage("err-not-plot-owner");
     }
 
     private String getMessage(String key)
     {
         String value = config.getFileConfiguration().getString(key);
-//        if(value)
-        return Util.color(HEADER + value);
+        return value == null ? "null" : Util.color(HEADER + value);
     }
 }

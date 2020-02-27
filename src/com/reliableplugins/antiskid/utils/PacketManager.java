@@ -7,9 +7,8 @@
 package com.reliableplugins.antiskid.utils;
 
 import com.reliableplugins.antiskid.AntiSkid;
-import com.reliableplugins.antiskid.abstracts.PacketListener;
+import com.reliableplugins.antiskid.listeners.PacketListener;
 import io.netty.channel.Channel;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;

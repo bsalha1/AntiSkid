@@ -7,9 +7,8 @@
 package com.reliableplugins.antiskid.config;
 
 import com.reliableplugins.antiskid.AntiSkid;
-import com.reliableplugins.antiskid.abstracts.AbstractConfig;
 
-public class MessageConfig extends AbstractConfig
+public class MessageConfig extends Config
 {
     public MessageConfig(AntiSkid plugin, String fileName)
     {
@@ -38,7 +37,8 @@ public class MessageConfig extends AbstractConfig
         addDefault("err-invalid-player", "&cInvalid player.");
         addDefault("err-whitelist-self", "&cYou cannot whitelist yourself.");
         addDefault("err-whitelist-remove-self", "&cYou are not in your whitelist.");
-        addDefault("err-not-territory", "&cYou can only protect your faction's claims.");
+        addDefault("err-not-territory", "&cYou can only protect your own faction's claims.");
+        addDefault("err-not-plot-owner", "&cYou can only protect your own plot.");
 
         loadDefaults();
     }

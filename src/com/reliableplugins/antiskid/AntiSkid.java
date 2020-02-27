@@ -35,12 +35,15 @@ public class AntiSkid extends JavaPlugin
 
     public volatile Semaphore lock;
     private boolean isFactions;
+    private boolean isPlots;
 
     private INMSHandler nmsHandler;
     private NMSManager nmsManager;
     private PluginManager plugMan;
     private PacketManager packMan;
     private MessageManager messageManager;
+
+    private String minimumFactionRank = null;
 
     private MessageConfig messageConfig;
     private MainConfig mainConfig;
@@ -54,7 +57,6 @@ public class AntiSkid extends JavaPlugin
         nmsManager = new NMSManager(this);
         loadConfigs();
 
-//        new TaskProtectRepeaters(this);
         new Base_CommandAntiSkid(this);
 
         plugMan.registerEvents(new ListenPlayerJoin(this), this);
@@ -80,15 +82,36 @@ public class AntiSkid extends JavaPlugin
             this.getLogger().log(Level.INFO, messageConfig.getFileName() + " has been created.");
         }
 
-        isFactions = mainConfig.getFileConfiguration().getBoolean("factions-support");
+        // Check if Factions support is enabled
+        isFactions = mainConfig.getFileConfiguration().getBoolean("factions.support");
         if(isFactions)
         {
-            plugMan.registerEvents(new ListenUnclaim(this), this);
-            this.getLogger().log(Level.INFO, "Factions support enabled!");
+            if(plugMan.isPluginEnabled("Factions"))
+            {
+                minimumFactionRank = mainConfig.getFileConfiguration().getString("factions.minimum-rank");
+                plugMan.registerEvents(new ListenUnclaim(this), this);
+                this.getLogger().log(Level.INFO, "Factions support enabled!");
+            }
+            else
+            {
+                isFactions = false;
+                this.getLogger().log(Level.SEVERE, "Factions jar was not found!");
+            }
         }
-        else
+
+        // Check if PlotSquared support is enabled
+        isPlots = mainConfig.getFileConfiguration().getBoolean("plotsquared.support");
+        if(isPlots)
         {
-            this.getLogger().log(Level.WARNING, "Factions support is disabled. Go to plugins/AntiSkid/config.yml and set factions-support = true if this was a mistake");
+            if(plugMan.isPluginEnabled("PlotSquared"))
+            {
+                this.getLogger().log(Level.INFO, "PlotSquared support enabled!");
+            }
+            else
+            {
+                isPlots = false;
+                this.getLogger().log(Level.SEVERE, "PlotSquared jar was not found!");
+            }
         }
 
         try
@@ -156,5 +179,10 @@ public class AntiSkid extends JavaPlugin
     public void setNMS(INMSHandler nmsHandler)
     {
         this.nmsHandler = nmsHandler;
+    }
+
+    public boolean isPlots()
+    {
+        return isPlots;
     }
 }

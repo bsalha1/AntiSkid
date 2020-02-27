@@ -4,7 +4,7 @@
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
-package com.reliableplugins.antiskid.abstracts;
+package com.reliableplugins.antiskid.commands;
 
 import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
@@ -14,7 +14,7 @@ import org.bukkit.command.CommandSender;
 
 import java.util.Set;
 
-public abstract class AbstractCommand
+public abstract class Command
 {
     private String label;
     private String[] alias;
@@ -24,7 +24,7 @@ public abstract class AbstractCommand
 
     protected AntiSkid plugin;
 
-    public AbstractCommand()
+    public Command()
     {
         this.label = getClass().getAnnotation(CommandBuilder.class).label();
         this.alias = getClass().getAnnotation(CommandBuilder.class).alias();

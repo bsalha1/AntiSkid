@@ -4,20 +4,15 @@
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
-package com.reliableplugins.antiskid.hook.impl;
+package com.reliableplugins.antiskid.hook;
 
 import com.massivecraft.factions.*;
 import com.massivecraft.factions.struct.Role;
-import com.massivecraft.factions.zcore.fperms.Access;
-import com.massivecraft.factions.zcore.fperms.Permissable;
-import com.massivecraft.factions.zcore.fperms.PermissableAction;
 import com.reliableplugins.antiskid.AntiSkid;
-import com.reliableplugins.antiskid.hook.PluginHook;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class FactionHook implements PluginHook<FactionHook>
@@ -81,6 +76,11 @@ public class FactionHook implements PluginHook<FactionHook>
             faction = Board.getInstance().getFactionAt(new FLocation(worldName, x, chunk.getZ()));
         }
         return group;
+    }
+
+    public static Role getRole(String name)
+    {
+        return Role.fromString(name.toLowerCase().trim());
     }
 
     public static boolean canBuild(Player player, Chunk chunk)

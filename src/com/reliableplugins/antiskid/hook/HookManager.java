@@ -7,7 +7,6 @@
 package com.reliableplugins.antiskid.hook;
 
 import com.reliableplugins.antiskid.AntiSkid;
-import com.reliableplugins.antiskid.hook.impl.FactionHook;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +21,7 @@ public class HookManager
     {
         this.antiSkid = antiSkid;
         hookPlugin(new FactionHook());
+        hookPlugin(new PlotSquaredHook());
     }
 
     private void hookPlugin(PluginHook pluginHook)

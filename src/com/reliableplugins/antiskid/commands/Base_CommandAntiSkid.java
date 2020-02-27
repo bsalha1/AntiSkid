@@ -7,8 +7,6 @@
 package com.reliableplugins.antiskid.commands;
 
 import com.reliableplugins.antiskid.AntiSkid;
-import com.reliableplugins.antiskid.abstracts.AbstractCommand;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -17,7 +15,7 @@ import java.util.*;
 
 public class Base_CommandAntiSkid implements CommandExecutor
 {
-    private Map<String, AbstractCommand> subcommands = new HashMap<>();
+    private Map<String, Command> subcommands = new HashMap<>();
     private CommandHelp commandHelp;
     private AntiSkid plugin;
 
@@ -35,7 +33,7 @@ public class Base_CommandAntiSkid implements CommandExecutor
     }
 
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String string, String[] args) {
+    public boolean onCommand(CommandSender commandSender, org.bukkit.command.Command command, String string, String[] args) {
 
         if(args.length == 0)
         {
@@ -50,7 +48,7 @@ public class Base_CommandAntiSkid implements CommandExecutor
             return true;
         }
 
-        for (AbstractCommand subcommand : subcommands.values())
+        for (Command subcommand : subcommands.values())
         {
             // If argument isn't a subcommand or an alias of a subcommand, continue
             if(!args[0].equalsIgnoreCase(subcommand.getLabel()) && !subcommand.getAlias().contains(args[0].toLowerCase())) continue;
@@ -83,13 +81,13 @@ public class Base_CommandAntiSkid implements CommandExecutor
         return true;
     }
 
-    private void addCommand(AbstractCommand command)
+    private void addCommand(Command command)
     {
         command.setPlugin(plugin);
         this.subcommands.put(command.getLabel().toLowerCase(), command);
     }
 
-    public Collection<AbstractCommand> getCommands()
+    public Collection<Command> getCommands()
     {
         return Collections.unmodifiableCollection(subcommands.values());
     }

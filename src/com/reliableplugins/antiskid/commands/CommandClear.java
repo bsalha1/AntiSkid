@@ -6,7 +6,6 @@
 
 package com.reliableplugins.antiskid.commands;
 
-import com.reliableplugins.antiskid.abstracts.AbstractCommand;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.utils.Util;
 import org.bukkit.Chunk;
@@ -16,7 +15,7 @@ import org.bukkit.command.CommandSender;
 import java.util.*;
 
 @CommandBuilder(label = "clear", description = "Reveal all protected repeaters", permission = "antiskid.clear")
-public class CommandClear extends AbstractCommand
+public class CommandClear extends Command
 {
     @Override
     public void execute(CommandSender executor, String[] args)
