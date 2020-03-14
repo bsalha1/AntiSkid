@@ -9,7 +9,7 @@ package com.reliableplugins.antiskid.listeners;
 import io.netty.channel.ChannelDuplexHandler;
 import org.bukkit.entity.Player;
 
-public abstract class PacketListener extends ChannelDuplexHandler implements Cloneable
+public abstract class AChannelListener extends ChannelDuplexHandler implements Cloneable
 {
     protected Player player;
 

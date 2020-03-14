@@ -4,15 +4,15 @@ import com.reliableplugins.antiskid.type.Vector;
 
 public class PacketClientLeftClickBlock extends Packet
 {
-    private Vector location;
+    private Vector<Integer> position;
 
-    public PacketClientLeftClickBlock(Vector location)
+    public PacketClientLeftClickBlock(Vector<Integer> position)
     {
-        this.location = location;
+        this.position = position;
     }
 
-    public Vector getLocation()
+    public Vector<Integer> getPosition()
     {
-        return location;
+        return position;
     }
 }

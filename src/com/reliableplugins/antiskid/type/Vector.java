@@ -6,45 +6,45 @@
 
 package com.reliableplugins.antiskid.type;
 
-public class Vector
+public class Vector<T>
 {
-    private int x = 0;
-    private int y = 0;
-    private int z = 0;
+    private T x;
+    private T y;
+    private T z;
 
-    public Vector(int x, int y, int z)
+    public Vector(T x, T y, T z)
     {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public void setX(int x)
+    public void setX(T x)
     {
         this.x = x;
     }
 
-    public void setY(int y)
+    public void setY(T y)
     {
         this.y = y;
     }
 
-    public void setZ(int z)
+    public void setZ(T z)
     {
         this.z = z;
     }
 
-    public int getX()
+    public T getX()
     {
         return x;
     }
 
-    public int getY()
+    public T getY()
     {
         return y;
     }
 
-    public int getZ()
+    public T getZ()
     {
         return z;
     }

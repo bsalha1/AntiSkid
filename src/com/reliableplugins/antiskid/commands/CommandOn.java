@@ -10,6 +10,7 @@ import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.hook.FactionHook;
 import com.reliableplugins.antiskid.hook.PlotSquaredHook;
 import com.reliableplugins.antiskid.type.Whitelist;
+import com.reliableplugins.antiskid.utils.Util;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -37,8 +38,8 @@ public class CommandOn extends Command
     private void antiskidOn()
     {
         Set<Chunk> chunks = new HashSet<>();
-        // Make sure the player is in their faction territory
-        if(plugin.isFactions())
+
+        if(plugin.getFactionsWorlds().contains(executor.getWorld())) // If this is a factions world...
         {
             chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
             if(chunks.isEmpty())
@@ -47,9 +48,7 @@ public class CommandOn extends Command
                 return;
             }
         }
-
-        // Make sure player is the owner of the plot
-        if(plugin.isPlots())
+        else if(plugin.getPlotsWorlds().contains(executor.getWorld())) // If this is a plots world...
         {
             if(!PlotSquaredHook.isOwner(executor, executor.getLocation()))
             {

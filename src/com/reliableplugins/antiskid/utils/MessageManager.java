@@ -77,3 +77,4 @@ public class MessageManager
         return value == null ? "null" : Util.color(HEADER + value);
     }
 }
+

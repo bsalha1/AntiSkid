@@ -10,22 +10,26 @@ import com.reliableplugins.antiskid.task.AbstractTask;
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.Vector;
 import com.reliableplugins.antiskid.type.packet.*;
+import com.reliableplugins.antiskid.utils.Util;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import net.minecraft.server.v1_8_R3.BlockPosition;
+import net.minecraft.server.v1_8_R3.PacketPlayOutExplosion;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 @ChannelHandler.Sharable
-public class ListenPacket extends PacketListener
+public class ChannelListener extends AChannelListener
 {
     private AntiSkid plugin;
 
-    public ListenPacket(AntiSkid plugin)
+    public ChannelListener(AntiSkid plugin)
     {
         this.plugin = plugin;
     }
@@ -75,7 +79,7 @@ public class ListenPacket extends PacketListener
 
 
         // MAP CHUNK BULK PACKET
-        if(temp instanceof PacketServerMapChunkBulk)
+        else if(temp instanceof PacketServerMapChunkBulk)
         {
             PacketServerMapChunkBulk pack = (PacketServerMapChunkBulk) temp;
             Chunk[] chunks = pack.getChunks();
@@ -109,7 +113,7 @@ public class ListenPacket extends PacketListener
 
 
         // BLOCK CHANGE PACKET
-        if(temp instanceof PacketServerBlockChange)
+        else if(temp instanceof PacketServerBlockChange)
         {
             PacketServerBlockChange pack = (PacketServerBlockChange) temp;
             Material material = pack.getMaterial();
@@ -121,7 +125,7 @@ public class ListenPacket extends PacketListener
                 return;
             }
 
-            Vector packetLocation = pack.getLocation();
+            Vector<Integer> packetLocation = pack.getPosition();
             Location location = new Location(player.getWorld(), packetLocation.getX(), packetLocation.getY(), packetLocation.getZ());
             Chunk chunk = location.getChunk();
 
@@ -146,15 +150,18 @@ public class ListenPacket extends PacketListener
             }
             plugin.lock.release();
         }
+
+        else if(temp instanceof PacketServerExplosion)
+        {
+            PacketServerExplosion pack = (PacketServerExplosion) temp;
+            for(Vector<Integer> position : pack.getPositions())
+            {
+//                plugin.cache.isProtected()
+            }
+        }
         super.write(context, packet, promise);
     }
 
-    /**
-     * Client-Side handler
-     * @param channelHandlerContext context of channel handler
-     * @param packet the packet
-     * @throws Exception -
-     */
     @Override
     public void channelRead(ChannelHandlerContext channelHandlerContext, Object packet) throws Exception
     {
@@ -165,7 +172,7 @@ public class ListenPacket extends PacketListener
         if(temp instanceof PacketClientLeftClickBlock)
         {
             PacketClientLeftClickBlock pack = (PacketClientLeftClickBlock) temp;
-            Vector position = pack.getLocation();
+            Vector<Integer> position = pack.getPosition();
             Location location = new Location(player.getWorld(), position.getX(), position.getY(), position.getZ());
             Material material = location.getBlock().getType();
             if(!(material.equals(Material.DIODE_BLOCK_OFF)

@@ -6,20 +6,22 @@
 
 package com.reliableplugins.antiskid;
 
-import com.reliableplugins.antiskid.commands.Base_CommandAntiSkid;
+import com.reliableplugins.antiskid.commands.*;
 import com.reliableplugins.antiskid.config.MainConfig;
 import com.reliableplugins.antiskid.config.MessageConfig;
 import com.reliableplugins.antiskid.listeners.*;
 import com.reliableplugins.antiskid.nms.INMSHandler;
-import com.reliableplugins.antiskid.nms.NMSManager;
+import com.reliableplugins.antiskid.nms.impl.*;
 import com.reliableplugins.antiskid.type.Whitelist;
 import com.reliableplugins.antiskid.utils.Cache;
 import com.reliableplugins.antiskid.utils.MessageManager;
-import com.reliableplugins.antiskid.utils.PacketManager;
+import com.reliableplugins.antiskid.utils.ChannelManager;
 import com.reliableplugins.antiskid.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -27,7 +29,7 @@ import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 
-public class AntiSkid extends JavaPlugin
+public class AntiSkid extends JavaPlugin implements Listener
 {
     public volatile TreeMap<UUID, Map<Chunk, Set<Location>>> diodes = new TreeMap<>();
     public volatile TreeMap<UUID, Whitelist> whitelists = new TreeMap<>();
@@ -38,12 +40,15 @@ public class AntiSkid extends JavaPlugin
     private boolean isPlots;
 
     private INMSHandler nmsHandler;
-    private NMSManager nmsManager;
-    private PluginManager plugMan;
-    private PacketManager packMan;
+    private CommandHandler cmdHandler;
+
+    private PluginManager pluginManager;
+    private ChannelManager listenerManager;
     private MessageManager messageManager;
 
     private String minimumFactionRank = null;
+    private Set<World> factionsWorlds = new HashSet<>();
+    private Set<World> plotsWorlds = new HashSet<>();
 
     private MessageConfig messageConfig;
     private MainConfig mainConfig;
@@ -52,44 +57,56 @@ public class AntiSkid extends JavaPlugin
     public void onEnable()
     {
         lock = new Semaphore(1);
-        plugMan = Bukkit.getPluginManager();
-        packMan = new PacketManager(this);
-        nmsManager = new NMSManager(this);
+        pluginManager = Bukkit.getPluginManager();
+
+        nmsHandler = getNMSHandler();
+        cmdHandler = new CommandHandler(this);
+        cmdHandler.addCommand(new CommandOn());
+        cmdHandler.addCommand(new CommandOff());
+        cmdHandler.addCommand(new CommandWhitelist());
+        cmdHandler.addCommand(new CommandReload());
+        cmdHandler.addCommand(new CommandClear());
+
+        listenerManager = new ChannelManager(this);
+        pluginManager.registerEvents(new ListenPlayerJoin(this), this);
+        pluginManager.registerEvents(new ListenDiodeAction(this), this);
+        listenerManager.loadChannelListener(new ChannelListener(this));
+        cache = new Cache(this);
+
         loadConfigs();
 
-        new Base_CommandAntiSkid(this);
-
-        plugMan.registerEvents(new ListenPlayerJoin(this), this);
-        plugMan.registerEvents(new ListenDiodeAction(this), this);
-        packMan.loadPacketListener(new ListenPacket(this));
-
-        cache = new Cache(this);
         this.getLogger().log(Level.INFO, "AntiSkid v1.0 has been loaded");
     }
 
     public void loadConfigs()
     {
+        factionsWorlds.clear();
+        plotsWorlds.clear();
+
         mainConfig = new MainConfig(this, "config.yml");
         messageConfig = new MessageConfig(this, "messages.yml");
-
-        if(mainConfig.isNew())
-        {
-            this.getLogger().log(Level.INFO, mainConfig.getFileName() + " has been created");
-        }
-
-        if(messageConfig.isNew())
-        {
-            this.getLogger().log(Level.INFO, messageConfig.getFileName() + " has been created.");
-        }
 
         // Check if Factions support is enabled
         isFactions = mainConfig.getFileConfiguration().getBoolean("factions.support");
         if(isFactions)
         {
-            if(plugMan.isPluginEnabled("Factions"))
+            if(pluginManager.isPluginEnabled("Factions"))
             {
+                // Get worlds
+                List<String> factionsWorldNames = mainConfig.getFileConfiguration().getStringList("factions.worlds");
+                for(String s : factionsWorldNames)
+                {
+                    this.getServer().getWorlds().forEach((world) ->
+                    {
+                        if(world.getName().equalsIgnoreCase(s))
+                        {
+                            factionsWorlds.add(world);
+                        }
+                    });
+                }
+
                 minimumFactionRank = mainConfig.getFileConfiguration().getString("factions.minimum-rank");
-                plugMan.registerEvents(new ListenUnclaim(this), this);
+                pluginManager.registerEvents(new ListenUnclaim(this), this);
                 this.getLogger().log(Level.INFO, "Factions support enabled!");
             }
             else
@@ -103,8 +120,20 @@ public class AntiSkid extends JavaPlugin
         isPlots = mainConfig.getFileConfiguration().getBoolean("plotsquared.support");
         if(isPlots)
         {
-            if(plugMan.isPluginEnabled("PlotSquared"))
+            if(pluginManager.isPluginEnabled("PlotSquared"))
             {
+                // Get worlds
+                List<String> plotsWorldNames = mainConfig.getFileConfiguration().getStringList("plotsquared.worlds");
+                for(String s : plotsWorldNames)
+                {
+                    this.getServer().getWorlds().forEach((world) ->
+                    {
+                        if(world.getName().equalsIgnoreCase(s))
+                        {
+                            plotsWorlds.add(world);
+                        }
+                    });
+                }
                 this.getLogger().log(Level.INFO, "PlotSquared support enabled!");
             }
             else
@@ -114,13 +143,25 @@ public class AntiSkid extends JavaPlugin
             }
         }
 
-        try
+        messageManager = new MessageManager(messageConfig);
+    }
+
+    private INMSHandler getNMSHandler()
+    {
+        switch(getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3])
         {
-            messageManager = new MessageManager(messageConfig);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
+            case "v1_11_R1":
+                return new Version_1_11_R1();
+            case "v1_12_R1":
+                return new Version_1_12_R1();
+            case "v1_13_R1":
+                return new Version_1_13_R1();
+            case "v1_13_R2":
+                return new Version_1_13_R2();
+            case "v1_14_R1":
+                return new Version_1_14_R1();
+            default:
+                return new Version_1_8_R3();
         }
     }
 
@@ -137,11 +178,11 @@ public class AntiSkid extends JavaPlugin
         }
         this.getLogger().log(Level.INFO, "Cleanup: All protected repeaters have been revealed");
 
-        this.packMan.unloadAllPacketListeners();
+        this.listenerManager.unloadChannelListener();
         this.getLogger().log(Level.INFO, "Cleanup: All packet listeners have been removed");
 
-        messageConfig.save();
-        mainConfig.save();
+        this.messageConfig.save();
+        this.mainConfig.save();
 
         this.getLogger().log(Level.INFO, "AntiSkid has been unloaded");
     }
@@ -161,9 +202,9 @@ public class AntiSkid extends JavaPlugin
         return messageConfig;
     }
 
-    public PacketManager getPacketManager()
+    public ChannelManager getPacketManager()
     {
-        return packMan;
+        return listenerManager;
     }
 
     public MessageManager getMessageManager()
@@ -176,13 +217,18 @@ public class AntiSkid extends JavaPlugin
         return nmsHandler;
     }
 
-    public void setNMS(INMSHandler nmsHandler)
-    {
-        this.nmsHandler = nmsHandler;
-    }
-
     public boolean isPlots()
     {
         return isPlots;
+    }
+
+    public Set<World> getFactionsWorlds()
+    {
+        return factionsWorlds;
+    }
+
+    public Set<World> getPlotsWorlds()
+    {
+        return plotsWorlds;
     }
 }

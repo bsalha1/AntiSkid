@@ -5,12 +5,12 @@ import org.bukkit.Material;
 
 public class PacketServerBlockChange extends Packet
 {
-    private Vector location;
+    private Vector<Integer> position;
     private Material material;
 
-    public PacketServerBlockChange(Vector location, Material material)
+    public PacketServerBlockChange(Vector<Integer> position, Material material)
     {
-        this.location = location;
+        this.position = position;
         this.material = material;
     }
 
@@ -19,8 +19,8 @@ public class PacketServerBlockChange extends Packet
         return material;
     }
 
-    public Vector getLocation()
+    public Vector<Integer> getPosition()
     {
-        return location;
+        return position;
     }
 }

@@ -95,12 +95,13 @@ public class Version_1_11_R1 implements INMSHandler
             }
         }
         else if(packet instanceof PacketPlayInBlockDig)
-        {
-            PacketPlayInBlockDig pack = (PacketPlayInBlockDig) packet;
-            BlockPosition bpos = pack.a();
-            return new PacketClientLeftClickBlock(new Vector(bpos.getX(), bpos.getY(), bpos.getZ()));
-        }
+            {
+                PacketPlayInBlockDig pack = (PacketPlayInBlockDig) packet;
+                BlockPosition bpos = pack.a();
+                return new PacketClientLeftClickBlock(new Vector(bpos.getX(), bpos.getY(), bpos.getZ()));
+            }
 
         return null;
     }
 }
+

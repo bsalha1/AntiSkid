@@ -18,9 +18,9 @@ import org.bukkit.entity.Player;
 @CommandBuilder(label = "help", alias = {"h"}, permission = "antiskid.help")
 public class CommandHelp extends Command
 {
-    private Base_CommandAntiSkid baseCommand;
+    private CommandHandler baseCommand;
 
-    public CommandHelp(Base_CommandAntiSkid baseCommand)
+    public CommandHelp(CommandHandler baseCommand)
     {
         this.baseCommand = baseCommand;
     }

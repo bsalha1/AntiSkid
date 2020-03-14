@@ -13,22 +13,16 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
-public class Base_CommandAntiSkid implements CommandExecutor
+public class CommandHandler implements CommandExecutor
 {
     private Map<String, Command> subcommands = new HashMap<>();
     private CommandHelp commandHelp;
     private AntiSkid plugin;
 
-    public Base_CommandAntiSkid(AntiSkid plugin)
+    public CommandHandler(AntiSkid plugin)
     {
         this.plugin = plugin;
         this.commandHelp = new CommandHelp(this);
-
-        addCommand(new CommandOn());
-        addCommand(new CommandOff());
-        addCommand(new CommandWhitelist());
-        addCommand(new CommandReload());
-        addCommand(new CommandClear());
         plugin.getCommand("antiskid").setExecutor(this);
     }
 
@@ -81,7 +75,7 @@ public class Base_CommandAntiSkid implements CommandExecutor
         return true;
     }
 
-    private void addCommand(Command command)
+    public void addCommand(Command command)
     {
         command.setPlugin(plugin);
         this.subcommands.put(command.getLabel().toLowerCase(), command);
