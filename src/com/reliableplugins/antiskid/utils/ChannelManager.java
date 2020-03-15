@@ -42,7 +42,7 @@ public class ChannelManager
         {
             AChannelListener listenerCopy = (AChannelListener) listener.clone();
             listenerCopy.setPlayer(player);
-            plugin.getNMS().getSocketChannel(player).pipeline().addBefore("packet_handler", listenerCopy.getClass().getName(), listenerCopy);
+            plugin.getNMS().getSocketChannel(player).pipeline().addBefore("packet_handler", ChannelListener.class.getName(), listenerCopy);
         }
         catch(Exception e)
         {

@@ -1,23 +1,18 @@
 package com.reliableplugins.antiskid.type.packet;
 
+import org.bukkit.Chunk;
+
 public class PacketServerMapChunk extends Packet
 {
-    private int x;
-    private int z;
+    private Chunk chunk;
 
-    public PacketServerMapChunk(int x, int z)
+    public PacketServerMapChunk(Chunk chunk)
     {
-        this.x = x;
-        this.z = z;
+        this.chunk = chunk;
     }
 
-    public int getX()
+    public Chunk getChunk()
     {
-        return x;
-    }
-
-    public int getZ()
-    {
-        return z;
+        return chunk;
     }
 }

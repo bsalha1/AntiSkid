@@ -1,20 +1,20 @@
 package com.reliableplugins.antiskid.type.packet;
 
-import com.reliableplugins.antiskid.type.Vector;
+import org.bukkit.Location;
 
 import java.util.Set;
 
 public class PacketServerExplosion extends Packet
 {
-    private Set<Vector<Integer>> positions;
+    private Set<Location> locations;
 
-    public PacketServerExplosion(Set<Vector<Integer>> positions)
+    public PacketServerExplosion(Set<Location> locations)
     {
-        this.positions = positions;
+        this.locations = locations;
     }
 
-    public Set<Vector<Integer>> getPositions()
+    public Set<Location> getLocations()
     {
-        return positions;
+        return locations;
     }
 }

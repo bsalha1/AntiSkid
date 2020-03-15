@@ -10,17 +10,13 @@ import com.reliableplugins.antiskid.task.AbstractTask;
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.Vector;
 import com.reliableplugins.antiskid.type.packet.*;
-import com.reliableplugins.antiskid.utils.Util;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.PacketPlayOutExplosion;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,23 +30,18 @@ public class ChannelListener extends AChannelListener
         this.plugin = plugin;
     }
 
-    /**
-     * Server-Side handler
-     * @param context context
-     * @param packet the packet being written onto
-     * @param promise promise
-     */
+    // Sending data from server to client
     @Override
     public void write(ChannelHandlerContext context, Object packet, ChannelPromise promise) throws Exception
     {
         INMSHandler nmsHandler = plugin.getNMS();
-        Packet temp = nmsHandler.getPacket(packet);
+        Packet temp = nmsHandler.getPacket(packet, player);
 
         // MAP CHUNK PACKET
         if(temp instanceof PacketServerMapChunk)
         {
             PacketServerMapChunk pack = (PacketServerMapChunk) temp;
-            Chunk chunk = player.getWorld().getChunkAt(pack.getX(), pack.getZ());
+            Chunk chunk = pack.getChunk();
 
             try
             {
@@ -125,8 +116,7 @@ public class ChannelListener extends AChannelListener
                 return;
             }
 
-            Vector<Integer> packetLocation = pack.getPosition();
-            Location location = new Location(player.getWorld(), packetLocation.getX(), packetLocation.getY(), packetLocation.getZ());
+            Location location = pack.getLocation();
             Chunk chunk = location.getChunk();
 
             try
@@ -154,26 +144,35 @@ public class ChannelListener extends AChannelListener
         else if(temp instanceof PacketServerExplosion)
         {
             PacketServerExplosion pack = (PacketServerExplosion) temp;
-            for(Vector<Integer> position : pack.getPositions())
+            try
             {
-//                plugin.cache.isProtected()
+                plugin.lock.acquire();
+            } catch(Exception ignored) {}
+
+            for(Location location : pack.getLocations())
+            {
+                if(plugin.cache.isProtected(location.getChunk(), location))
+                {
+                    plugin.cache.unprotectLocation(location);
+                }
             }
+            plugin.lock.release();
         }
         super.write(context, packet, promise);
     }
 
+    // Simulates client sending data
     @Override
     public void channelRead(ChannelHandlerContext channelHandlerContext, Object packet) throws Exception
     {
         INMSHandler nmsHandler = plugin.getNMS();
-        Packet temp = nmsHandler.getPacket(packet);
+        Packet temp = nmsHandler.getPacket(packet, player);
 
         // CLIENTSIDE LEFT CLICK BLOCK
         if(temp instanceof PacketClientLeftClickBlock)
         {
             PacketClientLeftClickBlock pack = (PacketClientLeftClickBlock) temp;
-            Vector<Integer> position = pack.getPosition();
-            Location location = new Location(player.getWorld(), position.getX(), position.getY(), position.getZ());
+            Location location = pack.getLocation();
             Material material = location.getBlock().getType();
             if(!(material.equals(Material.DIODE_BLOCK_OFF)
                     || material.equals(Material.DIODE_BLOCK_ON)

@@ -1,18 +1,18 @@
 package com.reliableplugins.antiskid.type.packet;
 
-import com.reliableplugins.antiskid.type.Vector;
+import org.bukkit.Location;
 
 public class PacketClientLeftClickBlock extends Packet
 {
-    private Vector<Integer> position;
+    private Location location;
 
-    public PacketClientLeftClickBlock(Vector<Integer> position)
+    public PacketClientLeftClickBlock(Location location)
     {
-        this.position = position;
+        this.location = location;
     }
 
-    public Vector<Integer> getPosition()
+    public Location getLocation()
     {
-        return position;
+        return location;
     }
 }

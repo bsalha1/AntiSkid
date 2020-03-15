@@ -1,16 +1,17 @@
 package com.reliableplugins.antiskid.type.packet;
 
 import com.reliableplugins.antiskid.type.Vector;
+import org.bukkit.Location;
 import org.bukkit.Material;
 
 public class PacketServerBlockChange extends Packet
 {
-    private Vector<Integer> position;
+    private Location location;
     private Material material;
 
-    public PacketServerBlockChange(Vector<Integer> position, Material material)
+    public PacketServerBlockChange(Location location, Material material)
     {
-        this.position = position;
+        this.location = location;
         this.material = material;
     }
 
@@ -19,8 +20,8 @@ public class PacketServerBlockChange extends Packet
         return material;
     }
 
-    public Vector<Integer> getPosition()
+    public Location getLocation()
     {
-        return position;
+        return location;
     }
 }

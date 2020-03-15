@@ -62,11 +62,12 @@ public class Cache
 
     public void unprotectLocation(Location location)
     {
-        for(Map<Chunk, Set<Location>> entry : plugin.diodes.values())
+        for(Map<Chunk, Set<Location>> map : plugin.diodes.values())
         {
-            for(Set<Location> locs : entry.values())
+            if(map.containsKey(location.getChunk()))
             {
-                locs.remove(location);
+                map.get(location.getChunk()).remove(location);
+                return;
             }
         }
     }

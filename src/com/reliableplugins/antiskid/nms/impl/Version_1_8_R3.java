@@ -61,7 +61,7 @@ public class Version_1_8_R3 implements INMSHandler
     }
 
     @Override
-    public Packet getPacket(Object packet)
+    public Packet getPacket(Object packet, Player player)
     {
         try
         {
@@ -71,7 +71,7 @@ public class Version_1_8_R3 implements INMSHandler
                 BlockPosition bpos;
                 bpos = Util.getPrivateField("a", blockChange);
 
-                return new PacketServerBlockChange(new Vector(bpos.getX(), bpos.getY(), bpos.getZ()), CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
+                return new PacketServerBlockChange(new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()), CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
             }
             else if(packet instanceof PacketPlayOutMapChunkBulk)
             {
@@ -85,16 +85,16 @@ public class Version_1_8_R3 implements INMSHandler
             {
                 PacketPlayInBlockDig pack = (PacketPlayInBlockDig) packet;
                 BlockPosition bpos = pack.a();
-                return new PacketClientLeftClickBlock(new Vector<>(bpos.getX(), bpos.getY(), bpos.getZ()));
+                return new PacketClientLeftClickBlock(new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()));
             }
             else if(packet instanceof PacketPlayOutExplosion)
             {
                 PacketPlayOutExplosion pack = (PacketPlayOutExplosion) packet;
                 List<BlockPosition> bposes = Util.getPrivateField("e", pack);
-                Set<Vector<Integer>> positions = new HashSet<>();
+                Set<Location> positions = new HashSet<>();
                 for(BlockPosition bpos : bposes)
                 {
-                    positions.add(new Vector<>(bpos.getX(), bpos.getY(), bpos.getZ()));
+                    positions.add(new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()));
                 }
                 return new PacketServerExplosion(positions);
             }

@@ -63,7 +63,7 @@ public class Version_1_11_R1 implements INMSHandler
     }
 
     @Override
-    public Packet getPacket(Object packet)
+    public Packet getPacket(Object packet, Player player)
     {
         if(packet instanceof PacketPlayOutBlockChange)
         {
@@ -78,7 +78,7 @@ public class Version_1_11_R1 implements INMSHandler
                 return null;
             }
 
-            return new PacketServerBlockChange(new Vector(bpos.getX(), bpos.getY(), bpos.getZ()), CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
+            return new PacketServerBlockChange(new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()), CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
         }
         else if(packet instanceof PacketPlayOutMapChunk)
         {
@@ -87,7 +87,7 @@ public class Version_1_11_R1 implements INMSHandler
             {
                 int x = Util.getPrivateField("a", mapChunk);
                 int z = Util.getPrivateField("b", mapChunk);
-                return new PacketServerMapChunk(x, z);
+                return new PacketServerMapChunk(player.getWorld().getChunkAt(x, z));
             }
             catch(Exception e)
             {
@@ -98,7 +98,7 @@ public class Version_1_11_R1 implements INMSHandler
             {
                 PacketPlayInBlockDig pack = (PacketPlayInBlockDig) packet;
                 BlockPosition bpos = pack.a();
-                return new PacketClientLeftClickBlock(new Vector(bpos.getX(), bpos.getY(), bpos.getZ()));
+                return new PacketClientLeftClickBlock(new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()));
             }
 
         return null;

@@ -29,5 +29,5 @@ public interface INMSHandler
 
     void broadcastBlockChangePacket(Material material, Location location, TreeSet<UUID> whitelist);
 
-    Packet getPacket(Object packet);
+    Packet getPacket(Object packet, Player player);
 }
