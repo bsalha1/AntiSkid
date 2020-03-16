@@ -7,13 +7,10 @@
 package com.reliableplugins.antiskid.nms.impl;
 
 import com.reliableplugins.antiskid.nms.INMSHandler;
-import com.reliableplugins.antiskid.type.Vector;
-import com.reliableplugins.antiskid.type.packet.Packet;
-import com.reliableplugins.antiskid.type.packet.PacketClientLeftClickBlock;
-import com.reliableplugins.antiskid.type.packet.PacketServerBlockChange;
-import com.reliableplugins.antiskid.type.packet.PacketServerMapChunk;
+import com.reliableplugins.antiskid.type.packet.*;
 import com.reliableplugins.antiskid.utils.Util;
 import io.netty.channel.Channel;
+import net.minecraft.server.v1_12_R1.PacketPlayOutExplosion;
 import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.PacketPlayInBlockDig;
 import net.minecraft.server.v1_12_R1.PacketPlayOutBlockChange;
@@ -26,17 +23,10 @@ import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 public class Version_1_12_R1 implements INMSHandler
 {
-    @Override
-    public String getVersion()
-    {
-        return "v1_12_R1";
-    }
 
     @Override
     public Channel getSocketChannel(Player player)
@@ -70,41 +60,44 @@ public class Version_1_12_R1 implements INMSHandler
     @Override
     public Packet getPacket(Object packet, Player player)
     {
-        if(packet instanceof PacketPlayOutBlockChange)
+        try
         {
-            PacketPlayOutBlockChange blockChange = (PacketPlayOutBlockChange) packet;
-            BlockPosition bpos;
-            try
+            if(packet instanceof PacketPlayOutBlockChange)
             {
+                PacketPlayOutBlockChange blockChange = (PacketPlayOutBlockChange) packet;
+                BlockPosition bpos;
                 bpos = Util.getPrivateField("a", blockChange);
+                return new PacketServerBlockChange(new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()), CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
             }
-            catch(Exception e)
+            else if(packet instanceof PacketPlayOutMapChunk)
             {
-                return null;
-            }
-
-            return new PacketServerBlockChange(new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()), CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
-        }
-        else if(packet instanceof PacketPlayOutMapChunk)
-        {
-            PacketPlayOutMapChunk mapChunk = (PacketPlayOutMapChunk) packet;
-            try
-            {
+                PacketPlayOutMapChunk mapChunk = (PacketPlayOutMapChunk) packet;
                 int x = Util.getPrivateField("a", mapChunk);
                 int z = Util.getPrivateField("b", mapChunk);
                 return new PacketServerMapChunk(player.getWorld().getChunkAt(x, z));
             }
-            catch(Exception e)
+            else if(packet instanceof PacketPlayOutExplosion)
             {
-                return null;
+                PacketPlayOutExplosion pack = (PacketPlayOutExplosion) packet;
+                List<BlockPosition> bposes = Util.getPrivateField("e", pack);
+                Set<Location> positions = new HashSet<>();
+                for(BlockPosition bpos : bposes)
+                {
+                    positions.add(new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()));
+                }
+                return new PacketServerExplosion(positions);
             }
-        }
-        else if(packet instanceof PacketPlayInBlockDig)
+            else if(packet instanceof PacketPlayInBlockDig)
             {
                 PacketPlayInBlockDig pack = (PacketPlayInBlockDig) packet;
                 BlockPosition bpos = pack.a();
                 return new PacketClientLeftClickBlock(new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()));
             }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
 
         return null;
     }

@@ -7,7 +7,6 @@
 package com.reliableplugins.antiskid.nms.impl;
 
 import com.reliableplugins.antiskid.nms.INMSHandler;
-import com.reliableplugins.antiskid.type.Vector;
 import com.reliableplugins.antiskid.type.packet.*;
 import com.reliableplugins.antiskid.type.packet.Packet;
 import com.reliableplugins.antiskid.utils.Util;
@@ -25,11 +24,6 @@ import java.util.*;
 
 public class Version_1_8_R3 implements INMSHandler
 {
-    @Override
-    public String getVersion()
-    {
-        return "v1_8_R3";
-    }
 
     @Override
     public Channel getSocketChannel(Player player)

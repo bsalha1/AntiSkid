@@ -6,11 +6,7 @@
 
 package com.reliableplugins.antiskid.nms;
 
-import com.reliableplugins.antiskid.type.Vector;
 import com.reliableplugins.antiskid.type.packet.Packet;
-import com.reliableplugins.antiskid.type.packet.PacketClientLeftClickBlock;
-import com.reliableplugins.antiskid.type.packet.PacketServerBlockChange;
-import com.reliableplugins.antiskid.type.packet.PacketServerMapChunkBulk;
 import io.netty.channel.Channel;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,8 +17,6 @@ import java.util.UUID;
 
 public interface INMSHandler
 {
-    String getVersion();
-
     Channel getSocketChannel(Player player);
 
     void sendBlockChangePacket(Player player, Material material, Location location);

@@ -150,6 +150,16 @@ public class AntiSkid extends JavaPlugin implements Listener
     {
         switch(getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3])
         {
+            case "v1_8_R2":
+                return new Version_1_8_R2();
+            case "v1_8_R3":
+                return new Version_1_8_R3();
+            case "v_1_9_R1":
+                return new Version_1_9_R1();
+            case "v_1_9_R2":
+                return new Version_1_9_R2();
+            case "v_1_10_R1":
+                return new Version_1_10_R1();
             case "v1_11_R1":
                 return new Version_1_11_R1();
             case "v1_12_R1":
@@ -160,8 +170,9 @@ public class AntiSkid extends JavaPlugin implements Listener
                 return new Version_1_13_R2();
             case "v1_14_R1":
                 return new Version_1_14_R1();
+            case "v1_15_R1":
             default:
-                return new Version_1_8_R3();
+                return new Version_1_15_R1();
         }
     }
 
