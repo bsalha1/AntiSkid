@@ -1,4 +1,4 @@
-package com.reliableplugins.antiskid.nms.impl;
+package com.reliableplugins.antiskid.nms;
 
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.packet.*;
@@ -19,7 +19,7 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
-public class Version_1_15_R1 implements INMSHandler
+public class Version_1_15_R1 extends ANMSHandler
 {
     @Override
     public Channel getSocketChannel(Player player)

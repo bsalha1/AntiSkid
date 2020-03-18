@@ -10,9 +10,13 @@ import com.massivecraft.factions.*;
 import com.massivecraft.factions.struct.Role;
 import com.reliableplugins.antiskid.AntiSkid;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class FactionHook implements PluginHook<FactionHook>
@@ -43,14 +47,20 @@ public class FactionHook implements PluginHook<FactionHook>
             for(int z = chunk.getZ(); ; z++) // Check positive z
             {
                 faction = Board.getInstance().getFactionAt(new FLocation(worldName, x, z));
-                if(!faction.equals(playerFaction)) break;
+                if(!faction.equals(playerFaction))
+                {
+                    break;
+                }
                 group.add(world.getChunkAt(x, z));
             }
 
             for(int z = chunk.getZ() - 1; ; z--) // Check negative z
             {
                 faction = Board.getInstance().getFactionAt(new FLocation(worldName, x, z));
-                if(!faction.equals(playerFaction)) break;
+                if(!faction.equals(playerFaction))
+                {
+                    break;
+                }
                 group.add(world.getChunkAt(x, z));
             }
             faction = Board.getInstance().getFactionAt(new FLocation(worldName, x, chunk.getZ()));
@@ -63,14 +73,20 @@ public class FactionHook implements PluginHook<FactionHook>
             for(int z = chunk.getZ(); ; z++) // Check positive z
             {
                 faction = Board.getInstance().getFactionAt(new FLocation(worldName, x, z));
-                if(!faction.equals(playerFaction)) break;
+                if(!faction.equals(playerFaction))
+                {
+                    break;
+                }
                 group.add(world.getChunkAt(x, z));
             }
 
             for(int z = chunk.getZ() - 1; ; z--) // Check negative z
             {
                 faction = Board.getInstance().getFactionAt(new FLocation(worldName, x, z));
-                if(!faction.equals(playerFaction)) break;
+                if(!faction.equals(playerFaction))
+                {
+                    break;
+                }
                 group.add(world.getChunkAt(x, z));
             }
             faction = Board.getInstance().getFactionAt(new FLocation(worldName, x, chunk.getZ()));

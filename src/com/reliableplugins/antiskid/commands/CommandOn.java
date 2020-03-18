@@ -10,7 +10,6 @@ import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.hook.FactionHook;
 import com.reliableplugins.antiskid.hook.PlotSquaredHook;
 import com.reliableplugins.antiskid.type.Whitelist;
-import com.reliableplugins.antiskid.utils.Util;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -38,64 +37,84 @@ public class CommandOn extends Command
     private void antiskidOn()
     {
         Set<Chunk> chunks = new HashSet<>();
+        Map<Chunk, Set<Location>> diodes;
 
+        try{ plugin.lock.acquire(); } catch(Exception ignored){}
+
+        //
+        // FACTIONS
+        //
         if(plugin.getFactionsWorlds().contains(executor.getWorld())) // If this is a factions world...
         {
             chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
             if(chunks.isEmpty())
             {
                 executor.sendMessage(plugin.getMessageManager().ERROR_NOT_TERRITORY);
+                plugin.lock.release();
                 return;
             }
         }
+
+        //
+        // PLOT SQUARED
+        //
         else if(plugin.getPlotsWorlds().contains(executor.getWorld())) // If this is a plots world...
         {
             if(!PlotSquaredHook.isOwner(executor, executor.getLocation()))
             {
                 executor.sendMessage(plugin.getMessageManager().ERROR_NOT_PLOT_OWNER);
+                plugin.lock.release();
                 return;
             }
+
+            /* Cache Diodes */
+            Bukkit.broadcastMessage("chunks");
+            chunks = PlotSquaredHook.getChunks(executor.getLocation());
+            Bukkit.broadcastMessage(chunks.toString());
         }
 
-        try
+        /* Cache Diodes */
+        if(plugin.getMainConfig().getFileConfiguration().getBoolean("fast-scan"))
         {
-            plugin.lock.acquire();
-        } catch(Exception ignored) { }
+            diodes = fastScan(chunks);
+        }
+        else
+        {
+            diodes = regularScan(chunks);
+        }
 
+        // If first time
         if(!plugin.diodes.containsKey(executorId))
         {
             plugin.diodes.put(executorId, new HashMap<>());
         }
+
+        // If no whitelist
         if(!plugin.whitelists.containsKey(executorId))
         {
             plugin.whitelists.put(executorId, new Whitelist(executorId));
         }
-        Whitelist whitelist = plugin.whitelists.get(executorId);
 
-        /* Cache Diodes */
-        Map<Chunk, Set<Location>> diodes;
-        if(plugin.getMainConfig().getFileConfiguration().getBoolean("fast-scan"))
-        {
-            diodes = fastScan(chunks, whitelist);
-        }
-        else
-        {
-            diodes = regularScan(chunks, whitelist);
-        }
+        // Register diodes
         plugin.diodes.get(executorId).putAll(diodes);
-
         plugin.lock.release();
 
+        for(Set<Location> locations : diodes.values())
+        {
+            protectDiodes(locations);
+        }
         executor.sendMessage(plugin.getMessageManager().ANTISKID_ON.replace("{NUM}", Integer.toString(diodes.keySet().size())));
     }
 
-    /**
-     * Scan chunks with dispensers in them for diodes
-     * @param chunks to scan
-     * @param whitelist players who shouldn't receive blockchange
-     * @return map of chunk to locations of diodes
-     */
-    private Map<Chunk, Set<Location>> fastScan(Set<Chunk> chunks, Whitelist whitelist)
+    private void protectDiodes(Set<Location> locations)
+    {
+        for(Location location : locations)
+        {
+            plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, location, plugin.whitelists.get(executorId).getUUIDs());
+        }
+    }
+
+    public static Map<Chunk, Set<Location>> fastScan(Set<Chunk> chunks)
     {
         Map<Chunk, Set<Location>> diodes = new HashMap<>();
         for(Chunk chunk : chunks)
@@ -104,7 +123,7 @@ public class CommandOn extends Command
             {
                 if(state.getType().equals(Material.DISPENSER))
                 {
-                    diodes.put(chunk, findAndProtectDiodes(chunk, whitelist));
+                    diodes.put(chunk, getDiodes(chunk));
                     break;
                 }
             }
@@ -112,30 +131,23 @@ public class CommandOn extends Command
         return diodes;
     }
 
-    /**
-     * Scan all chunks for diodes
-     * @param chunks to scan
-     * @param whitelist players who shouldn't receive blockchange
-     * @return map of chunk to locations of diodes
-     */
-    private Map<Chunk, Set<Location>> regularScan(Set<Chunk> chunks, Whitelist whitelist)
+    public static Map<Chunk, Set<Location>> regularScan(Set<Chunk> chunks)
     {
         Map<Chunk, Set<Location>> diodes = new HashMap<>();
         for(Chunk chunk : chunks)
         {
-            diodes.put(chunk, findAndProtectDiodes(chunk, whitelist));
+            diodes.put(chunk, getDiodes(chunk));
         }
         return diodes;
     }
 
-    private HashSet<Location> findAndProtectDiodes(Chunk chunk, Whitelist whitelist)
+    private static HashSet<Location> getDiodes(Chunk chunk)
     {
         HashSet<Location> diodeLocations = new HashSet<>();
         int x1 = chunk.getX() << 4;
         int z1 = chunk.getZ() << 4;
         World world = chunk.getWorld();
         Block block;
-        Location location;
 
         for(int x = x1; x < x1 + 16; x++)
             for(int z = z1; z < z1 + 16; z++)
@@ -144,11 +156,12 @@ public class CommandOn extends Command
                     block = world.getBlockAt(x, y, z);
                     if(block.getType().equals(Material.DIODE_BLOCK_OFF))
                     {
-                        location = block.getLocation();
-                        diodeLocations.add(location);
-                        plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, location, whitelist.getUUIDs());
+                        diodeLocations.add(block.getLocation());
                     }
                 }
+
         return diodeLocations;
     }
+
+
 }

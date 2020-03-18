@@ -43,10 +43,7 @@ public class ChannelListener extends AChannelListener
             PacketServerMapChunk pack = (PacketServerMapChunk) temp;
             Chunk chunk = pack.getChunk();
 
-            try
-            {
-                plugin.lock.acquire();
-            } catch(Exception ignored) {}
+            try{ plugin.lock.acquire(); } catch(Exception ignored){}
 
             // If player not whitelisted, send carpet instead of diode
             if(!plugin.cache.isWhitelisted(player, chunk))
@@ -75,10 +72,7 @@ public class ChannelListener extends AChannelListener
             PacketServerMapChunkBulk pack = (PacketServerMapChunkBulk) temp;
             Chunk[] chunks = pack.getChunks();
 
-            try
-            {
-                plugin.lock.acquire();
-            } catch(Exception ignored) {}
+            try{ plugin.lock.acquire(); } catch(Exception ignored){}
 
             for(Chunk chunk : chunks)
             {
@@ -119,10 +113,7 @@ public class ChannelListener extends AChannelListener
             Location location = pack.getLocation();
             Chunk chunk = location.getChunk();
 
-            try
-            {
-                plugin.lock.acquire();
-            } catch(Exception ignored) {}
+            try { plugin.lock.acquire(); } catch(Exception ignored){}
 
             // Do not transmit diode blockchange (keep carpet)
             if(!plugin.cache.isWhitelisted(player, chunk))
@@ -144,10 +135,7 @@ public class ChannelListener extends AChannelListener
         else if(temp instanceof PacketServerExplosion)
         {
             PacketServerExplosion pack = (PacketServerExplosion) temp;
-            try
-            {
-                plugin.lock.acquire();
-            } catch(Exception ignored) {}
+            try{ plugin.lock.acquire(); } catch(Exception ignored){}
 
             for(Location location : pack.getLocations())
             {

@@ -4,5 +4,5 @@ version: 1.0
 softdepend: [Factions, PlotSquared]
 commands:
   antiskid:
-    description: Shuffles the repeaters on your cannon to protect it from skidding
-    usage: "/antiskid on/off"
+    description: Help command for AntiSkid
+    usage: "/antiskid"

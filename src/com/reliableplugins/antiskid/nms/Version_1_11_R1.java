@@ -4,28 +4,25 @@
  * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
-package com.reliableplugins.antiskid.nms.impl;
+package com.reliableplugins.antiskid.nms;
 
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.packet.*;
+import com.reliableplugins.antiskid.type.packet.Packet;
 import com.reliableplugins.antiskid.utils.Util;
 import io.netty.channel.Channel;
-import net.minecraft.server.v1_12_R1.PacketPlayOutExplosion;
-import net.minecraft.server.v1_12_R1.BlockPosition;
-import net.minecraft.server.v1_12_R1.PacketPlayInBlockDig;
-import net.minecraft.server.v1_12_R1.PacketPlayOutBlockChange;
-import net.minecraft.server.v1_12_R1.PacketPlayOutMapChunk;
+import net.minecraft.server.v1_11_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_11_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_11_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 
 import java.util.*;
 
-public class Version_1_12_R1 implements INMSHandler
+public class Version_1_11_R1 extends ANMSHandler
 {
 
     @Override
