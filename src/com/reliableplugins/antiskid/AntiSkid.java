@@ -16,6 +16,7 @@ import com.reliableplugins.antiskid.utils.Cache;
 import com.reliableplugins.antiskid.utils.MessageManager;
 import com.reliableplugins.antiskid.utils.ChannelManager;
 import com.reliableplugins.antiskid.utils.Util;
+import javafx.util.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -32,13 +33,14 @@ public class AntiSkid extends JavaPlugin implements Listener
 {
     public volatile TreeMap<UUID, Map<Chunk, Set<Location>>> diodes = new TreeMap<>();
     public volatile TreeMap<UUID, Whitelist> whitelists = new TreeMap<>();
-    public Cache cache;
+    public volatile TreeMap<UUID, Pair<Location, Location>> selectionPoints = new TreeMap<>();
+    public volatile Cache cache;
 
     public volatile Semaphore lock;
     private boolean isFactions;
     private boolean isPlots;
 
-    private INMSHandler nmsHandler;
+    private ANMSHandler nmsHandler;
     private CommandHandler cmdHandler;
 
     private PluginManager pluginManager;
@@ -61,18 +63,21 @@ public class AntiSkid extends JavaPlugin implements Listener
         nmsHandler = getNMSHandler();
         cmdHandler = new CommandHandler(this);
         cmdHandler.addCommand(new CommandOn());
+        cmdHandler.addCommand(new CommandTool());
         cmdHandler.addCommand(new CommandOff());
         cmdHandler.addCommand(new CommandWhitelist());
         cmdHandler.addCommand(new CommandReload());
         cmdHandler.addCommand(new CommandClear());
 
-        listenerManager = new ChannelManager(this);
-        pluginManager.registerEvents(new ListenPlayerJoin(this), this);
-        pluginManager.registerEvents(new ListenDiodeAction(this), this);
-        listenerManager.loadChannelListener(new ChannelListener(this));
-        cache = new Cache(this);
 
         loadConfigs();
+
+        listenerManager = new ChannelManager(this);
+        pluginManager.registerEvents(new ListenPlayerLoginLogout(this), this);
+        pluginManager.registerEvents(new ListenDiodeAction(this), this);
+        pluginManager.registerEvents(new ListenUseSelectionTool(this), this);
+        listenerManager.loadChannelListener(new ChannelListener(this));
+        cache = new Cache(this);
 
         this.getLogger().log(Level.INFO, "AntiSkid v1.0 has been loaded");
     }
@@ -145,7 +150,7 @@ public class AntiSkid extends JavaPlugin implements Listener
         messageManager = new MessageManager(messageConfig);
     }
 
-    private INMSHandler getNMSHandler()
+    private ANMSHandler getNMSHandler()
     {
         switch(getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3])
         {
@@ -222,7 +227,7 @@ public class AntiSkid extends JavaPlugin implements Listener
         return this.messageManager;
     }
 
-    public INMSHandler getNMS()
+    public ANMSHandler getNMS()
     {
         return nmsHandler;
     }

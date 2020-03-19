@@ -21,12 +21,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
-public class ListenPlayerJoin implements Listener
+public class ListenPlayerLoginLogout implements Listener
 {
     private AntiSkid plugin;
     private Player player;
 
-    public ListenPlayerJoin(AntiSkid plugin)
+    public ListenPlayerLoginLogout(AntiSkid plugin)
     {
         this.plugin = plugin;
     }

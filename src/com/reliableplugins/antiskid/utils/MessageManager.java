@@ -29,6 +29,9 @@ public class MessageManager
     public String ANTISKID_RELOAD_FINISH;
     public String ANTISKID_CLEAR;
     public String ANTISKID_OFF;
+    public String ANTISKID_POSITION_1;
+    public String ANTISKID_POSITION_2;
+
     public String HELP_ANTISKID;
     public String HELP_WHITELIST;
 
@@ -42,6 +45,8 @@ public class MessageManager
     public String ERROR_INVALID_PLAYER;
     public String ERROR_NOT_TERRITORY;
     public String ERROR_NOT_PLOT_OWNER;
+    public String ERROR_NO_POSITION1;
+    public String ERROR_NO_POSITION2;
 
     public MessageManager(MessageConfig config)
     {
@@ -50,15 +55,20 @@ public class MessageManager
         ANTISKID_ON = getMessage("antiskid-on");
         WHITELIST_ADD = getMessage("whitelist-add");
         WHITELIST_REM = getMessage("whitelist-remove");
-        ERROR_PLAYER_NOT_WHITELISTED = getMessage("err-not-whitelisted");
-        ERROR_PLAYER_ALREADY_WHITELISTED = getMessage("err-already-whitelisted");
         WHITELIST_LIST = getMessage("whitelist-list");
         ANTISKID_RELOAD_START = getMessage("antiskid-reload-start");
         ANTISKID_RELOAD_FINISH = getMessage("antiskid-reload-finish");
         ANTISKID_OFF = getMessage("antiskid-off");
         ANTISKID_CLEAR = getMessage("antiskid-clear");
+        ANTISKID_POSITION_1 = getMessage("antiskid-position-1");
+        ANTISKID_POSITION_2 = getMessage("antiskid-position-2");
+
         HELP_ANTISKID = getMessage("antiskid-help");
         HELP_WHITELIST = getMessage("antiskid-whitelist-help");
+
+
+        ERROR_PLAYER_NOT_WHITELISTED = getMessage("err-not-whitelisted");
+        ERROR_PLAYER_ALREADY_WHITELISTED = getMessage("err-already-whitelisted");
         ERROR_PROTECTED_DIODE = getMessage("err-protected-diode");
         ERROR_NO_PERMS = getMessage("err-no-perms");
         ERROR_NOT_PLAYER = getMessage("err-not-player");
@@ -69,6 +79,8 @@ public class MessageManager
         ERROR_INVALID_PLAYER = getMessage("err-invalid-player");
         ERROR_NOT_TERRITORY = getMessage("err-not-territory");
         ERROR_NOT_PLOT_OWNER = getMessage("err-not-plot-owner");
+        ERROR_NO_POSITION1 = getMessage("err-no-position-1");
+        ERROR_NO_POSITION2 = getMessage("err-no-position-2");
     }
 
     private String getMessage(String key)

@@ -10,5 +10,6 @@
     <orderEntry type="library" name="mcversions" level="application" />
     <orderEntry type="library" name="Factions" level="project" />
     <orderEntry type="library" name="PlotSquared" level="project" />
+    <orderEntry type="library" name="PlotSquared-Bukkit-4.453" level="project" />
   </component>
 </module>

@@ -20,6 +20,9 @@ public class MessageConfig extends Config
         addDefault("antiskid-reload-start", "&bAntiskid is reloading.");
         addDefault("antiskid-reload-finish", "&bAntiskid has reloaded.");
 
+        addDefault("antiskid-position-1", "&bPosition 1 selected at {COORDINATE}");
+        addDefault("antiskid-position-2", "&bPosition 2 selected at {COORDINATE}");
+
         addDefault("whitelist-add", "&7{PLAYER} added to whitelist.");
         addDefault("whitelist-remove", "&7{PLAYER} removed from whitelist.");
         addDefault("whitelist-list", "&7Whitelist: {LIST}");
@@ -39,6 +42,8 @@ public class MessageConfig extends Config
         addDefault("err-whitelist-remove-self", "&cYou are not in your whitelist.");
         addDefault("err-not-territory", "&cYou can only protect your own faction's claims.");
         addDefault("err-not-plot-owner", "&cYou can only protect your own plot.");
+        addDefault("err-no-position-1", "&cYou must left click to create a position 1");
+        addDefault("err-no-position-2", "&cYou must right click to create a position 2");
 
         loadDefaults();
     }

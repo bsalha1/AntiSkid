@@ -1,14 +1,12 @@
 package com.reliableplugins.antiskid.nms;
 
-import com.reliableplugins.antiskid.nms.INMSHandler;
-import com.reliableplugins.antiskid.type.packet.*;
+import com.reliableplugins.antiskid.type.packet.PacketClientLeftClickBlock;
+import com.reliableplugins.antiskid.type.packet.PacketServerBlockChange;
+import com.reliableplugins.antiskid.type.packet.PacketServerExplosion;
+import com.reliableplugins.antiskid.type.packet.PacketServerMapChunk;
 import com.reliableplugins.antiskid.utils.Util;
 import io.netty.channel.Channel;
-import net.minecraft.server.v1_15_R1.PacketPlayOutExplosion;
-import net.minecraft.server.v1_15_R1.BlockPosition;
-import net.minecraft.server.v1_15_R1.PacketPlayInBlockDig;
-import net.minecraft.server.v1_15_R1.PacketPlayOutBlockChange;
-import net.minecraft.server.v1_15_R1.PacketPlayOutMapChunk;
+import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,6 +19,79 @@ import java.util.*;
 
 public class Version_1_15_R1 extends ANMSHandler
 {
+    public Version_1_15_R1()
+    {
+        packetWrapper = new HashMap<>();
+
+        // PlayOutBlockChange
+        packetWrapper.put(PacketPlayOutBlockChange.class, pair ->
+        {
+            try
+            {
+                PacketPlayOutBlockChange blockChange = (PacketPlayOutBlockChange) pair.getKey();
+                BlockPosition bpos;
+                bpos = Util.getPrivateField("a", blockChange);
+
+                return new PacketServerBlockChange(new Location(pair.getValue().getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()), CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
+            }
+            catch(Exception e)
+            {
+                return null;
+            }
+        });
+
+        // PlayOutMapChunk
+        packetWrapper.put(PacketPlayOutMapChunk.class, pair ->
+        {
+            try
+            {
+                PacketPlayOutMapChunk mapChunk = (PacketPlayOutMapChunk) pair.getKey();
+                int x = Util.getPrivateField("a", mapChunk);
+                int z = Util.getPrivateField("b", mapChunk);
+                return new PacketServerMapChunk(pair.getValue().getWorld().getChunkAt(x, z));
+            }
+            catch(Exception e)
+            {
+                return null;
+            }
+        });
+
+        // PlayOutExplosion
+        packetWrapper.put(PacketPlayOutExplosion.class, pair ->
+        {
+            try
+            {
+                PacketPlayOutExplosion pack = (PacketPlayOutExplosion) pair.getKey();
+                List<BlockPosition> bposes = Util.getPrivateField("e", pack);
+                Set<Location> positions = new HashSet<>();
+                for(BlockPosition bpos : bposes)
+                {
+                    positions.add(new Location(pair.getValue().getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()));
+                }
+                return new PacketServerExplosion(positions);
+            }
+            catch(Exception e)
+            {
+                return null;
+            }
+        });
+
+        // PlayInBlockDig
+        packetWrapper.put(PacketPlayInBlockDig.class, pair ->
+        {
+            try
+            {
+                PacketPlayInBlockDig pack = (PacketPlayInBlockDig) pair.getKey();
+                BlockPosition bpos = pack.b();
+                return new PacketClientLeftClickBlock(new Location(pair.getValue().getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()));
+            }
+            catch(Exception e)
+            {
+                return null;
+            }
+        });
+    }
+
     @Override
     public Channel getSocketChannel(Player player)
     {
@@ -48,51 +119,5 @@ public class Version_1_15_R1 extends ANMSHandler
             if(whitelist.contains(player.getUniqueId())) continue;
             sendBlockChangePacket(player, material, location);
         }
-    }
-
-    @Override
-    public Packet getPacket(Object packet, Player player)
-    {
-        try
-        {
-            if(packet instanceof PacketPlayOutBlockChange)
-            {
-                PacketPlayOutBlockChange blockChange = (PacketPlayOutBlockChange) packet;
-                BlockPosition bpos;
-                bpos = Util.getPrivateField("a", blockChange);
-
-                return new PacketServerBlockChange(new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()), CraftMagicNumbers.getMaterial(blockChange.block.getBlock()));
-            }
-            else if(packet instanceof PacketPlayOutMapChunk)
-            {
-                PacketPlayOutMapChunk mapChunk = (PacketPlayOutMapChunk) packet;
-                int x = Util.getPrivateField("a", mapChunk);
-                int z = Util.getPrivateField("b", mapChunk);
-                return new PacketServerMapChunk(player.getWorld().getChunkAt(x, z));
-            }
-            else if(packet instanceof PacketPlayOutExplosion)
-            {
-                PacketPlayOutExplosion pack = (PacketPlayOutExplosion) packet;
-                List<BlockPosition> bposes = Util.getPrivateField("e", pack);
-                Set<Location> positions = new HashSet<>();
-                for(BlockPosition bpos : bposes)
-                {
-                    positions.add(new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()));
-                }
-                return new PacketServerExplosion(positions);
-            }
-            else if(packet instanceof PacketPlayInBlockDig)
-            {
-                PacketPlayInBlockDig pack = (PacketPlayInBlockDig) packet;
-                BlockPosition bpos = pack.b();
-                return new PacketClientLeftClickBlock(new Location(player.getWorld(), bpos.getX(), bpos.getY(), bpos.getZ()));
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 }

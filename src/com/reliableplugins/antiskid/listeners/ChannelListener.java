@@ -6,6 +6,7 @@
 package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
+import com.reliableplugins.antiskid.nms.ANMSHandler;
 import com.reliableplugins.antiskid.task.AbstractTask;
 import com.reliableplugins.antiskid.nms.INMSHandler;
 import com.reliableplugins.antiskid.type.Vector;
@@ -34,13 +35,13 @@ public class ChannelListener extends AChannelListener
     @Override
     public void write(ChannelHandlerContext context, Object packet, ChannelPromise promise) throws Exception
     {
-        INMSHandler nmsHandler = plugin.getNMS();
-        Packet temp = nmsHandler.getPacket(packet, player);
+        ANMSHandler nmsHandler = plugin.getNMS();
+        Packet wrappedPacket = nmsHandler.getPacket(packet, player);
 
         // MAP CHUNK PACKET
-        if(temp instanceof PacketServerMapChunk)
+        if(wrappedPacket instanceof PacketServerMapChunk)
         {
-            PacketServerMapChunk pack = (PacketServerMapChunk) temp;
+            PacketServerMapChunk pack = (PacketServerMapChunk) wrappedPacket;
             Chunk chunk = pack.getChunk();
 
             try{ plugin.lock.acquire(); } catch(Exception ignored){}
@@ -67,9 +68,9 @@ public class ChannelListener extends AChannelListener
 
 
         // MAP CHUNK BULK PACKET
-        else if(temp instanceof PacketServerMapChunkBulk)
+        else if(wrappedPacket instanceof PacketServerMapChunkBulk)
         {
-            PacketServerMapChunkBulk pack = (PacketServerMapChunkBulk) temp;
+            PacketServerMapChunkBulk pack = (PacketServerMapChunkBulk) wrappedPacket;
             Chunk[] chunks = pack.getChunks();
 
             try{ plugin.lock.acquire(); } catch(Exception ignored){}
@@ -98,9 +99,9 @@ public class ChannelListener extends AChannelListener
 
 
         // BLOCK CHANGE PACKET
-        else if(temp instanceof PacketServerBlockChange)
+        else if(wrappedPacket instanceof PacketServerBlockChange)
         {
-            PacketServerBlockChange pack = (PacketServerBlockChange) temp;
+            PacketServerBlockChange pack = (PacketServerBlockChange) wrappedPacket;
             Material material = pack.getMaterial();
 
             // If is not a diode blockchange continue transmission
@@ -132,9 +133,9 @@ public class ChannelListener extends AChannelListener
             plugin.lock.release();
         }
 
-        else if(temp instanceof PacketServerExplosion)
+        else if(wrappedPacket instanceof PacketServerExplosion)
         {
-            PacketServerExplosion pack = (PacketServerExplosion) temp;
+            PacketServerExplosion pack = (PacketServerExplosion) wrappedPacket;
             try{ plugin.lock.acquire(); } catch(Exception ignored){}
 
             for(Location location : pack.getLocations())
@@ -153,7 +154,7 @@ public class ChannelListener extends AChannelListener
     @Override
     public void channelRead(ChannelHandlerContext channelHandlerContext, Object packet) throws Exception
     {
-        INMSHandler nmsHandler = plugin.getNMS();
+        ANMSHandler nmsHandler = plugin.getNMS();
         Packet temp = nmsHandler.getPacket(packet, player);
 
         // CLIENTSIDE LEFT CLICK BLOCK

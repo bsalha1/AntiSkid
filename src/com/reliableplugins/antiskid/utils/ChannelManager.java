@@ -24,7 +24,10 @@ public class ChannelManager
 
     public void unloadChannelListener(Player player)
     {
-        plugin.getNMS().getSocketChannel(player).pipeline().remove(ChannelListener.class.getName());
+        if(plugin.getNMS().getSocketChannel(player).pipeline().get(ChannelListener.class.getName()) != null)
+        {
+            plugin.getNMS().getSocketChannel(player).pipeline().remove(ChannelListener.class.getName());
+        }
     }
 
     public void unloadChannelListener()

@@ -9,7 +9,9 @@ package com.reliableplugins.antiskid.commands;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.hook.FactionHook;
 import com.reliableplugins.antiskid.hook.PlotSquaredHook;
+import com.reliableplugins.antiskid.type.SelectionTool;
 import com.reliableplugins.antiskid.type.Whitelist;
+import javafx.util.Pair;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -42,9 +44,37 @@ public class CommandOn extends Command
         try{ plugin.lock.acquire(); } catch(Exception ignored){}
 
         //
+        // SELECTION TOOL
+        //
+        if(executor.getInventory().contains(SelectionTool.getItem()))
+        {
+            Pair<Location, Location> locations = plugin.selectionPoints.get(executorId);
+            if(locations != null) // If selection set
+            {
+                if(locations.getKey() == null) // If no pos1
+                {
+                    executor.sendMessage(plugin.getMessageManager().ERROR_NO_POSITION1);
+                    plugin.lock.release();
+                    return;
+                }
+                else if(locations.getValue() == null) // If no pos2
+                {
+                    executor.sendMessage(plugin.getMessageManager().ERROR_NO_POSITION2);
+                    plugin.lock.release();
+                    return;
+                }
+                else // Valid pos1 and pos2
+                {
+                    chunks = getChunksFromSelection(locations.getKey(), locations.getValue());
+                }
+            }
+        }
+
+
+        //
         // FACTIONS
         //
-        if(plugin.getFactionsWorlds().contains(executor.getWorld())) // If this is a factions world...
+        else if(plugin.getFactionsWorlds().contains(executor.getWorld())) // If this is a factions world...
         {
             chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
             if(chunks.isEmpty())
@@ -68,9 +98,7 @@ public class CommandOn extends Command
             }
 
             /* Cache Diodes */
-            Bukkit.broadcastMessage("chunks");
             chunks = PlotSquaredHook.getChunks(executor.getLocation());
-            Bukkit.broadcastMessage(chunks.toString());
         }
 
         /* Cache Diodes */
@@ -163,5 +191,21 @@ public class CommandOn extends Command
         return diodeLocations;
     }
 
+    private static HashSet<Chunk> getChunksFromSelection(Location pos1, Location pos2)
+    {
+        World world = pos1.getWorld();
+        HashSet<Chunk> chunks = new HashSet<>();
+        int minX = Math.min((int) pos1.getX(), (int) pos2.getX());
+        int maxX = Math.max((int) pos1.getX(), (int) pos2.getX());
 
+        int minZ = Math.min((int) pos1.getZ(), (int) pos2.getZ());
+        int maxZ = Math.max((int) pos1.getZ(), (int) pos2.getZ());
+
+        for(int x = minX; x < maxX; x++)
+            for(int z = minZ; z < maxZ; z++)
+            {
+                chunks.add(world.getChunkAt(x >> 4, z >> 4));
+            }
+        return chunks;
+    }
 }
