@@ -8,7 +8,7 @@ package com.reliableplugins.antiskid.commands;
 
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.hook.FactionHook;
-import com.reliableplugins.antiskid.hook.PlotSquaredHook;
+//import com.reliableplugins.antiskid.hook.PlotSquaredHook;
 import com.reliableplugins.antiskid.type.SelectionTool;
 import com.reliableplugins.antiskid.type.Whitelist;
 import javafx.util.Pair;
@@ -44,9 +44,24 @@ public class CommandOn extends Command
         try{ plugin.lock.acquire(); } catch(Exception ignored){}
 
         //
+        // FACTIONS
+        //
+        if(plugin.getFactionsWorlds().contains(executor.getWorld())) // If this is a factions world...
+        {
+            System.out.println("fac world");
+            chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
+            if(chunks.isEmpty())
+            {
+                executor.sendMessage(plugin.getMessageManager().ERROR_NOT_TERRITORY);
+                plugin.lock.release();
+                return;
+            }
+        }
+
+        //
         // SELECTION TOOL
         //
-        if(executor.getInventory().contains(SelectionTool.getItem()))
+        else if(executor.getInventory().contains(SelectionTool.getItem()))
         {
             Pair<Location, Location> locations = plugin.selectionPoints.get(executorId);
             if(locations != null) // If selection set
@@ -70,35 +85,30 @@ public class CommandOn extends Command
             }
         }
 
-
-        //
-        // FACTIONS
-        //
-        else if(plugin.getFactionsWorlds().contains(executor.getWorld())) // If this is a factions world...
-        {
-            chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
-            if(chunks.isEmpty())
-            {
-                executor.sendMessage(plugin.getMessageManager().ERROR_NOT_TERRITORY);
-                plugin.lock.release();
-                return;
-            }
-        }
-
         //
         // PLOT SQUARED
         //
-        else if(plugin.getPlotsWorlds().contains(executor.getWorld())) // If this is a plots world...
+//        else if(plugin.getPlotsWorlds().contains(executor.getWorld())) // If this is a plots world...
+//        {
+//            if(!PlotSquaredHook.isOwner(executor, executor.getLocation()))
+//            {
+//                executor.sendMessage(plugin.getMessageManager().ERROR_NOT_PLOT_OWNER);
+//                plugin.lock.release();
+//                return;
+//            }
+//
+//            /* Cache Diodes */
+//            chunks = PlotSquaredHook.getChunks(executor.getLocation());
+//        }
+
+        for(Chunk chunk : chunks)
         {
-            if(!PlotSquaredHook.isOwner(executor, executor.getLocation()))
+            if(plugin.cache.isProtected(chunk))
             {
-                executor.sendMessage(plugin.getMessageManager().ERROR_NOT_PLOT_OWNER);
+                executor.sendMessage(plugin.getMessageManager().ERROR_ALREADY_PROTECTED);
                 plugin.lock.release();
                 return;
             }
-
-            /* Cache Diodes */
-            chunks = PlotSquaredHook.getChunks(executor.getLocation());
         }
 
         /* Cache Diodes */
@@ -138,7 +148,7 @@ public class CommandOn extends Command
     {
         for(Location location : locations)
         {
-            plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, location, plugin.whitelists.get(executorId).getUUIDs());
+            plugin.getNMS().broadcastBlockChangePacket(plugin.getReplacer(), location, plugin.whitelists.get(executorId).getUUIDs());
         }
     }
 
@@ -147,7 +157,13 @@ public class CommandOn extends Command
         Map<Chunk, Set<Location>> diodes = new HashMap<>();
         for(Chunk chunk : chunks)
         {
-            for(BlockState state : chunk.getTileEntities())
+            BlockState[] states = chunk.getTileEntities();
+            if(states == null || states.length == 0)
+            {
+                continue;
+            }
+
+            for(BlockState state : states)
             {
                 if(state.getType().equals(Material.DISPENSER))
                 {

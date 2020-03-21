@@ -47,6 +47,7 @@ public class MessageManager
     public String ERROR_NOT_PLOT_OWNER;
     public String ERROR_NO_POSITION1;
     public String ERROR_NO_POSITION2;
+    public String ERROR_ALREADY_PROTECTED;
 
     public MessageManager(MessageConfig config)
     {
@@ -81,6 +82,7 @@ public class MessageManager
         ERROR_NOT_PLOT_OWNER = getMessage("err-not-plot-owner");
         ERROR_NO_POSITION1 = getMessage("err-no-position-1");
         ERROR_NO_POSITION2 = getMessage("err-no-position-2");
+        ERROR_ALREADY_PROTECTED = getMessage("err-already-protected");
     }
 
     private String getMessage(String key)

@@ -41,9 +41,10 @@ public class MessageConfig extends Config
         addDefault("err-whitelist-self", "&cYou cannot whitelist yourself.");
         addDefault("err-whitelist-remove-self", "&cYou are not in your whitelist.");
         addDefault("err-not-territory", "&cYou can only protect your own faction's claims.");
-        addDefault("err-not-plot-owner", "&cYou can only protect your own plot.");
+//        addDefault("err-not-plot-owner", "&cYou can only protect your own plot.");
         addDefault("err-no-position-1", "&cYou must left click to create a position 1");
         addDefault("err-no-position-2", "&cYou must right click to create a position 2");
+        addDefault("err-already-protected", "&cPart of this region is already protected");
 
         loadDefaults();
     }

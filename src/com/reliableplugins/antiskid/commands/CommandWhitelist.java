@@ -180,7 +180,7 @@ public class CommandWhitelist extends Command
                 {
                     for(Location location : locations)
                     {
-                        plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, location);
+                        plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
                     }
                 }
             }

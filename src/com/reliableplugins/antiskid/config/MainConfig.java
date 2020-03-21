@@ -24,7 +24,7 @@ public class MainConfig extends Config
         if(this.isNew())
         {
             this.getFileConfiguration().createSection("factions");
-            this.getFileConfiguration().createSection("plotsquared");
+//            this.getFileConfiguration().createSection("plotsquared");
         }
         addDefault("factions.support", true);
         addDefault("factions.minimum-rank", "moderator");
@@ -35,8 +35,8 @@ public class MainConfig extends Config
         }
         addDefault("factions.worlds", worlds);
 
-        addDefault("plotsquared.support", true);
-        addDefault("plotsquared.worlds", worlds);
+//        addDefault("plotsquared.support", true);
+//        addDefault("plotsquared.worlds", worlds);
 
         loadDefaults();
     }

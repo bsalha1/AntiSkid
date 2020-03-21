@@ -59,7 +59,7 @@ public class ListenPlayerLoginLogout implements Listener
             for(Set<Location> locs : entry.getValue().values())
                 for(Location loc : locs)
                 {
-                    plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, loc);
+                    plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), loc);
                 }
         }
         plugin.lock.release();

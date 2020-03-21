@@ -56,7 +56,7 @@ public class ChannelListener extends AChannelListener
                         @Override
                         public void run()
                         {
-                            plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, location);
+                            plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
                         }
                     };
                 }
@@ -87,7 +87,7 @@ public class ChannelListener extends AChannelListener
                             @Override
                             public void run()
                             {
-                                plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, location);
+                                plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
                             }
                         };
                     }
@@ -128,7 +128,7 @@ public class ChannelListener extends AChannelListener
             if(diodes != null && diodes.containsKey(chunk) && !diodes.get(chunk).contains(location))
             {
                 diodes.get(chunk).add(location);
-                plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, location, plugin.cache.getWhitelist(chunk).getUUIDs());
+                plugin.getNMS().broadcastBlockChangePacket(plugin.getReplacer(), location, plugin.cache.getWhitelist(chunk).getUUIDs());
             }
             plugin.lock.release();
         }
@@ -172,16 +172,13 @@ public class ChannelListener extends AChannelListener
             }
 
             Chunk chunk = location.getChunk();
-            try
-            {
-                plugin.lock.acquire();
-            } catch(Exception ignored) {}
+            try { plugin.lock.acquire(); } catch(Exception ignored) {}
 
             // Cancel repeater reveal if not whitelisted
             if(!plugin.cache.isWhitelisted(player, chunk))
             {
                 plugin.lock.release();
-                plugin.getNMS().sendBlockChangePacket(player, Material.CARPET, location);
+                plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
                 player.sendMessage(plugin.getMessageManager().ERROR_PROTECTED_DIODE);
                 return;
             }

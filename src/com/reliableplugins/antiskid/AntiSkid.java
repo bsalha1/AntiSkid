@@ -17,10 +17,7 @@ import com.reliableplugins.antiskid.utils.MessageManager;
 import com.reliableplugins.antiskid.utils.ChannelManager;
 import com.reliableplugins.antiskid.utils.Util;
 import javafx.util.Pair;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -38,7 +35,7 @@ public class AntiSkid extends JavaPlugin implements Listener
 
     public volatile Semaphore lock;
     private boolean isFactions;
-    private boolean isPlots;
+//    private boolean isPlots;
 
     private ANMSHandler nmsHandler;
     private CommandHandler cmdHandler;
@@ -47,9 +44,10 @@ public class AntiSkid extends JavaPlugin implements Listener
     private ChannelManager listenerManager;
     private MessageManager messageManager;
 
+    private Material replacer;
     private String minimumFactionRank = null;
-    private Set<World> factionsWorlds = new HashSet<>();
-    private Set<World> plotsWorlds = new HashSet<>();
+    private Set<World> factionsWorlds;
+    private Set<World> plotsWorlds;
 
     private MessageConfig messageConfig;
     private MainConfig mainConfig;
@@ -57,6 +55,10 @@ public class AntiSkid extends JavaPlugin implements Listener
     @Override
     public void onEnable()
     {
+        replacer = Material.REDSTONE_COMPARATOR_OFF;
+        factionsWorlds = new HashSet<>();
+        plotsWorlds = new HashSet<>();
+
         lock = new Semaphore(1);
         pluginManager = Bukkit.getPluginManager();
 
@@ -68,7 +70,6 @@ public class AntiSkid extends JavaPlugin implements Listener
         cmdHandler.addCommand(new CommandWhitelist());
         cmdHandler.addCommand(new CommandReload());
         cmdHandler.addCommand(new CommandClear());
-
 
         loadConfigs();
 
@@ -121,31 +122,31 @@ public class AntiSkid extends JavaPlugin implements Listener
         }
 
         // Check if PlotSquared support is enabled
-        isPlots = mainConfig.getFileConfiguration().getBoolean("plotsquared.support");
-        if(isPlots)
-        {
-            if(pluginManager.isPluginEnabled("PlotSquared"))
-            {
-                // Get worlds
-                List<String> plotsWorldNames = mainConfig.getFileConfiguration().getStringList("plotsquared.worlds");
-                for(String s : plotsWorldNames)
-                {
-                    this.getServer().getWorlds().forEach((world) ->
-                    {
-                        if(world.getName().equalsIgnoreCase(s))
-                        {
-                            plotsWorlds.add(world);
-                        }
-                    });
-                }
-                this.getLogger().log(Level.INFO, "PlotSquared support enabled!");
-            }
-            else
-            {
-                isPlots = false;
-                this.getLogger().log(Level.SEVERE, "PlotSquared jar was not found!");
-            }
-        }
+//        isPlots = mainConfig.getFileConfiguration().getBoolean("plotsquared.support");
+//        if(isPlots)
+//        {
+//            if(pluginManager.isPluginEnabled("PlotSquared"))
+//            {
+//                // Get worlds
+//                List<String> plotsWorldNames = mainConfig.getFileConfiguration().getStringList("plotsquared.worlds");
+//                for(String s : plotsWorldNames)
+//                {
+//                    this.getServer().getWorlds().forEach((world) ->
+//                    {
+//                        if(world.getName().equalsIgnoreCase(s))
+//                        {
+//                            plotsWorlds.add(world);
+//                        }
+//                    });
+//                }
+//                this.getLogger().log(Level.INFO, "PlotSquared support enabled!");
+//            }
+//            else
+//            {
+//                isPlots = false;
+//                this.getLogger().log(Level.SEVERE, "PlotSquared jar was not found!");
+//            }
+//        }
 
         messageManager = new MessageManager(messageConfig);
     }
@@ -232,10 +233,10 @@ public class AntiSkid extends JavaPlugin implements Listener
         return nmsHandler;
     }
 
-    public boolean isPlots()
-    {
-        return isPlots;
-    }
+//    public boolean isPlots()
+//    {
+//        return isPlots;
+//    }
 
     public Set<World> getFactionsWorlds()
     {
@@ -245,5 +246,10 @@ public class AntiSkid extends JavaPlugin implements Listener
     public Set<World> getPlotsWorlds()
     {
         return plotsWorlds;
+    }
+
+    public Material getReplacer()
+    {
+        return replacer;
     }
 }

@@ -1,7 +1,7 @@
 package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
-import com.reliableplugins.antiskid.hook.PlotSquaredHook;
+//import com.reliableplugins.antiskid.hook.PlotSquaredHook;
 import com.reliableplugins.antiskid.task.AbstractTask;
 import com.reliableplugins.antiskid.hook.FactionHook;
 import com.reliableplugins.antiskid.type.Whitelist;
@@ -50,7 +50,7 @@ public class ListenDiodeAction implements Listener
                             @Override
                             public void run()
                             {
-                                plugin.getNMS().broadcastBlockChangePacket(Material.CARPET, loc, whitelist.getUUIDs());
+                                plugin.getNMS().broadcastBlockChangePacket(plugin.getReplacer(), loc, whitelist.getUUIDs());
                             }
                         };
                     }
@@ -81,13 +81,13 @@ public class ListenDiodeAction implements Listener
                 plugin.cache.unprotectLocation(location);
             }
         }
-        else if(plugin.getPlotsWorlds().contains(world))
-        {
-            if(PlotSquaredHook.isAdded(event.getPlayer(), location))
-            {
-                plugin.cache.unprotectLocation(location);
-            }
-        }
+//        else if(plugin.getPlotsWorlds().contains(world))
+//        {
+//            if(PlotSquaredHook.isAdded(event.getPlayer(), location))
+//            {
+//                plugin.cache.unprotectLocation(location);
+//            }
+//        }
         else
         {
             plugin.cache.unprotectLocation(location);

@@ -21,7 +21,7 @@ public class HookManager
     {
         this.antiSkid = antiSkid;
         hookPlugin(new FactionHook());
-        hookPlugin(new PlotSquaredHook());
+//        hookPlugin(new PlotSquaredHook());
     }
 
     private void hookPlugin(PluginHook pluginHook)
