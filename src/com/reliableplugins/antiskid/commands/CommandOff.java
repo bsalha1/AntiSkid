@@ -31,15 +31,16 @@ public class CommandOff extends Command
         }
         else
         {
-            try { plugin.lock.acquire(); } catch(Exception ignored){}
+            plugin.startSyncTask(() -> {
 
-            Set<Chunk> chunks = plugin.diodes.get(executorId).keySet();
-            for(Chunk chunk : chunks)
-            {
-                Util.reloadChunk(chunk);
-            }
-            plugin.diodes.remove(executorId);
-            plugin.lock.release();
+                            Set<Chunk> chunks = plugin.diodes.get(executorId).keySet();
+                            for(Chunk chunk : chunks)
+                            {
+                                Util.reloadChunk(chunk);
+                            }
+                            plugin.diodes.remove(executorId);
+                    }
+            );
 
             executor.sendMessage(plugin.getMessageManager().ANTISKID_OFF);
         }

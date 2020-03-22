@@ -7,9 +7,7 @@ package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.nms.ANMSHandler;
-import com.reliableplugins.antiskid.task.AbstractTask;
-import com.reliableplugins.antiskid.nms.INMSHandler;
-import com.reliableplugins.antiskid.type.Vector;
+import com.reliableplugins.antiskid.task.ATask;
 import com.reliableplugins.antiskid.type.packet.*;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -44,25 +42,24 @@ public class ChannelListener extends AChannelListener
             PacketServerMapChunk pack = (PacketServerMapChunk) wrappedPacket;
             Chunk chunk = pack.getChunk();
 
-            try{ plugin.lock.acquire(); } catch(Exception ignored){}
-
-            // If player not whitelisted, send carpet instead of diode
-            if(!plugin.cache.isWhitelisted(player, chunk))
+            plugin.startSyncTask(() ->
             {
-                for(Location location : plugin.cache.getLocations(chunk))
+                // If player not whitelisted, send carpet instead of diode
+                if(!plugin.cache.isWhitelisted(player, chunk))
                 {
-                    new AbstractTask(plugin, 1)
+                    for(Location location : plugin.cache.getLocations(chunk))
                     {
-                        @Override
-                        public void run()
+                        new ATask(plugin, 1)
                         {
-                            plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
-                        }
-                    };
+                            @Override
+                            public void run()
+                            {
+                                plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
+                            }
+                        };
+                    }
                 }
-            }
-
-            plugin.lock.release();
+            });
         }
 
 
@@ -73,27 +70,27 @@ public class ChannelListener extends AChannelListener
             PacketServerMapChunkBulk pack = (PacketServerMapChunkBulk) wrappedPacket;
             Chunk[] chunks = pack.getChunks();
 
-            try{ plugin.lock.acquire(); } catch(Exception ignored){}
-
-            for(Chunk chunk : chunks)
+            plugin.startSyncTask(()->
             {
-                // If player not whitelisted, send carpet instead of diode
-                if(!plugin.cache.isWhitelisted(player, chunk))
+                for(Chunk chunk : chunks)
                 {
-                    for(Location location : plugin.cache.getLocations(chunk))
+                    // If player not whitelisted, send carpet instead of diode
+                    if(!plugin.cache.isWhitelisted(player, chunk))
                     {
-                        new AbstractTask(plugin, 1)
+                        for(Location location : plugin.cache.getLocations(chunk))
                         {
-                            @Override
-                            public void run()
+                            new ATask(plugin, 1)
                             {
-                                plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
-                            }
-                        };
+                                @Override
+                                public void run()
+                                {
+                                    plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
+                                }
+                            };
+                        }
                     }
                 }
-            }
-            plugin.lock.release();
+            });
         }
 
 
@@ -114,12 +111,9 @@ public class ChannelListener extends AChannelListener
             Location location = pack.getLocation();
             Chunk chunk = location.getChunk();
 
-            try { plugin.lock.acquire(); } catch(Exception ignored){}
-
             // Do not transmit diode blockchange (keep carpet)
             if(!plugin.cache.isWhitelisted(player, chunk))
             {
-                plugin.lock.release();
                 return;
             }
 
@@ -127,25 +121,28 @@ public class ChannelListener extends AChannelListener
             Map<Chunk, Set<Location>> diodes = plugin.diodes.get(player.getUniqueId());
             if(diodes != null && diodes.containsKey(chunk) && !diodes.get(chunk).contains(location))
             {
-                diodes.get(chunk).add(location);
-                plugin.getNMS().broadcastBlockChangePacket(plugin.getReplacer(), location, plugin.cache.getWhitelist(chunk).getUUIDs());
+                plugin.startSyncTask(()->
+                {
+                    diodes.get(chunk).add(location);
+                    plugin.getNMS().broadcastBlockChangePacket(plugin.getReplacer(), location, plugin.cache.getWhitelist(chunk).getUUIDs());
+                });
             }
-            plugin.lock.release();
         }
 
         else if(wrappedPacket instanceof PacketServerExplosion)
         {
             PacketServerExplosion pack = (PacketServerExplosion) wrappedPacket;
-            try{ plugin.lock.acquire(); } catch(Exception ignored){}
 
-            for(Location location : pack.getLocations())
+            plugin.startSyncTask(()->
             {
-                if(plugin.cache.isProtected(location.getChunk(), location))
+                for(Location location : pack.getLocations())
                 {
-                    plugin.cache.unprotectLocation(location);
+                    if(plugin.cache.isProtected(location.getChunk(), location))
+                    {
+                        plugin.cache.unprotectLocation(location);
+                    }
                 }
-            }
-            plugin.lock.release();
+            });
         }
         super.write(context, packet, promise);
     }
@@ -172,17 +169,12 @@ public class ChannelListener extends AChannelListener
             }
 
             Chunk chunk = location.getChunk();
-            try { plugin.lock.acquire(); } catch(Exception ignored) {}
-
-            // Cancel repeater reveal if not whitelisted
             if(!plugin.cache.isWhitelisted(player, chunk))
             {
-                plugin.lock.release();
                 plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
                 player.sendMessage(plugin.getMessageManager().ERROR_PROTECTED_DIODE);
                 return;
             }
-            plugin.lock.release();
         }
 
         super.channelRead(channelHandlerContext, packet);

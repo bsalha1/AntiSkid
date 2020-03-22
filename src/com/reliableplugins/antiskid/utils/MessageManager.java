@@ -44,6 +44,7 @@ public class MessageManager
     public String ERROR_UNWHITELIST_SELF;
     public String ERROR_INVALID_PLAYER;
     public String ERROR_NOT_TERRITORY;
+    public String ERROR_LOW_RANK;
     public String ERROR_NOT_PLOT_OWNER;
     public String ERROR_NO_POSITION1;
     public String ERROR_NO_POSITION2;
@@ -79,6 +80,7 @@ public class MessageManager
         ERROR_UNWHITELIST_SELF = getMessage("err-whitelist-remove-self");
         ERROR_INVALID_PLAYER = getMessage("err-invalid-player");
         ERROR_NOT_TERRITORY = getMessage("err-not-territory");
+        ERROR_LOW_RANK = getMessage("err-low-rank");
         ERROR_NOT_PLOT_OWNER = getMessage("err-not-plot-owner");
         ERROR_NO_POSITION1 = getMessage("err-no-position-1");
         ERROR_NO_POSITION2 = getMessage("err-no-position-2");

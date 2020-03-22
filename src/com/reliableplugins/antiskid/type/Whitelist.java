@@ -16,15 +16,18 @@ public class Whitelist
 {
     private TreeSet<UUID> whitelisted = new TreeSet<>();
     private UUID creatorUUID;
+    private Player creator;
 
     public Whitelist(Player player)
     {
+        this.creator = player;
         this.creatorUUID = player.getUniqueId();
         whitelisted.add(creatorUUID);
     }
 
     public Whitelist(UUID uuid)
     {
+        this.creator = Bukkit.getPlayer(uuid);
         this.creatorUUID = uuid;
         whitelisted.add(uuid);
     }
@@ -81,6 +84,11 @@ public class Whitelist
     public boolean containsPlayer(UUID uuid)
     {
         return whitelisted.contains(uuid);
+    }
+
+    public Player getCreator()
+    {
+        return creator;
     }
 
     public TreeSet<UUID> getUUIDs()

@@ -34,42 +34,43 @@ public class ListenUseSelectionTool implements Listener
             Location location = event.getClickedBlock().getLocation();
             event.setCancelled(true);
 
-            try{ plugin.lock.acquire(); } catch(Exception ignored){}
-
-            Pair<Location, Location> locations = plugin.selectionPoints.get(player.getUniqueId());
-            if(locations == null)
+            plugin.startSyncTask(()->
             {
-                locations = new Pair<>(location, null);
-            }
-            else
-            {
-                locations = new Pair<>(location, locations.getValue());
-            }
-            plugin.selectionPoints.put(player.getUniqueId(), locations);
-            plugin.lock.release();
+                Pair<Location, Location> locations = plugin.selectionPoints.get(player.getUniqueId());
+                if(locations == null)
+                {
+                    locations = new Pair<>(location, null);
+                }
+                else
+                {
+                    locations = new Pair<>(location, locations.getValue());
+                }
+                plugin.selectionPoints.put(player.getUniqueId(), locations);
+            });
 
             player.sendMessage(plugin.getMessageManager().ANTISKID_POSITION_1.replace("{COORDINATE}",
                     "(" + location.getX() + ", " + location.getY() + ", " + location.getZ() + ")"));
         }
         else if(action.equals(Action.RIGHT_CLICK_BLOCK))
         {
-            Player player = event.getPlayer();
-            Location location = event.getClickedBlock().getLocation();
             event.setCancelled(true);
 
-            try{ plugin.lock.acquire(); } catch(Exception ignored){}
+            Player player = event.getPlayer();
+            Location location = event.getClickedBlock().getLocation();
 
-            Pair<Location, Location> locations = plugin.selectionPoints.get(player.getUniqueId());
-            if(locations == null)
+            plugin.startSyncTask(()->
             {
-                locations = new Pair<>(null, location);
-            }
-            else
-            {
-                locations = new Pair<>(locations.getKey(), location);
-            }
-            plugin.selectionPoints.put(player.getUniqueId(), locations);
-            plugin.lock.release();
+                Pair<Location, Location> locations = plugin.selectionPoints.get(player.getUniqueId());
+                if(locations == null)
+                {
+                    locations = new Pair<>(null, location);
+                }
+                else
+                {
+                    locations = new Pair<>(locations.getKey(), location);
+                }
+                plugin.selectionPoints.put(player.getUniqueId(), locations);
+            });
 
             player.sendMessage(plugin.getMessageManager().ANTISKID_POSITION_2.replace("{COORDINATE}",
                     "(" + location.getX() + ", " + location.getY() + ", " + location.getZ() + ")"));

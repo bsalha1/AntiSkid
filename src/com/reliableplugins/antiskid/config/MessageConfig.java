@@ -14,9 +14,9 @@ public class MessageConfig extends Config
     {
         super(plugin, fileName);
         addDefault("message-header", "&8(&9AntiSkid&8) ");
-        addDefault("antiskid-on", "&bAntiskid protection has been turned on ({NUM} chunks protected)");
+        addDefault("antiskid-on", "&bAntiskid protection has been turned on ({NUM} chunks protected).");
         addDefault("antiskid-off", "&bAntiskid protection has been turned off.");
-        addDefault("antiskid-clear", "&bAntiskid protection has been cleared. {NUM} chunks freed");
+        addDefault("antiskid-clear", "&bAntiskid protection has been cleared. {NUM} chunks freed.");
         addDefault("antiskid-reload-start", "&bAntiskid is reloading.");
         addDefault("antiskid-reload-finish", "&bAntiskid has reloaded.");
 
@@ -41,10 +41,11 @@ public class MessageConfig extends Config
         addDefault("err-whitelist-self", "&cYou cannot whitelist yourself.");
         addDefault("err-whitelist-remove-self", "&cYou are not in your whitelist.");
         addDefault("err-not-territory", "&cYou can only protect your own faction's claims.");
+        addDefault("err-low-rank", "&cYou must be at least {RANK} to use AntiSkid.");
 //        addDefault("err-not-plot-owner", "&cYou can only protect your own plot.");
-        addDefault("err-no-position-1", "&cYou must left click to create a position 1");
-        addDefault("err-no-position-2", "&cYou must right click to create a position 2");
-        addDefault("err-already-protected", "&cPart of this region is already protected");
+        addDefault("err-no-position-1", "&cYou must left click to create a position 1.");
+        addDefault("err-no-position-2", "&cYou must right click to create a position 2.");
+        addDefault("err-already-protected", "&cPart of this region is already protected.");
 
         loadDefaults();
     }

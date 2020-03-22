@@ -28,6 +28,7 @@ public class MainConfig extends Config
         }
         addDefault("factions.support", true);
         addDefault("factions.minimum-rank", "moderator");
+        addDefault("factions.whitelist-faction", true);
         List<String> worlds = new ArrayList<>();
         for(World world : plugin.getServer().getWorlds())
         {

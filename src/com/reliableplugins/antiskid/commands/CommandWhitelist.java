@@ -12,11 +12,13 @@ import com.reliableplugins.antiskid.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @CommandBuilder(label = "whitelist", permission = "antiskid.whitelist", playerRequired = true, description = "Manage the whitelist for the executor's protection.\nIf they are added, they can see the repeaters.")
 public class CommandWhitelist extends Command
@@ -36,26 +38,14 @@ public class CommandWhitelist extends Command
             Player player = Bukkit.getPlayer(args[1]);
             if(args[0].equalsIgnoreCase("add")) // If adding player
             {
-                try
-                {
-                    plugin.lock.acquire();
-                }
-                catch(Exception ignored) { }
-                whitelistPlayer(player);
-                plugin.lock.release();
+                plugin.startSyncTask(()-> whitelistPlayer(player));
             }
             else if(args[0].equalsIgnoreCase("del")
             || args[0].equalsIgnoreCase("delete")
             || args[0].equalsIgnoreCase("rem")
             || args[0].equalsIgnoreCase("remove")) // If deleting player
             {
-                try
-                {
-                    plugin.lock.acquire();
-                }
-                catch(Exception ignored) { }
-                unWhitelistPlayer(player);
-                plugin.lock.release();
+                plugin.startSyncTask(()->unWhitelistPlayer(player));
             }
             else // If invalid whitelist argument
             {
@@ -65,13 +55,7 @@ public class CommandWhitelist extends Command
         // If /antiskid whitelist
         else if(args.length == 0)
         {
-            try
-            {
-                plugin.lock.acquire();
-            }
-            catch(Exception ignored) { }
-            printWhitelist();
-            plugin.lock.release();
+            plugin.startSyncTask(this::printWhitelist);
         }
         // If /antiskid whitelist <invalid arguments>
         else

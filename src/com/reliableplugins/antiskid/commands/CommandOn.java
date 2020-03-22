@@ -8,11 +8,13 @@ package com.reliableplugins.antiskid.commands;
 
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.hook.FactionHook;
-//import com.reliableplugins.antiskid.hook.PlotSquaredHook;
 import com.reliableplugins.antiskid.type.SelectionTool;
 import com.reliableplugins.antiskid.type.Whitelist;
 import javafx.util.Pair;
-import org.bukkit.*;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.command.CommandSender;
@@ -20,6 +22,8 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.concurrent.Executors;
+
+//import com.reliableplugins.antiskid.hook.PlotSquaredHook;
 
 @CommandBuilder(label = "on", permission = "antiskid.on", description = "Turns on protection for the chunk group the executor is in.\nAnyone besides the executor and the people on their whitelist\ncan see the repeaters in this chunk group.", playerRequired = true)
 public class CommandOn extends Command
@@ -38,24 +42,48 @@ public class CommandOn extends Command
 
     private void antiskidOn()
     {
-        Set<Chunk> chunks = new HashSet<>();
+        Set<Chunk> chunks = new HashSet<Chunk>();
         Map<Chunk, Set<Location>> diodes;
-
-        try{ plugin.lock.acquire(); } catch(Exception ignored){}
 
         //
         // FACTIONS
         //
-        if(plugin.getFactionsWorlds().contains(executor.getWorld())) // If this is a factions world...
+        if(plugin.config.factionsWorlds.contains(executor.getWorld())) // If this is a factions world...
         {
-            System.out.println("fac world");
+            if(FactionHook.getRole(executor) < plugin.config.minimumFactionRank)
+            {
+                executor.sendMessage(plugin.getMessageManager().ERROR_LOW_RANK.replace("{RANK}", FactionHook.getRoleName(plugin.config.minimumFactionRank)));
+                return;
+            }
+
             chunks = FactionHook.findChunkGroup(executor, executor.getLocation().getChunk());
             if(chunks.isEmpty())
             {
                 executor.sendMessage(plugin.getMessageManager().ERROR_NOT_TERRITORY);
-                plugin.lock.release();
                 return;
             }
+
+            Whitelist whitelist;
+            if(!plugin.whitelists.containsKey(executorId)) // if no whitelist
+            {
+                whitelist = new Whitelist(executorId);
+            }
+            else
+            {
+                whitelist = plugin.whitelists.get(executorId);
+            }
+
+            plugin.startSyncTask(()->
+            {
+                if(plugin.config.isFactionWhitelisted)
+                {
+                    for(Player player : FactionHook.getFactionMembers(executor))
+                    {
+                        whitelist.addPlayer(player);
+                    }
+                }
+                plugin.whitelists.put(executorId, whitelist);
+            });
         }
 
         //
@@ -69,19 +97,23 @@ public class CommandOn extends Command
                 if(locations.getKey() == null) // If no pos1
                 {
                     executor.sendMessage(plugin.getMessageManager().ERROR_NO_POSITION1);
-                    plugin.lock.release();
                     return;
                 }
                 else if(locations.getValue() == null) // If no pos2
                 {
                     executor.sendMessage(plugin.getMessageManager().ERROR_NO_POSITION2);
-                    plugin.lock.release();
                     return;
                 }
                 else // Valid pos1 and pos2
                 {
                     chunks = getChunksFromSelection(locations.getKey(), locations.getValue());
                 }
+            }
+
+            // If no whitelist
+            if(!plugin.whitelists.containsKey(executorId))
+            {
+                plugin.startSyncTask(()-> plugin.whitelists.put(executorId, new Whitelist(executorId)));
             }
         }
 
@@ -106,13 +138,12 @@ public class CommandOn extends Command
             if(plugin.cache.isProtected(chunk))
             {
                 executor.sendMessage(plugin.getMessageManager().ERROR_ALREADY_PROTECTED);
-                plugin.lock.release();
                 return;
             }
         }
 
         /* Cache Diodes */
-        if(plugin.getMainConfig().getFileConfiguration().getBoolean("fast-scan"))
+        if(plugin.config.isFastScan)
         {
             diodes = fastScan(chunks);
         }
@@ -124,23 +155,17 @@ public class CommandOn extends Command
         // If first time
         if(!plugin.diodes.containsKey(executorId))
         {
-            plugin.diodes.put(executorId, new HashMap<>());
-        }
-
-        // If no whitelist
-        if(!plugin.whitelists.containsKey(executorId))
-        {
-            plugin.whitelists.put(executorId, new Whitelist(executorId));
+            plugin.startSyncTask(()->plugin.diodes.put(executorId, new HashMap<>()));
         }
 
         // Register diodes
-        plugin.diodes.get(executorId).putAll(diodes);
-        plugin.lock.release();
+        plugin.startSyncTask(()->plugin.diodes.get(executorId).putAll(diodes));
 
         for(Set<Location> locations : diodes.values())
         {
             protectDiodes(locations);
         }
+
         executor.sendMessage(plugin.getMessageManager().ANTISKID_ON.replace("{NUM}", Integer.toString(diodes.keySet().size())));
     }
 

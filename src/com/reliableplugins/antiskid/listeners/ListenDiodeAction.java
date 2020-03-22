@@ -2,7 +2,7 @@ package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
 //import com.reliableplugins.antiskid.hook.PlotSquaredHook;
-import com.reliableplugins.antiskid.task.AbstractTask;
+import com.reliableplugins.antiskid.task.ATask;
 import com.reliableplugins.antiskid.hook.FactionHook;
 import com.reliableplugins.antiskid.type.Whitelist;
 import org.bukkit.Chunk;
@@ -45,7 +45,7 @@ public class ListenDiodeAction implements Listener
                 {
                     if(loc.equals(location))
                     {
-                        new AbstractTask(plugin, 15)
+                        new ATask(plugin, 15)
                         {
                             @Override
                             public void run()
@@ -74,7 +74,7 @@ public class ListenDiodeAction implements Listener
         World world = event.getBlock().getWorld();
         Location location = event.getBlock().getLocation();
 
-        if(plugin.getFactionsWorlds().contains(world))
+        if(plugin.config.factionsWorlds.contains(world))
         {
             if(FactionHook.canBuild(event.getPlayer(), location.getChunk()))
             {

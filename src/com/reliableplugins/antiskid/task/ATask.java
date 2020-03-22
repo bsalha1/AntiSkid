@@ -9,20 +9,20 @@ package com.reliableplugins.antiskid.task;
 import com.reliableplugins.antiskid.AntiSkid;
 import org.bukkit.Bukkit;
 
-public abstract class AbstractTask implements Runnable
+public abstract class ATask implements Runnable
 {
     protected int id;
     protected AntiSkid plugin;
 
     // Set delayed task
-    public AbstractTask(AntiSkid plugin, long delay)
+    public ATask(AntiSkid plugin, long delay)
     {
         this.plugin = plugin;
         this.id = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, this, delay);
     }
 
     // Set delayed repeating task
-    public AbstractTask(AntiSkid plugin, long delay, long period)
+    public ATask(AntiSkid plugin, long delay, long period)
     {
         this.plugin = plugin;
         this.id = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, delay, period);

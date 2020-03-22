@@ -20,22 +20,21 @@ public class CommandClear extends Command
     @Override
     public void execute(CommandSender executor, String[] args)
     {
-        try
+        plugin.startSyncTask(()->
         {
-            plugin.lock.acquire();
-        } catch(Exception ignored) { }
-        TreeMap<UUID, Map<Chunk, Set<Location>>> diodes = (TreeMap<UUID, Map<Chunk, Set<Location>>>) plugin.diodes.clone();
-        plugin.diodes.clear();
-        int i = 0;
-        for(Map<Chunk, Set<Location>> map : diodes.values())
-        {
-            for(Chunk chunk : map.keySet())
+            int i = 0;
+            TreeMap<UUID, Map<Chunk, Set<Location>>> diodes = (TreeMap<UUID, Map<Chunk, Set<Location>>>) plugin.diodes.clone();
+            plugin.diodes.clear();
+            for(Map<Chunk, Set<Location>> map : diodes.values())
             {
-                Util.reloadChunk(chunk);
-                i++;
+                for(Chunk chunk : map.keySet())
+                {
+                    Util.reloadChunk(chunk);
+                    i++;
+                }
             }
-        }
-        plugin.lock.release();
-        executor.sendMessage(plugin.getMessageManager().ANTISKID_CLEAR.replace("{NUM}", Integer.toString(i)));
+            executor.sendMessage(plugin.getMessageManager().ANTISKID_CLEAR.replace("{NUM}", Integer.toString(i)));
+        });
+
     }
 }

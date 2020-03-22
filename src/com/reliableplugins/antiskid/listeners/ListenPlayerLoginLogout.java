@@ -9,7 +9,6 @@ package com.reliableplugins.antiskid.listeners;
 import com.reliableplugins.antiskid.AntiSkid;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -47,22 +46,19 @@ public class ListenPlayerLoginLogout implements Listener
         }
         catch(Exception ignored){}
 
-        try
+        plugin.startSyncTask(()->
         {
-            plugin.lock.acquire();
-        }
-        catch(Exception ignored) { }
-        for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
-        {
-            if(plugin.whitelists.get(entry.getKey()).containsPlayer(player.getUniqueId())) continue;
+            for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
+            {
+                if(plugin.whitelists.get(entry.getKey()).containsPlayer(player.getUniqueId())) continue;
 
-            for(Set<Location> locs : entry.getValue().values())
-                for(Location loc : locs)
-                {
-                    plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), loc);
-                }
-        }
-        plugin.lock.release();
+                for(Set<Location> locs : entry.getValue().values())
+                    for(Location loc : locs)
+                    {
+                        plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), loc);
+                    }
+            }
+        });
     }
 
     @EventHandler

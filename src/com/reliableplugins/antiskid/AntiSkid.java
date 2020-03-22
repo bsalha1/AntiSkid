@@ -9,8 +9,10 @@ package com.reliableplugins.antiskid;
 import com.reliableplugins.antiskid.commands.*;
 import com.reliableplugins.antiskid.config.MainConfig;
 import com.reliableplugins.antiskid.config.MessageConfig;
+import com.reliableplugins.antiskid.hook.FactionHook;
 import com.reliableplugins.antiskid.listeners.*;
 import com.reliableplugins.antiskid.nms.*;
+import com.reliableplugins.antiskid.task.SyncTask;
 import com.reliableplugins.antiskid.type.Whitelist;
 import com.reliableplugins.antiskid.utils.Cache;
 import com.reliableplugins.antiskid.utils.MessageManager;
@@ -22,6 +24,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
@@ -33,9 +36,7 @@ public class AntiSkid extends JavaPlugin implements Listener
     public volatile TreeMap<UUID, Pair<Location, Location>> selectionPoints = new TreeMap<>();
     public volatile Cache cache;
 
-    public volatile Semaphore lock;
-    private boolean isFactions;
-//    private boolean isPlots;
+    private volatile Semaphore lock;
 
     private ANMSHandler nmsHandler;
     private CommandHandler cmdHandler;
@@ -44,20 +45,18 @@ public class AntiSkid extends JavaPlugin implements Listener
     private ChannelManager listenerManager;
     private MessageManager messageManager;
 
+    private String version;
     private Material replacer;
-    private String minimumFactionRank = null;
-    private Set<World> factionsWorlds;
-    private Set<World> plotsWorlds;
 
+    public Configurables config;
     private MessageConfig messageConfig;
     private MainConfig mainConfig;
 
     @Override
     public void onEnable()
     {
+        version = "1.0";
         replacer = Material.REDSTONE_COMPARATOR_OFF;
-        factionsWorlds = new HashSet<>();
-        plotsWorlds = new HashSet<>();
 
         lock = new Semaphore(1);
         pluginManager = Bukkit.getPluginManager();
@@ -71,7 +70,22 @@ public class AntiSkid extends JavaPlugin implements Listener
         cmdHandler.addCommand(new CommandReload());
         cmdHandler.addCommand(new CommandClear());
 
+        config = new Configurables();
         loadConfigs();
+        try
+        {
+            InputStream initialStream = getResource("README.md");
+            byte[] buffer = new byte[initialStream.available()];
+            initialStream.read(buffer);
+
+            File targetFile = new File(getDataFolder(), "README.md");
+            OutputStream outStream = new FileOutputStream(targetFile);
+            outStream.write(buffer);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
 
         listenerManager = new ChannelManager(this);
         pluginManager.registerEvents(new ListenPlayerLoginLogout(this), this);
@@ -80,20 +94,22 @@ public class AntiSkid extends JavaPlugin implements Listener
         listenerManager.loadChannelListener(new ChannelListener(this));
         cache = new Cache(this);
 
-        this.getLogger().log(Level.INFO, "AntiSkid v1.0 has been loaded");
+        getLogger().log(Level.INFO, "AntiSkid v" + version + " has been loaded");
     }
 
     public void loadConfigs()
     {
-        factionsWorlds.clear();
-        plotsWorlds.clear();
+        config.factionsWorlds = new HashSet<>();
+        config.plotsWorlds = new HashSet<>();
 
         mainConfig = new MainConfig(this, "config.yml");
         messageConfig = new MessageConfig(this, "messages.yml");
 
+        config.isFastScan = mainConfig.getFileConfiguration().getBoolean("fast-scan");
+
         // Check if Factions support is enabled
-        isFactions = mainConfig.getFileConfiguration().getBoolean("factions.support");
-        if(isFactions)
+        config.isFactions = mainConfig.getFileConfiguration().getBoolean("factions.support");
+        if(config.isFactions)
         {
             if(pluginManager.isPluginEnabled("Factions"))
             {
@@ -101,23 +117,24 @@ public class AntiSkid extends JavaPlugin implements Listener
                 List<String> factionsWorldNames = mainConfig.getFileConfiguration().getStringList("factions.worlds");
                 for(String s : factionsWorldNames)
                 {
-                    this.getServer().getWorlds().forEach((world) ->
+                    getServer().getWorlds().forEach((world) ->
                     {
                         if(world.getName().equalsIgnoreCase(s))
                         {
-                            factionsWorlds.add(world);
+                            config.factionsWorlds.add(world);
                         }
                     });
                 }
 
-                minimumFactionRank = mainConfig.getFileConfiguration().getString("factions.minimum-rank");
-                pluginManager.registerEvents(new ListenUnclaim(this), this);
-                this.getLogger().log(Level.INFO, "Factions support enabled!");
+                config.minimumFactionRank = FactionHook.getRole(mainConfig.getFileConfiguration().getString("factions.minimum-rank"));
+                config.isFactionWhitelisted = mainConfig.getFileConfiguration().getBoolean("factions.whitelist-faction");
+                pluginManager.registerEvents(new ListenFactionAction(this), this);
+                getLogger().log(Level.INFO, "Factions support enabled!");
             }
             else
             {
-                isFactions = false;
-                this.getLogger().log(Level.SEVERE, "Factions jar was not found!");
+                config.isFactions = false;
+                getLogger().log(Level.SEVERE, "Factions jar was not found!");
             }
         }
 
@@ -184,7 +201,7 @@ public class AntiSkid extends JavaPlugin implements Listener
     @Override
     public void onDisable()
     {
-        this.getLogger().log(Level.INFO, "Cleanup: Start cleanup");
+        getLogger().log(Level.INFO, "Cleanup: Start cleanup");
         for(Map<Chunk, Set<Location>> chunksMap : diodes.values())
         {
             for(Chunk chunk : chunksMap.keySet())
@@ -192,20 +209,26 @@ public class AntiSkid extends JavaPlugin implements Listener
                 Util.reloadChunk(chunk);
             }
         }
-        this.getLogger().log(Level.INFO, "Cleanup: All protected repeaters have been revealed");
+        getLogger().log(Level.INFO, "Cleanup: All protected repeaters have been revealed");
 
-        this.listenerManager.unloadChannelListener();
-        this.getLogger().log(Level.INFO, "Cleanup: All packet listeners have been removed");
+        listenerManager.unloadChannelListener();
+        getLogger().log(Level.INFO, "Cleanup: All packet listeners have been removed");
 
-        this.messageConfig.save();
-        this.mainConfig.save();
+        messageConfig.save();
+        mainConfig.save();
 
-        this.getLogger().log(Level.INFO, "AntiSkid has been unloaded");
+        getLogger().log(Level.INFO, "AntiSkid has been unloaded");
     }
 
-    public boolean isFactions()
+    public void startSyncTask(SyncTask task)
     {
-        return isFactions;
+        try
+        {
+            lock.acquire();
+        }
+        catch(Exception ignored){}
+        task.run();
+        lock.release();
     }
 
     public MainConfig getMainConfig()
@@ -225,7 +248,7 @@ public class AntiSkid extends JavaPlugin implements Listener
 
     public MessageManager getMessageManager()
     {
-        return this.messageManager;
+        return messageManager;
     }
 
     public ANMSHandler getNMS()
@@ -233,23 +256,28 @@ public class AntiSkid extends JavaPlugin implements Listener
         return nmsHandler;
     }
 
-//    public boolean isPlots()
-//    {
-//        return isPlots;
-//    }
-
-    public Set<World> getFactionsWorlds()
-    {
-        return factionsWorlds;
-    }
-
-    public Set<World> getPlotsWorlds()
-    {
-        return plotsWorlds;
-    }
-
     public Material getReplacer()
     {
         return replacer;
     }
+
+    public String getVersion()
+    {
+        return version;
+    }
+
+    public static class Configurables
+    {
+        public boolean isFastScan = false;
+
+        public boolean isFactions = false;
+        public int minimumFactionRank = 4;
+        public boolean isFactionWhitelisted = true;
+        public Set<World> factionsWorlds = new HashSet<>();
+
+        public Set<World> plotsWorlds = new HashSet<>();
+//    private boolean isPlots;
+    }
 }
+
+
