@@ -1,8 +1,8 @@
 package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
+import com.reliableplugins.antiskid.type.Pair;
 import com.reliableplugins.antiskid.type.SelectionTool;
-import javafx.util.Pair;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

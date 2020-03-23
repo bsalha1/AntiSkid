@@ -10,7 +10,7 @@ import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.hook.FactionHook;
 import com.reliableplugins.antiskid.type.SelectionTool;
 import com.reliableplugins.antiskid.type.Whitelist;
-import javafx.util.Pair;
+import com.reliableplugins.antiskid.type.Pair;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;

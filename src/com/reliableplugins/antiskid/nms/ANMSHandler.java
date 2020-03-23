@@ -1,7 +1,7 @@
 package com.reliableplugins.antiskid.nms;
 
+import com.reliableplugins.antiskid.type.Pair;
 import com.reliableplugins.antiskid.type.packet.Packet;
-import javafx.util.Pair;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
