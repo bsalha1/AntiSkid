@@ -125,9 +125,7 @@ public class Version_1_8_R3 extends ANMSHandler
         PacketPlayOutBlockChange packet =  new PacketPlayOutBlockChange(
                 ((CraftWorld) location.getWorld()).getHandle(),
                 new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
-
         packet.block = CraftMagicNumbers.getBlock(material).getBlockData();
-
         ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
     }
 

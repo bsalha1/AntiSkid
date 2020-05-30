@@ -6,6 +6,7 @@
 
 package com.reliableplugins.antiskid.commands;
 
+import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -16,8 +17,7 @@ public class CommandReload extends Command
     @Override
     public void execute(CommandSender executor, String[] args)
     {
-//        plugin.getFileManager().saveAll();
-        plugin.initConfigs();
+        AntiSkid.INSTANCE.initConfigs();
 
         executor.sendMessage(ChatColor.AQUA + "AntiSkid has been reloaded");
     }

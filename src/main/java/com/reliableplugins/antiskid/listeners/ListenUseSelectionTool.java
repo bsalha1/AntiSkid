@@ -13,13 +13,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class ListenUseSelectionTool implements Listener
 {
-    private AntiSkid plugin;
-
-    public ListenUseSelectionTool(AntiSkid plugin)
-    {
-        this.plugin = plugin;
-    }
-
     @EventHandler
     public void onInteract(PlayerInteractEvent event)
     {
@@ -35,9 +28,9 @@ public class ListenUseSelectionTool implements Listener
             Location location = event.getClickedBlock().getLocation();
             event.setCancelled(true);
 
-            plugin.startSynchronousTask(()->
+            AntiSkid.INSTANCE.startSynchronousTask(()->
             {
-                Pair<Location, Location> locations = plugin.selectionPoints.get(player.getUniqueId());
+                Pair<Location, Location> locations = AntiSkid.INSTANCE.selectionPoints.get(player.getUniqueId());
                 if(locations == null)
                 {
                     locations = new Pair<>(location, null);
@@ -46,7 +39,7 @@ public class ListenUseSelectionTool implements Listener
                 {
                     locations = new Pair<>(location, locations.getValue());
                 }
-                plugin.selectionPoints.put(player.getUniqueId(), locations);
+                AntiSkid.INSTANCE.selectionPoints.put(player.getUniqueId(), locations);
             });
 
             player.sendMessage(Message.ANTISKID_POSITION_1.getMessage().replace("{COORDINATE}",
@@ -59,9 +52,9 @@ public class ListenUseSelectionTool implements Listener
             Player player = event.getPlayer();
             Location location = event.getClickedBlock().getLocation();
 
-            plugin.startSynchronousTask(()->
+            AntiSkid.INSTANCE.startSynchronousTask(()->
             {
-                Pair<Location, Location> locations = plugin.selectionPoints.get(player.getUniqueId());
+                Pair<Location, Location> locations = AntiSkid.INSTANCE.selectionPoints.get(player.getUniqueId());
                 if(locations == null)
                 {
                     locations = new Pair<>(null, location);
@@ -70,7 +63,7 @@ public class ListenUseSelectionTool implements Listener
                 {
                     locations = new Pair<>(locations.getKey(), location);
                 }
-                plugin.selectionPoints.put(player.getUniqueId(), locations);
+                AntiSkid.INSTANCE.selectionPoints.put(player.getUniqueId(), locations);
             });
 
             player.sendMessage(Message.ANTISKID_POSITION_2.getMessage().replace("{COORDINATE}",

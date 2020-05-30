@@ -1,8 +1,6 @@
 package com.reliableplugins.antiskid.listeners;
 
 import com.reliableplugins.antiskid.AntiSkid;
-//import com.reliableplugins.antiskid.hook.PlotSquaredHook;
-import com.reliableplugins.antiskid.hook.PlotSquaredHook;
 import com.reliableplugins.antiskid.task.ATask;
 import com.reliableplugins.antiskid.hook.FactionHook;
 import com.reliableplugins.antiskid.type.Whitelist;
@@ -21,13 +19,6 @@ import java.util.UUID;
 
 public class ListenDiodeAction implements Listener
 {
-    private AntiSkid plugin;
-
-    public ListenDiodeAction(AntiSkid plugin)
-    {
-        this.plugin = plugin;
-    }
-
     @EventHandler
     public void onBlockRedstoneEvent(BlockRedstoneEvent event)
     {
@@ -37,21 +28,21 @@ public class ListenDiodeAction implements Listener
         }
 
         Location location = event.getBlock().getLocation();
-        for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
+        for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : AntiSkid.INSTANCE.diodes.entrySet())
         {
-            Whitelist whitelist = plugin.whitelists.get(entry.getKey());
+            Whitelist whitelist = AntiSkid.INSTANCE.whitelists.get(entry.getKey());
             for(Set<Location> locations : entry.getValue().values())
             {
                 for(Location loc : locations)
                 {
                     if(loc.equals(location))
                     {
-                        new ATask(plugin, 15)
+                        new ATask(15)
                         {
                             @Override
                             public void run()
                             {
-                                plugin.getNMS().broadcastBlockChangePacket(plugin.getReplacer(), loc, whitelist.getUUIDs());
+                                AntiSkid.INSTANCE.getNMS().broadcastBlockChangePacket(AntiSkid.INSTANCE.getReplacer(), loc, whitelist.getUUIDs());
                             }
                         };
                     }
@@ -67,7 +58,7 @@ public class ListenDiodeAction implements Listener
         if((!material.equals(Material.DIODE_BLOCK_OFF)
                 && !material.equals(Material.DIODE_BLOCK_ON)
                 && !material.equals(Material.DIODE))
-                || !plugin.cache.isProtected(event.getBlock().getChunk()))
+                || !AntiSkid.INSTANCE.cache.isProtected(event.getBlock().getChunk()))
         {
             return;
         }
@@ -75,23 +66,23 @@ public class ListenDiodeAction implements Listener
         World world = event.getBlock().getWorld();
         Location location = event.getBlock().getLocation();
 
-        if(plugin.getMainConfig().factionsWorlds.contains(world))
+        if(AntiSkid.INSTANCE.getMainConfig().factionsWorlds.contains(world))
         {
             if(FactionHook.canBuild(event.getPlayer(), location.getChunk()))
             {
-                plugin.cache.unprotectLocation(location);
+                AntiSkid.INSTANCE.cache.unprotectLocation(location);
             }
         }
-        else if(plugin.getMainConfig().plotsWorlds.contains(world))
+        else if(AntiSkid.INSTANCE.getMainConfig().plotsWorlds.contains(world))
         {
-            if(plugin.getMainConfig().plotSquaredHook.isAdded(event.getPlayer(), location))
+            if(AntiSkid.INSTANCE.getMainConfig().plotSquaredHook.isAdded(event.getPlayer(), location))
             {
-                plugin.cache.unprotectLocation(location);
+                AntiSkid.INSTANCE.cache.unprotectLocation(location);
             }
         }
         else
         {
-            plugin.cache.unprotectLocation(location);
+            AntiSkid.INSTANCE.cache.unprotectLocation(location);
         }
     }
 }

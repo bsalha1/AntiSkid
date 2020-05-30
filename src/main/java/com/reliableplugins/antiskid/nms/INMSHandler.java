@@ -6,7 +6,6 @@
 
 package com.reliableplugins.antiskid.nms;
 
-import com.reliableplugins.antiskid.type.packet.Packet;
 import io.netty.channel.Channel;
 import org.bukkit.Location;
 import org.bukkit.Material;

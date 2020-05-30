@@ -8,18 +8,12 @@ import java.util.logging.Level;
 
 public class FileManager
 {
-    private AntiSkid plugin;
     private List<Config> files = new ArrayList<>();
-
-    public FileManager(AntiSkid plugin)
-    {
-        this.plugin = plugin;
-    }
 
     public void addFile(Config file)
     {
         files.add(file);
-        plugin.getLogger().log(Level.INFO, file.getConfigFile().getName() + " has initialized.");
+        AntiSkid.INSTANCE.getLogger().log(Level.INFO, file.getConfigFile().getName() + " has initialized.");
         file.load();
     }
 

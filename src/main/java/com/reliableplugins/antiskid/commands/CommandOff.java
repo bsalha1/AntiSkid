@@ -6,6 +6,7 @@
 
 package com.reliableplugins.antiskid.commands;
 
+import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.config.Message;
 import com.reliableplugins.antiskid.utils.BukkitUtil;
@@ -26,19 +27,19 @@ public class CommandOff extends Command
         Player executor = (Player) sender;
         UUID executorId = executor.getUniqueId();
 
-        if(!plugin.diodes.containsKey(executorId))
+        if(!AntiSkid.INSTANCE.diodes.containsKey(executorId))
         {
             executor.sendMessage(Message.ERROR_NOT_PROTECTED.getMessage());
         }
         else
         {
-            plugin.startSynchronousTask(() -> {
-                    Set<Chunk> chunks = plugin.diodes.get(executorId).keySet();
+            AntiSkid.INSTANCE.startSynchronousTask(() -> {
+                    Set<Chunk> chunks = AntiSkid.INSTANCE.diodes.get(executorId).keySet();
                     for(Chunk chunk : chunks)
                     {
                         BukkitUtil.reloadChunk(chunk);
                     }
-                    plugin.diodes.remove(executorId);
+                    AntiSkid.INSTANCE.diodes.remove(executorId);
                 }
             );
 

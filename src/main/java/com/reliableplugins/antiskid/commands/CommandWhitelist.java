@@ -6,11 +6,11 @@
 
 package com.reliableplugins.antiskid.commands;
 
+import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.config.Message;
 import com.reliableplugins.antiskid.type.Whitelist;
 import com.reliableplugins.antiskid.utils.BukkitUtil;
-import com.reliableplugins.antiskid.utils.ReflectUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -42,7 +42,7 @@ public class CommandWhitelist extends Command
             // Whitelist Player
             if(args[0].equalsIgnoreCase("add"))
             {
-                plugin.startSynchronousTask(()-> whitelistPlayer(player));
+                AntiSkid.INSTANCE.startSynchronousTask(()-> whitelistPlayer(player));
             }
 
             // UnWhitelist Player
@@ -51,7 +51,7 @@ public class CommandWhitelist extends Command
             || args[0].equalsIgnoreCase("rem")
             || args[0].equalsIgnoreCase("remove"))
             {
-                plugin.startSynchronousTask(()->unWhitelistPlayer(player));
+                AntiSkid.INSTANCE.startSynchronousTask(()->unWhitelistPlayer(player));
             }
 
             // Invalid Arguments
@@ -64,7 +64,7 @@ public class CommandWhitelist extends Command
         // No Arguments - print whitelist
         else if(args.length == 0)
         {
-            plugin.startSynchronousTask(this::printWhitelist);
+            AntiSkid.INSTANCE.startSynchronousTask(this::printWhitelist);
         }
 
         // Invalid Arguments
@@ -76,7 +76,7 @@ public class CommandWhitelist extends Command
 
     private void printWhitelist()
     {
-        Whitelist whitelist = plugin.whitelists.get(executorId);
+        Whitelist whitelist = AntiSkid.INSTANCE.whitelists.get(executorId);
 
         if(whitelist != null && (whitelist.size() != 0))
         {
@@ -90,7 +90,7 @@ public class CommandWhitelist extends Command
 
     private void whitelistPlayer(Player player)
     {
-        Whitelist whitelist = plugin.whitelists.get(executorId);
+        Whitelist whitelist = AntiSkid.INSTANCE.whitelists.get(executorId);
 
         if(player == null)
         {
@@ -106,8 +106,8 @@ public class CommandWhitelist extends Command
         // If the whitelist isn't initialized, initialize it
         if(whitelist == null)
         {
-            plugin.whitelists.put(executorId, new Whitelist(executorId));
-            plugin.whitelists.get(executorId).addPlayer(player.getUniqueId());
+            AntiSkid.INSTANCE.whitelists.put(executorId, new Whitelist(executorId));
+            AntiSkid.INSTANCE.whitelists.get(executorId).addPlayer(player.getUniqueId());
         }
         else if(!whitelist.addPlayer(player.getUniqueId()))
         {
@@ -117,9 +117,9 @@ public class CommandWhitelist extends Command
         executor.sendMessage(Message.WHITELIST_ADD.getMessage().replace("{PLAYER}", player.getName()));
 
         // If executor has protection, reveal to whitelisted
-        if(plugin.diodes.containsKey(executorId))
+        if(AntiSkid.INSTANCE.diodes.containsKey(executorId))
         {
-            Set<Chunk> chunks = plugin.diodes.get(executorId).keySet();
+            Set<Chunk> chunks = AntiSkid.INSTANCE.diodes.get(executorId).keySet();
             for(Chunk chunk : chunks)
             {
                 BukkitUtil.reloadChunk(chunk);
@@ -129,8 +129,8 @@ public class CommandWhitelist extends Command
 
     private void unWhitelistPlayer(Player player)
     {
-        Whitelist whitelist = plugin.whitelists.get(executorId);
-        Map<Chunk, Set<Location>> chunkSetMap = plugin.diodes.get(executorId);
+        Whitelist whitelist = AntiSkid.INSTANCE.whitelists.get(executorId);
+        Map<Chunk, Set<Location>> chunkSetMap = AntiSkid.INSTANCE.diodes.get(executorId);
 
         if(player == null)
         {
@@ -160,7 +160,7 @@ public class CommandWhitelist extends Command
                 {
                     for(Location location : locations)
                     {
-                        plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
+                        AntiSkid.INSTANCE.getNMS().sendBlockChangePacket(player, AntiSkid.INSTANCE.getReplacer(), location);
                     }
                 }
             }

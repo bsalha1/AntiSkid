@@ -23,18 +23,11 @@ import java.util.Set;
 @ChannelHandler.Sharable
 public class ChannelListener extends AChannelListener
 {
-    private AntiSkid plugin;
-
-    public ChannelListener(AntiSkid plugin)
-    {
-        this.plugin = plugin;
-    }
-
     // Sending data from server to client
     @Override
     public void write(ChannelHandlerContext context, Object packet, ChannelPromise promise) throws Exception
     {
-        ANMSHandler nmsHandler = plugin.getNMS();
+        ANMSHandler nmsHandler = AntiSkid.INSTANCE.getNMS();
         Packet wrappedPacket = nmsHandler.getPacket(packet, player);
 
         // MAP CHUNK PACKET
@@ -43,23 +36,9 @@ public class ChannelListener extends AChannelListener
             PacketServerMapChunk pack = (PacketServerMapChunk) wrappedPacket;
             Chunk chunk = pack.getChunk();
 
-            plugin.startSynchronousTask(() ->
+            AntiSkid.INSTANCE.startSynchronousTask(() ->
             {
-                // If player not whitelisted, send carpet instead of diode
-                if(!plugin.cache.isWhitelisted(player, chunk))
-                {
-                    for(Location location : plugin.cache.getLocations(chunk))
-                    {
-                        new ATask(plugin, 1)
-                        {
-                            @Override
-                            public void run()
-                            {
-                                plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
-                            }
-                        };
-                    }
-                }
+                protectChunk(chunk);
             });
         }
 
@@ -71,25 +50,11 @@ public class ChannelListener extends AChannelListener
             PacketServerMapChunkBulk pack = (PacketServerMapChunkBulk) wrappedPacket;
             Chunk[] chunks = pack.getChunks();
 
-            plugin.startSynchronousTask(()->
+            AntiSkid.INSTANCE.startSynchronousTask(()->
             {
                 for(Chunk chunk : chunks)
                 {
-                    // If player not whitelisted, send carpet instead of diode
-                    if(!plugin.cache.isWhitelisted(player, chunk))
-                    {
-                        for(Location location : plugin.cache.getLocations(chunk))
-                        {
-                            new ATask(plugin, 1)
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
-                                }
-                            };
-                        }
-                    }
+                    protectChunk(chunk);
                 }
             });
         }
@@ -113,19 +78,19 @@ public class ChannelListener extends AChannelListener
             Chunk chunk = location.getChunk();
 
             // Do not transmit diode blockchange (keep carpet)
-            if(!plugin.cache.isWhitelisted(player, chunk))
+            if(!AntiSkid.INSTANCE.cache.isWhitelisted(player, chunk))
             {
                 return;
             }
 
             // If diode isn't already protected, add it
-            Map<Chunk, Set<Location>> diodes = plugin.diodes.get(player.getUniqueId());
+            Map<Chunk, Set<Location>> diodes = AntiSkid.INSTANCE.diodes.get(player.getUniqueId());
             if(diodes != null && diodes.containsKey(chunk) && !diodes.get(chunk).contains(location))
             {
-                plugin.startSynchronousTask(()->
+                AntiSkid.INSTANCE.startSynchronousTask(()->
                 {
                     diodes.get(chunk).add(location);
-                    plugin.getNMS().broadcastBlockChangePacket(plugin.getReplacer(), location, plugin.cache.getWhitelist(chunk).getUUIDs());
+                    AntiSkid.INSTANCE.getNMS().broadcastBlockChangePacket(AntiSkid.INSTANCE.getReplacer(), location, AntiSkid.INSTANCE.cache.getWhitelist(chunk).getUUIDs());
                 });
             }
         }
@@ -134,13 +99,13 @@ public class ChannelListener extends AChannelListener
         {
             PacketServerExplosion pack = (PacketServerExplosion) wrappedPacket;
 
-            plugin.startSynchronousTask(()->
+            AntiSkid.INSTANCE.startSynchronousTask(()->
             {
                 for(Location location : pack.getLocations())
                 {
-                    if(plugin.cache.isProtected(location.getChunk(), location))
+                    if(AntiSkid.INSTANCE.cache.isProtected(location.getChunk(), location))
                     {
-                        plugin.cache.unprotectLocation(location);
+                        AntiSkid.INSTANCE.cache.unprotectLocation(location);
                     }
                 }
             });
@@ -148,11 +113,29 @@ public class ChannelListener extends AChannelListener
         super.write(context, packet, promise);
     }
 
+    private void protectChunk(Chunk chunk)
+    {
+        if(!AntiSkid.INSTANCE.cache.isWhitelisted(player, chunk))
+        {
+            for(Location location : AntiSkid.INSTANCE.cache.getLocations(chunk))
+            {
+                new ATask(1)
+                {
+                    @Override
+                    public void run()
+                    {
+                        AntiSkid.INSTANCE.getNMS().sendBlockChangePacket(player, AntiSkid.INSTANCE.getReplacer(), location);
+                    }
+                };
+            }
+        }
+    }
+
     // Simulates client sending data
     @Override
     public void channelRead(ChannelHandlerContext channelHandlerContext, Object packet) throws Exception
     {
-        ANMSHandler nmsHandler = plugin.getNMS();
+        ANMSHandler nmsHandler = AntiSkid.INSTANCE.getNMS();
         Packet temp = nmsHandler.getPacket(packet, player);
 
         // CLIENTSIDE LEFT CLICK BLOCK
@@ -170,9 +153,9 @@ public class ChannelListener extends AChannelListener
             }
 
             Chunk chunk = location.getChunk();
-            if(!plugin.cache.isWhitelisted(player, chunk))
+            if(!AntiSkid.INSTANCE.cache.isWhitelisted(player, chunk))
             {
-                plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), location);
+                AntiSkid.INSTANCE.getNMS().sendBlockChangePacket(player, AntiSkid.INSTANCE.getReplacer(), location);
                 player.sendMessage(Message.ERROR_PROTECTED_DIODE.getMessage());
                 return;
             }

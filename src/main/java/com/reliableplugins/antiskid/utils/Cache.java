@@ -12,28 +12,22 @@ import java.util.UUID;
 
 public class Cache
 {
-    private AntiSkid plugin;
-    public Cache(AntiSkid plugin)
-    {
-        this.plugin = plugin;
-    }
-
     public boolean ownsChunk(Player player, Chunk chunk)
     {
-        if(!plugin.diodes.containsKey(player.getUniqueId()))
+        if(!AntiSkid.INSTANCE.diodes.containsKey(player.getUniqueId()))
         {
             return false;
         }
-        return plugin.diodes.get(player.getUniqueId()).containsKey(chunk);
+        return AntiSkid.INSTANCE.diodes.get(player.getUniqueId()).containsKey(chunk);
     }
 
     public Whitelist getWhitelist(Chunk chunk)
     {
-        for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
+        for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : AntiSkid.INSTANCE.diodes.entrySet())
         {
             if(entry.getValue().containsKey(chunk))
             {
-                return plugin.whitelists.get(entry.getKey());
+                return AntiSkid.INSTANCE.whitelists.get(entry.getKey());
             }
         }
 
@@ -42,11 +36,11 @@ public class Cache
 
     public boolean isWhitelisted(Player player, Chunk chunk)
     {
-        for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
+        for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : AntiSkid.INSTANCE.diodes.entrySet())
         {
             if(entry.getValue().containsKey(chunk))
             {
-                return plugin.whitelists.get(entry.getKey()).containsPlayer(player);
+                return AntiSkid.INSTANCE.whitelists.get(entry.getKey()).containsPlayer(player);
             }
         }
         return true;
@@ -54,7 +48,7 @@ public class Cache
 
     public void unprotectChunk(Chunk chunk)
     {
-        for(Map<Chunk, Set<Location>> entry : plugin.diodes.values())
+        for(Map<Chunk, Set<Location>> entry : AntiSkid.INSTANCE.diodes.values())
         {
             entry.remove(chunk);
         }
@@ -62,7 +56,7 @@ public class Cache
 
     public void unprotectLocation(Location location)
     {
-        for(Map<Chunk, Set<Location>> map : plugin.diodes.values())
+        for(Map<Chunk, Set<Location>> map : AntiSkid.INSTANCE.diodes.values())
         {
             if(map.containsKey(location.getChunk()))
             {
@@ -74,12 +68,12 @@ public class Cache
 
     public boolean isPlayerProtected(Player player)
     {
-        return plugin.diodes.containsKey(player.getUniqueId());
+        return AntiSkid.INSTANCE.diodes.containsKey(player.getUniqueId());
     }
 
     public boolean isProtected(Chunk chunk)
     {
-        for(Map<Chunk, Set<Location>> map : plugin.diodes.values())
+        for(Map<Chunk, Set<Location>> map : AntiSkid.INSTANCE.diodes.values())
         {
             if(map.containsKey(chunk))
             {
@@ -91,7 +85,7 @@ public class Cache
 
     public boolean isProtected(Chunk chunk, Location location)
     {
-        for(Map<Chunk, Set<Location>> map : plugin.diodes.values())
+        for(Map<Chunk, Set<Location>> map : AntiSkid.INSTANCE.diodes.values())
         {
             if(map.containsKey(chunk))
             {
@@ -103,7 +97,7 @@ public class Cache
 
     public boolean isProtected(Chunk chunk, Location location, Player player)
     {
-        Map<Chunk, Set<Location>> map = plugin.diodes.get(player.getUniqueId());
+        Map<Chunk, Set<Location>> map = AntiSkid.INSTANCE.diodes.get(player.getUniqueId());
         if(map == null)
         {
             return false;
@@ -118,7 +112,7 @@ public class Cache
 
     public Set<Location> getLocations(Chunk chunk)
     {
-        for(Map<Chunk, Set<Location>> map : plugin.diodes.values())
+        for(Map<Chunk, Set<Location>> map : AntiSkid.INSTANCE.diodes.values())
         {
             if(map.containsKey(chunk))
             {

@@ -6,7 +6,6 @@
 
 package com.reliableplugins.antiskid.commands;
 
-import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 
 import com.google.common.collect.Sets;
@@ -21,8 +20,6 @@ public abstract class Command
     private String permission;
     private String description;
     private boolean playerRequired;
-
-    protected AntiSkid plugin;
 
     public Command()
     {
@@ -53,11 +50,6 @@ public abstract class Command
     public String getDescription()
     {
         return description;
-    }
-
-    public void setPlugin(AntiSkid plugin)
-    {
-        this.plugin = plugin;
     }
 
     public boolean hasPermission()

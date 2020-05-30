@@ -16,12 +16,10 @@ public abstract class Config
     private File configFile;
     protected YamlConfiguration config;
     protected boolean isNew = false;
-    protected AntiSkid plugin;
 
-    public Config(AntiSkid plugin, String filename)
+    public Config(String filename)
     {
-        this.plugin = plugin;
-        this.configFile = new File(plugin.getDataFolder().getAbsolutePath() + "/" +  filename);
+        this.configFile = new File(AntiSkid.INSTANCE.getDataFolder().getAbsolutePath() + "/" +  filename);
         try
         {
             isNew = configFile.createNewFile();
@@ -46,7 +44,6 @@ public abstract class Config
     }
 
     public abstract void load();
-
 
     public void save()
     {

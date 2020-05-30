@@ -18,13 +18,11 @@ public class CommandHandler implements CommandExecutor
 {
     private Map<String, Command> subcommands = new HashMap<>();
     private CommandHelp commandHelp;
-    private AntiSkid plugin;
 
-    public CommandHandler(AntiSkid plugin)
+    public CommandHandler()
     {
-        this.plugin = plugin;
         this.commandHelp = new CommandHelp(this);
-        plugin.getCommand("antiskid").setExecutor(this);
+        AntiSkid.INSTANCE.getCommand("antiskid").setExecutor(this);
     }
 
     @Override
@@ -78,7 +76,6 @@ public class CommandHandler implements CommandExecutor
 
     public void addCommand(Command command)
     {
-        command.setPlugin(plugin);
         this.subcommands.put(command.getLabel().toLowerCase(), command);
     }
 

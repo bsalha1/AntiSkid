@@ -15,24 +15,17 @@ import java.util.Collection;
 
 public class ChannelManager
 {
-    private AntiSkid plugin;
-
-    public ChannelManager(AntiSkid plugin)
-    {
-        this.plugin = plugin;
-    }
-
     public void unloadChannelListener(Player player)
     {
-        if(plugin.getNMS().getSocketChannel(player).pipeline().get(ChannelListener.class.getName()) != null)
+        if(AntiSkid.INSTANCE.getNMS().getSocketChannel(player).pipeline().get(ChannelListener.class.getName()) != null)
         {
-            plugin.getNMS().getSocketChannel(player).pipeline().remove(ChannelListener.class.getName());
+            AntiSkid.INSTANCE.getNMS().getSocketChannel(player).pipeline().remove(ChannelListener.class.getName());
         }
     }
 
     public void unloadChannelListener()
     {
-        Collection<? extends Player> onlinePlayers = plugin.getServer().getOnlinePlayers();
+        Collection<? extends Player> onlinePlayers = AntiSkid.INSTANCE.getServer().getOnlinePlayers();
         for(Player player : onlinePlayers)
         {
             unloadChannelListener(player);
@@ -45,7 +38,7 @@ public class ChannelManager
         {
             AChannelListener listenerCopy = (AChannelListener) listener.clone();
             listenerCopy.setPlayer(player);
-            plugin.getNMS().getSocketChannel(player).pipeline().addBefore("packet_handler", ChannelListener.class.getName(), listenerCopy);
+            AntiSkid.INSTANCE.getNMS().getSocketChannel(player).pipeline().addBefore("packet_handler", ChannelListener.class.getName(), listenerCopy);
         }
         catch(Exception e)
         {
@@ -55,7 +48,7 @@ public class ChannelManager
 
     public void loadChannelListener(AChannelListener listener)
     {
-        Collection<? extends Player> onlinePlayers = plugin.getServer().getOnlinePlayers();
+        Collection<? extends Player> onlinePlayers = AntiSkid.INSTANCE.getServer().getOnlinePlayers();
         for(Player player : onlinePlayers)
         {
             loadChannelListener(listener, player);

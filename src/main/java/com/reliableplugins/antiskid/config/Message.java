@@ -1,15 +1,15 @@
 package com.reliableplugins.antiskid.config;
 
+import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.utils.BukkitUtil;
 
 public enum Message
 {
-    HEADER("message-header", "&8(&9AntiSkid&8) "),
-    ANTISKID_ON("antiskid-on", "&bAntiskid protection has been turned on ({NUM} chunks protected)."),
-    ANTISKID_OFF("antiskid-off", "&bAntiskid protection has been turned off."),
-    ANTISKID_CLEAR("antiskid-clear", "&bAntiskid protection has been cleared. {NUM} chunks freed."),
-    ANTISKID_RELOAD_START("antiskid-reload-start", "&bAntiskid is reloading."),
-    ANTISKID_RELOAD_FINISH("antiskid-reload-finish", "&bAntiskid has reloaded."),
+    ANTISKID_ON("antiskid-on", "&bAntiSkid protection has been turned on ({NUM} chunks protected)."),
+    ANTISKID_OFF("antiskid-off", "&bAntiSkid protection has been turned off."),
+    ANTISKID_CLEAR("antiskid-clear", "&bAntiSkid protection has been cleared. {NUM} chunks freed."),
+    ANTISKID_RELOAD_START("antiskid-reload-start", "&bAntiSkid is reloading."),
+    ANTISKID_RELOAD_FINISH("antiskid-reload-finish", "&bAntiSkid has reloaded."),
 
     ANTISKID_POSITION_1("antiskid-position-1", "&bPosition 1 selected at {COORDINATE}"),
     ANTISKID_POSITION_2("antiskid-position-2", "&bPosition 2 selected at {COORDINATE}"),
@@ -24,7 +24,7 @@ public enum Message
     ERROR_NO_PERMS("err-no-perms", "&cYou do not have access to this command!"),
     ERROR_NOT_PLAYER("err-not-player", "&cOnly players may execute this command."),
     ERROR_PROTECTED_DIODE("err-protected-diode", "&cThat repeater is protected!"),
-    ERROR_NOT_PROTECTED("err-not-protected", "&cYou have not turned on antiskid yet."),
+    ERROR_NOT_PROTECTED("err-not-protected", "&cYou have not turned on AntiSkid yet."),
     ERROR_EMPTY_WHITELIST("err-empty-whitelist", "&cYou have no players in your whitelist."),
     ERROR_PLAYER_NOT_WHITELISTED("err-not-whitelisted", "&c{PLAYER} is not in your whitelist."),
     ERROR_PLAYER_ALREADY_WHITELISTED("err-already-whitelisted", "&c{PLAYER} is already whitelisted."),
@@ -36,10 +36,17 @@ public enum Message
     ERROR_NOT_PLOT_OWNER("err-not-plot-owner", "&cYou can only protect your own plot."),
     ERROR_NO_POSITION1("err-no-position-1", "&cYou must left click to create a position 1."),
     ERROR_NO_POSITION2("err-no-position-2", "&cYou must right click to create a position 2."),
+    ERROR_INVALID_WORLD("err-invalid-world", "&cThis world is not configured for AntiSkid"),
     ERROR_ALREADY_PROTECTED("err-already-protected", "&cPart of this region is already protected.");
 
-    String message;
-    String configKey;
+    private String message;
+    private String configKey;
+    private static String header;
+
+    static
+    {
+        header = AntiSkid.INSTANCE.getMessageConfig().getString("message-header", "&8(&9AntiSkid&8) ");
+    }
 
     Message(String configKey, String message)
     {
@@ -49,12 +56,12 @@ public enum Message
 
     public String getRawMessage()
     {
-        return message;
+        return header + message;
     }
 
     public String getMessage()
     {
-        return BukkitUtil.color(message);
+        return BukkitUtil.color(header + message);
     }
 
     public void setMessage(String message)

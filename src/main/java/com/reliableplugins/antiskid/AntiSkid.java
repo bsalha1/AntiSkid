@@ -1,9 +1,3 @@
-/*
- * Project: AntiSkid
- * Copyright (C) 2020 Bilal Salha <bsalha1@gmail.com>
- * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
- */
-
 package com.reliableplugins.antiskid;
 
 import com.reliableplugins.antiskid.commands.*;
@@ -35,6 +29,7 @@ public class AntiSkid extends JavaPlugin implements Listener
     public volatile HashMap<UUID, Whitelist> whitelists = new HashMap<>();
     public volatile HashMap<UUID, Pair<Location, Location>> selectionPoints = new HashMap<>();
     public volatile Cache cache;
+    public static AntiSkid INSTANCE;
 
     private volatile Semaphore lock;
 
@@ -48,11 +43,11 @@ public class AntiSkid extends JavaPlugin implements Listener
     private FileManager fileManager;
     private MainConfig mainConfig;
     private MessageConfig messageConfig;
-    public PlotSquaredHook plotSquaredHook;
 
     @Override
     public void onEnable()
     {
+        AntiSkid.INSTANCE = this;
         version = "1.1";
         replacer = Material.REDSTONE_COMPARATOR_OFF;
 
@@ -63,7 +58,7 @@ public class AntiSkid extends JavaPlugin implements Listener
 
         nmsHandler = getNMSHandler();
 
-        CommandHandler cmdHandler = new CommandHandler(this);
+        CommandHandler cmdHandler = new CommandHandler();
         cmdHandler.addCommand(new CommandOn());
         cmdHandler.addCommand(new CommandTool());
         cmdHandler.addCommand(new CommandOff());
@@ -86,26 +81,27 @@ public class AntiSkid extends JavaPlugin implements Listener
             e.printStackTrace();
         }
 
-        listenerManager = new ChannelManager(this);
-        pluginManager.registerEvents(new ListenPlayerLoginLogout(this), this);
-        pluginManager.registerEvents(new ListenDiodeAction(this), this);
-        pluginManager.registerEvents(new ListenUseSelectionTool(this), this);
-        listenerManager.loadChannelListener(new ChannelListener(this));
-        cache = new Cache(this);
+        listenerManager = new ChannelManager();
+        pluginManager.registerEvents(new ListenPlayerLoginLogout(), this);
+        pluginManager.registerEvents(new ListenDiodeAction(), this);
+        pluginManager.registerEvents(new ListenUseSelectionTool(), this);
+        listenerManager.loadChannelListener(new ChannelListener());
+        cache = new Cache();
 
         getLogger().log(Level.INFO, "AntiSkid v" + version + " has been loaded");
     }
 
     public void initConfigs()
     {
-        fileManager = new FileManager(this);
-        fileManager.addFile(mainConfig = new MainConfig(this));
-        fileManager.addFile(messageConfig = new MessageConfig(this));
+        fileManager = new FileManager();
+        fileManager.addFile(mainConfig = new MainConfig());
+        fileManager.addFile(messageConfig = new MessageConfig());
     }
 
     private ANMSHandler getNMSHandler()
     {
-        switch(getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3])
+        String nmsVersion = getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+        switch(nmsVersion)
         {
             case "v1_8_R2":
                 return new Version_1_8_R2();
@@ -198,5 +194,3 @@ public class AntiSkid extends JavaPlugin implements Listener
         return messageConfig;
     }
 }
-
-

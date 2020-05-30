@@ -26,24 +26,17 @@ import java.util.UUID;
 
 public class ListenFactionAction implements Listener
 {
-    private AntiSkid plugin;
-
-    public ListenFactionAction(AntiSkid plugin)
-    {
-        this.plugin = plugin;
-    }
-
     @EventHandler
     public void onUnclaim(LandUnclaimEvent event)
     {
         Chunk chunk = event.getLocation().getChunk();
-        plugin.startSynchronousTask(()->
+        AntiSkid.INSTANCE.startSynchronousTask(()->
         {
-            for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
+            for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : AntiSkid.INSTANCE.diodes.entrySet())
             {
                 if(entry.getValue().containsKey(chunk))
                 {
-                    plugin.diodes.get(entry.getKey()).remove(chunk);
+                    AntiSkid.INSTANCE.diodes.get(entry.getKey()).remove(chunk);
                     BukkitUtil.reloadChunk(chunk);
                     return;
                 }
@@ -54,12 +47,12 @@ public class ListenFactionAction implements Listener
     @EventHandler
     public void onUnclaimAll(LandUnclaimAllEvent event)
     {
-        plugin.startSynchronousTask(()->
+        AntiSkid.INSTANCE.startSynchronousTask(()->
         {
             for(FLocation floc : event.getFaction().getAllClaims())
             {
                 Chunk chunk = floc.getChunk();
-                for(Map<Chunk, Set<Location>> map : plugin.diodes.values())
+                for(Map<Chunk, Set<Location>> map : AntiSkid.INSTANCE.diodes.values())
                 {
                     map.remove(chunk);
                     BukkitUtil.reloadChunk(chunk);
@@ -71,16 +64,16 @@ public class ListenFactionAction implements Listener
     @EventHandler
     public void onJoinFaction(FPlayerJoinEvent event)
     {
-        if(plugin.getMainConfig().whitelistFaction)
+        if(AntiSkid.INSTANCE.getMainConfig().whitelistFaction)
         {
             for(Player player : event.getFaction().getOnlinePlayers())
             {
-                if(plugin.whitelists.containsKey(player.getUniqueId()))
+                if(AntiSkid.INSTANCE.whitelists.containsKey(player.getUniqueId()))
                 {
-                    plugin.startSynchronousTask(()-> plugin.whitelists.get(player.getUniqueId()).addPlayer(event.getfPlayer().getPlayer()));
-                    if(plugin.diodes.containsKey(player.getUniqueId()))
+                    AntiSkid.INSTANCE.startSynchronousTask(()-> AntiSkid.INSTANCE.whitelists.get(player.getUniqueId()).addPlayer(event.getfPlayer().getPlayer()));
+                    if(AntiSkid.INSTANCE.diodes.containsKey(player.getUniqueId()))
                     {
-                        for(Chunk chunk : plugin.diodes.get(player.getUniqueId()).keySet())
+                        for(Chunk chunk : AntiSkid.INSTANCE.diodes.get(player.getUniqueId()).keySet())
                         {
                             BukkitUtil.reloadChunk(chunk);
                         }
@@ -93,19 +86,19 @@ public class ListenFactionAction implements Listener
     @EventHandler
     public void onLeaveFaction(FPlayerLeaveEvent event)
     {
-        if(plugin.getMainConfig().whitelistFaction)
+        if(AntiSkid.INSTANCE.getMainConfig().whitelistFaction)
         {
             Player player = event.getfPlayer().getPlayer();
 
-            plugin.startSynchronousTask(()->
+            AntiSkid.INSTANCE.startSynchronousTask(()->
             {
-                for(Map.Entry<UUID, Whitelist> entry : plugin.whitelists.entrySet())
+                for(Map.Entry<UUID, Whitelist> entry : AntiSkid.INSTANCE.whitelists.entrySet())
                 {
                     Whitelist whitelist = entry.getValue();
                     if(!whitelist.getCreator().equals(player) && whitelist.containsPlayer(player))
                     {
-                        plugin.whitelists.get(entry.getKey()).removePlayer(player);
-                        Map<Chunk, Set<Location>> diodes = plugin.diodes.get(entry.getKey());
+                        AntiSkid.INSTANCE.whitelists.get(entry.getKey()).removePlayer(player);
+                        Map<Chunk, Set<Location>> diodes = AntiSkid.INSTANCE.diodes.get(entry.getKey());
                         if(diodes != null)
                         {
                             for(Chunk chunk : diodes.keySet())

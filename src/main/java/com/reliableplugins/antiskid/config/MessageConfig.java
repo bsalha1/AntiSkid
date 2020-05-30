@@ -1,13 +1,12 @@
 package com.reliableplugins.antiskid.config;
 
-import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.utils.BukkitUtil;
 
 public class MessageConfig extends Config
 {
-    public MessageConfig(AntiSkid plugin)
+    public MessageConfig()
     {
-        super(plugin, "messages.yml");
+        super("messages.yml");
     }
 
     @Override

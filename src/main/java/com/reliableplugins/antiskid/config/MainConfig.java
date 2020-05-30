@@ -35,15 +35,15 @@ public class MainConfig extends Config
     public List<World> plotsWorlds;
     public PlotSquaredHook plotSquaredHook;
 
-    public MainConfig(AntiSkid plugin)
+    public MainConfig()
     {
-        super(plugin, "config.yml");
+        super("config.yml");
     }
 
     @Override
     public void load()
     {
-        List<World> worlds = plugin.getServer().getWorlds();
+        List<World> worlds = AntiSkid.INSTANCE.getServer().getWorlds();
         HashMap<String, World> worldNameMap = new HashMap<>();
         for(World world : worlds)
         {
@@ -59,7 +59,7 @@ public class MainConfig extends Config
         {
             if(Bukkit.getPluginManager().isPluginEnabled("Factions"))
             {
-                Bukkit.getPluginManager().registerEvents(new ListenFactionAction(plugin), plugin);
+                Bukkit.getPluginManager().registerEvents(new ListenFactionAction(), AntiSkid.INSTANCE);
                 whitelistFaction = getBoolean("factions.whitelist-faction", true);
                 minimumRank = getString("factions.minimum-rank", "moderator");
                 minimumFactionRank = FactionHook.getRole(minimumRank);

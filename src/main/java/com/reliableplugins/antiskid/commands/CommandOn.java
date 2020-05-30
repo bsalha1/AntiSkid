@@ -6,6 +6,7 @@
 
 package com.reliableplugins.antiskid.commands;
 
+import com.reliableplugins.antiskid.AntiSkid;
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.config.Message;
 import com.reliableplugins.antiskid.hook.FactionHook;
@@ -20,8 +21,6 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.concurrent.Executors;
-
-//import com.reliableplugins.antiskid.hook.PlotSquaredHook;
 
 @CommandBuilder(label = "on", permission = "antiskid.on", description = "Turns on protection for the chunk group the executor is in.\nAnyone besides the executor and the people on their whitelist\ncan see the repeaters in this chunk group.", playerRequired = true)
 public class CommandOn extends Command
@@ -42,6 +41,7 @@ public class CommandOn extends Command
     {
         Set<Chunk> chunks = new HashSet<>();
         Map<Chunk, Set<Location>> diodes;
+        AntiSkid plugin = AntiSkid.INSTANCE;
 
         //
         // FACTIONS
@@ -89,17 +89,23 @@ public class CommandOn extends Command
         //
         else if(plugin.getMainConfig().plotsWorlds.contains(executor.getWorld())) // If this is a plots world...
         {
-            if(!plugin.plotSquaredHook.isOwner(executor, executor.getLocation()))
+            if(!plugin.getMainConfig().plotSquaredHook.isOwner(executor, executor.getLocation()))
             {
                 executor.sendMessage(Message.ERROR_NOT_PLOT_OWNER.getMessage());
                 return;
             }
 
-            chunks = plugin.plotSquaredHook.getChunks(executor.getLocation());
+            chunks = plugin.getMainConfig().plotSquaredHook.getChunks(executor.getLocation());
             if(chunks.isEmpty())
             {
-                // TODO: make message
                 executor.sendMessage(Message.ERROR_NOT_PLOT_OWNER.getMessage());
+                return;
+            }
+
+            // If no whitelist
+            if(!plugin.whitelists.containsKey(executorId))
+            {
+                plugin.startSynchronousTask(()-> plugin.whitelists.put(executorId, new Whitelist(executorId)));
             }
         }
 
@@ -135,8 +141,7 @@ public class CommandOn extends Command
         }
         else
         {
-            // TODO: make message
-            executor.sendMessage("Invalid world");
+            executor.sendMessage(Message.ERROR_INVALID_WORLD.getMessage());
         }
 
         for(Chunk chunk : chunks)
@@ -179,7 +184,18 @@ public class CommandOn extends Command
     {
         for(Location location : locations)
         {
-            plugin.getNMS().broadcastBlockChangePacket(plugin.getReplacer(), location, plugin.whitelists.get(executorId).getUUIDs());
+            try
+            {
+
+                AntiSkid.INSTANCE.getNMS().broadcastBlockChangePacket(
+                        AntiSkid.INSTANCE.getReplacer(),
+                        location,
+                        AntiSkid.INSTANCE.whitelists.get(executorId).getUUIDs());
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 

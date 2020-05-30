@@ -22,19 +22,13 @@ import java.util.concurrent.Executors;
 
 public class ListenPlayerLoginLogout implements Listener
 {
-    private AntiSkid plugin;
     private Player player;
-
-    public ListenPlayerLoginLogout(AntiSkid plugin)
-    {
-        this.plugin = plugin;
-    }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event)
     {
         this.player = event.getPlayer();
-        plugin.getPacketManager().loadChannelListener(new ChannelListener(plugin), player);
+        AntiSkid.INSTANCE.getPacketManager().loadChannelListener(new ChannelListener(), player);
         Executors.newSingleThreadExecutor().submit(this::hideRepeaters);
     }
 
@@ -46,16 +40,16 @@ public class ListenPlayerLoginLogout implements Listener
         }
         catch(Exception ignored){}
 
-        plugin.startSynchronousTask(()->
+        AntiSkid.INSTANCE.startSynchronousTask(()->
         {
-            for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : plugin.diodes.entrySet())
+            for(Map.Entry<UUID, Map<Chunk, Set<Location>>> entry : AntiSkid.INSTANCE.diodes.entrySet())
             {
-                if(plugin.whitelists.get(entry.getKey()).containsPlayer(player.getUniqueId())) continue;
+                if(AntiSkid.INSTANCE.whitelists.get(entry.getKey()).containsPlayer(player.getUniqueId())) continue;
 
                 for(Set<Location> locs : entry.getValue().values())
                     for(Location loc : locs)
                     {
-                        plugin.getNMS().sendBlockChangePacket(player, plugin.getReplacer(), loc);
+                        AntiSkid.INSTANCE.getNMS().sendBlockChangePacket(player, AntiSkid.INSTANCE.getReplacer(), loc);
                     }
             }
         });
@@ -64,6 +58,6 @@ public class ListenPlayerLoginLogout implements Listener
     @EventHandler
     public void onLeave(PlayerQuitEvent event)
     {
-        plugin.getPacketManager().unloadChannelListener(event.getPlayer());
+        AntiSkid.INSTANCE.getPacketManager().unloadChannelListener(event.getPlayer());
     }
 }

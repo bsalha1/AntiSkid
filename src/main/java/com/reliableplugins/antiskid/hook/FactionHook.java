@@ -7,7 +7,6 @@
 package com.reliableplugins.antiskid.hook;
 
 import com.massivecraft.factions.*;
-import com.reliableplugins.antiskid.AntiSkid;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
