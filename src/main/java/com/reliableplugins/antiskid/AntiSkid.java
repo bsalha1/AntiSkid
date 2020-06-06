@@ -48,7 +48,6 @@ public class AntiSkid extends JavaPlugin implements Listener
     public void onEnable()
     {
         AntiSkid.INSTANCE = this;
-        version = "1.1";
         replacer = Material.REDSTONE_COMPARATOR_OFF;
 
         lock = new Semaphore(1);
@@ -88,7 +87,7 @@ public class AntiSkid extends JavaPlugin implements Listener
         listenerManager.loadChannelListener(new ChannelListener());
         cache = new Cache();
 
-        getLogger().log(Level.INFO, "AntiSkid v" + version + " has been loaded");
+        getLogger().log(Level.INFO, this.getDescription().getName() + "v" + this.getDescription().getVersion()  + " has been loaded");
     }
 
     public void initConfigs()
@@ -145,7 +144,7 @@ public class AntiSkid extends JavaPlugin implements Listener
         listenerManager.unloadChannelListener();
         getLogger().log(Level.INFO, "Cleanup: All packet listeners have been removed");
 
-        getLogger().log(Level.INFO, "AntiSkid has been unloaded");
+        getLogger().log(Level.INFO, this.getDescription().getName() + "v" + this.getDescription().getVersion()  + " has been unloaded");
     }
 
     public void startSynchronousTask(Runnable task)
@@ -182,11 +181,6 @@ public class AntiSkid extends JavaPlugin implements Listener
     public Material getReplacer()
     {
         return replacer;
-    }
-
-    public String getVersion()
-    {
-        return version;
     }
 
     public MessageConfig getMessageConfig()

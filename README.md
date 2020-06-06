@@ -22,8 +22,11 @@ There are two config files in this plugin: `config.yml` and `messages.yml`. `con
 |-|-|-|
 |fast-scan|`false`|If true, will only protect repeaters in chunks with dispensers|
 |factions.support|`true`|If true, will attempt to hook into Factions plugin|
-|factions.minimum-rank|`moderator`|The minimum rank of the Faction member to use antiskid commands. Valid values: admin, coleader, moderator, normal, recruit|
-|factions.worlds|`all worlds`|The list of worlds in which Factions-based region selection will occur|
+|factions.whitelist-faction|`true`|If true, all Faction members will be whitelisted to the AntiSkid region|
+|factions.minimum-rank|`moderator`|The minimum rank of the Faction member to use AntiSkid commands. Valid values: admin, coleader, moderator, normal, recruit|
+|factions.worlds|`factions`|The list of world names in which Factions-based region selection will occur|
+|plotsquared.support|`true`|If true, will attempt to hook into PlotSquared plugin|
+|plotsquared.worlds|`plots`|The list of world names in which PlotSquared-based region selection will occur|
 
 ## Support
 
