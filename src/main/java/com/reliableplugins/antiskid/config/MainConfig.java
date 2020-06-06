@@ -129,18 +129,6 @@ public class MainConfig extends Config
         save();
     }
 
-    public boolean getBoolean(String key, boolean def)
-    {
-        getConfig().addDefault(key, def);
-        return getConfig().getBoolean(key);
-    }
-
-    public String getString(String key, String def)
-    {
-        getConfig().addDefault(key, def);
-        return getConfig().getString(key);
-    }
-
     public List<String> getStringList(String key, List<String> def)
     {
         getConfig().addDefault(key, def);

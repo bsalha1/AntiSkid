@@ -19,9 +19,10 @@ public abstract class Config
 
     public Config(String filename)
     {
-        this.configFile = new File(AntiSkid.INSTANCE.getDataFolder().getAbsolutePath() + "/" +  filename);
         try
         {
+            AntiSkid.INSTANCE.getDataFolder().mkdir();
+            configFile = new File(AntiSkid.INSTANCE.getDataFolder().getAbsolutePath() + "/" +  filename);
             isNew = configFile.createNewFile();
         }
         catch(IOException e)
