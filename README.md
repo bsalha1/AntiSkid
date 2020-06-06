@@ -1,17 +1,21 @@
 # AntiSkid
 
-This plugin allows players to protect their cannons from being "skidded" or stolen by other players. Upon toggling antiskid via `/antiskid on`, all the repeaters on their cannon (determined by the faction territory or by using the region selector via `/antiskid tool`) will be replaced with comparators, while you and anyone else on your whitelist will be able to see the repeaters just fine. 
+This plugin allows players to protect their cannons from being "skidded" or stolen by other players. Upon toggling antiskid via `/antiskid on`, all the repeaters on their cannon (determined by the faction territory, plot, or by using the region selector via `/antiskid tool`) will be replaced with comparators, while you and anyone else on your whitelist will be able to see the repeaters just fine. The protection is passive as well, so newly placed repeaters will also be masked!
 
-Anyone who tries to use Schematica or any other mod to capture the cannon will receive the protected cannon, and thus they will not be able to see any of your repeater timings!
+Anyone who tries to use Schematica or any other mod to capture the cannon will receive the protected cannon, and thus they will not be able to see any of your repeater timings, and the cannon won't work at all!
 
 
 ## Region Selection
 
-There are currently two methods of region selection to select the cannon: Factions-based and non-Factions-based. You can configure which worlds on your server are considered "Factions", and every other world will then not be considered "Factions".
+There are currently two methods of region selection to select the cannon: Factions-based Plots-based, and non-Factions-based. You can configure which worlds on your server are considered "Factions" and "Plots", and every other world will use `/antiskid tool` for region selection.
+
+Upon selecting the region, the protection is passive - everytime you place a repeater it will be masked, so you can turn AntiSkid on once and you'll be good to go! 
 
 **Factions:** On the Factions worlds, upon executing `/antiskid on`, the plugin will scan the entire connected chunk group and protect all repeaters in the claims.
 
-**Non-Factions:** On the other worlds, when `/antiskid on` is entered, the plugin will use the region selected by the selection tool, obtained from `/antiskid tool`. The region selection process is identical to world edit; you select the two corners of the region you seek to protect - left click for position 1 and right click for position 2.
+**Plots:** On the Plots worlds, upon executing `/antiskid on`, the plugin will scan the entire plot and protect all repeaters in  the plot.
+
+**Other:** On the other worlds, when `/antiskid on` is entered, the plugin will use the region selected by the selection tool, obtained from `/antiskid tool`. The region selection process is identical to world edit; you select the two corners of the region you seek to protect - left click for position 1 and right click for position 2.
 
 ## Config
 
