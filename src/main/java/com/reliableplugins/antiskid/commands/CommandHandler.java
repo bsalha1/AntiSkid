@@ -72,7 +72,6 @@ public class CommandHandler implements CommandExecutor
 
         // By here, the command entered isn't valid
         commandHelp.execute(commandSender, args);
-        System.out.println(Arrays.toString(args));
         return true;
     }
 
