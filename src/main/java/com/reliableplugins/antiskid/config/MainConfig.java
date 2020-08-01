@@ -70,7 +70,7 @@ public class MainConfig extends Config
                 {
                     if(!worldNameMap.containsKey(worldName))
                     {
-                        Bukkit.getLogger().log(Level.WARNING, worldName + " is not a world!");
+                        AntiSkid.INSTANCE.getLogger().log(Level.WARNING, worldName + " is not a world!");
                     }
                     else
                     {
@@ -80,7 +80,7 @@ public class MainConfig extends Config
             }
             else
             {
-                Bukkit.getLogger().log(Level.SEVERE, "Factions jar not found");
+                AntiSkid.INSTANCE.getLogger().log(Level.SEVERE, "Factions jar not found");
             }
         }
 
@@ -107,7 +107,7 @@ public class MainConfig extends Config
                 {
                     if(!worldNameMap.containsKey(worldName))
                     {
-                        Bukkit.getLogger().log(Level.WARNING, worldName + " is not a world!");
+                        AntiSkid.INSTANCE.getLogger().log(Level.WARNING, worldName + " is not a world!");
                     }
                     else
                     {
@@ -117,7 +117,7 @@ public class MainConfig extends Config
             }
             else
             {
-                Bukkit.getLogger().log(Level.SEVERE, "PlotSquared jar not found");
+                AntiSkid.INSTANCE.getLogger().log(Level.SEVERE, "PlotSquared jar not found");
             }
         }
 

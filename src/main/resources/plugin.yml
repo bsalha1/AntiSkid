@@ -1,6 +1,6 @@
 name: AntiSkid
 main: com.reliableplugins.antiskid.AntiSkid
-version: 1.1
+version: 1.2
 softdepend: [Factions, PlotSquared]
 commands:
   antiskid:

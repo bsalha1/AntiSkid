@@ -59,6 +59,11 @@ public enum Message
         return header + message;
     }
 
+    public String getLoneMessage()
+    {
+        return message;
+    }
+
     public String getMessage()
     {
         return BukkitUtil.color(header + message);

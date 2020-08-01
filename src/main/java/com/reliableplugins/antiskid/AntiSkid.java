@@ -4,7 +4,6 @@ import com.reliableplugins.antiskid.commands.*;
 import com.reliableplugins.antiskid.config.FileManager;
 import com.reliableplugins.antiskid.config.MainConfig;
 import com.reliableplugins.antiskid.config.MessageConfig;
-import com.reliableplugins.antiskid.hook.PlotSquaredHook;
 import com.reliableplugins.antiskid.listeners.*;
 import com.reliableplugins.antiskid.nms.*;
 import com.reliableplugins.antiskid.type.Pair;
@@ -14,7 +13,6 @@ import com.reliableplugins.antiskid.utils.Cache;
 import com.reliableplugins.antiskid.utils.ChannelManager;
 import org.bukkit.*;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
@@ -35,9 +33,8 @@ public class AntiSkid extends JavaPlugin implements Listener
 
     private ANMSHandler nmsHandler;
 
-    private ChannelManager listenerManager;
+    private ChannelManager channelManager;
 
-    private String version;
     private Material replacer;
 
     private FileManager fileManager;
@@ -49,21 +46,16 @@ public class AntiSkid extends JavaPlugin implements Listener
     {
         AntiSkid.INSTANCE = this;
         replacer = Material.REDSTONE_COMPARATOR_OFF;
-
         lock = new Semaphore(1);
-        PluginManager pluginManager = Bukkit.getPluginManager();
 
-        initConfigs();
+        fileManager = initConfigs();
+        nmsHandler = initNms();
+        initCommands();
+        initListeners();
 
-        nmsHandler = getNMSHandler();
-
-        CommandHandler cmdHandler = new CommandHandler();
-        cmdHandler.addCommand(new CommandOn());
-        cmdHandler.addCommand(new CommandTool());
-        cmdHandler.addCommand(new CommandOff());
-        cmdHandler.addCommand(new CommandWhitelist());
-        cmdHandler.addCommand(new CommandReload());
-        cmdHandler.addCommand(new CommandClear());
+        channelManager = new ChannelManager();
+        channelManager.loadChannelListener(new ChannelListener());
+        cache = new Cache();
 
         try
         {
@@ -80,24 +72,30 @@ public class AntiSkid extends JavaPlugin implements Listener
             e.printStackTrace();
         }
 
-        listenerManager = new ChannelManager();
-        pluginManager.registerEvents(new ListenPlayerLoginLogout(), this);
-        pluginManager.registerEvents(new ListenDiodeAction(), this);
-        pluginManager.registerEvents(new ListenUseSelectionTool(), this);
-        listenerManager.loadChannelListener(new ChannelListener());
-        cache = new Cache();
-
         getLogger().log(Level.INFO, this.getDescription().getName() + "v" + this.getDescription().getVersion()  + " has been loaded");
     }
 
-    public void initConfigs()
+    public FileManager initConfigs()
     {
-        fileManager = new FileManager();
+        FileManager fileManager = new FileManager();
         fileManager.addFile(mainConfig = new MainConfig());
         fileManager.addFile(messageConfig = new MessageConfig());
+        return fileManager;
     }
 
-    private ANMSHandler getNMSHandler()
+    private CommandHandler initCommands()
+    {
+        CommandHandler cmdHandler = new CommandHandler();
+        cmdHandler.addCommand(new CommandOn());
+        cmdHandler.addCommand(new CommandTool());
+        cmdHandler.addCommand(new CommandOff());
+        cmdHandler.addCommand(new CommandWhitelist());
+        cmdHandler.addCommand(new CommandReload());
+        cmdHandler.addCommand(new CommandClear());
+        return cmdHandler;
+    }
+
+    private ANMSHandler initNms()
     {
         String nmsVersion = getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
         switch(nmsVersion)
@@ -123,9 +121,18 @@ public class AntiSkid extends JavaPlugin implements Listener
             case "v1_14_R1":
                 return new Version_1_14_R1();
             case "v1_15_R1":
-            default:
                 return new Version_1_15_R1();
+            case "v1_16_R1":
+            default:
+                return new Version_1_16_R1();
         }
+    }
+
+    private void initListeners()
+    {
+        Bukkit.getPluginManager().registerEvents(new ListenPlayerLoginLogout(), this);
+        Bukkit.getPluginManager().registerEvents(new ListenDiodeAction(), this);
+        Bukkit.getPluginManager().registerEvents(new ListenUseSelectionTool(), this);
     }
 
     @Override
@@ -141,7 +148,7 @@ public class AntiSkid extends JavaPlugin implements Listener
         }
         getLogger().log(Level.INFO, "Cleanup: All protected repeaters have been revealed");
 
-        listenerManager.unloadChannelListener();
+        channelManager.unloadChannelListener();
         getLogger().log(Level.INFO, "Cleanup: All packet listeners have been removed");
 
         getLogger().log(Level.INFO, this.getDescription().getName() + "v" + this.getDescription().getVersion()  + " has been unloaded");
@@ -170,7 +177,7 @@ public class AntiSkid extends JavaPlugin implements Listener
 
     public ChannelManager getPacketManager()
     {
-        return listenerManager;
+        return channelManager;
     }
 
     public ANMSHandler getNMS()

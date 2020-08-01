@@ -1,80 +1,106 @@
-/*
- * Project: AntiSkid
- * Copyright (C) 2020 Bilal Salha <bsalha1@gmail.com>
- * GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
- */
-
 package com.reliableplugins.antiskid.commands;
 
 import com.reliableplugins.antiskid.annotation.CommandBuilder;
 import com.reliableplugins.antiskid.utils.BukkitUtil;
-import com.reliableplugins.antiskid.utils.ReflectUtil;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-@CommandBuilder(label = "help", alias = {"h"}, permission = "antiskid.help")
+@CommandBuilder(label = "help", alias = {"h"})
 public class CommandHelp extends Command
 {
-    private CommandHandler baseCommand;
+    private final CommandHandler baseCommand;
+    private static final int commandsPerPage = 6;
+    private static final String color = "&9";
+    private static final String descriptionColor = "&7";
 
     public CommandHelp(CommandHandler baseCommand)
     {
         this.baseCommand = baseCommand;
     }
 
-    @Override
     public void execute(CommandSender sender, String[] args)
     {
-        Command[] commands = baseCommand.getCommands().toArray(new Command[baseCommand.getCommands().size()]);
-        Player player = Bukkit.getPlayer(sender.getName());
-
-        int page = 0;
-
-        if (args.length != 0)
+        int pageNum = 1;
+        if(args.length > 1)
         {
-            if (args[0].matches("^[0-9]"))
+            try
             {
-                page = (Integer.parseInt(args[0]) - 1);
+                pageNum = Integer.parseInt(args[1]);
+            }
+            catch(Exception ignored)
+            {
             }
         }
+        Command[] commands = baseCommand.getSubCommands().toArray(new Command[0]);
 
-        int maxPage = (int) Math.floor(commands.length / 5) + 1;
-        if(page > maxPage)
+        int maxPage = (int)Math.ceil((double)commands.length / commandsPerPage);
+        if(pageNum > maxPage)
         {
-            page = maxPage;
+            pageNum = maxPage;
         }
+        String header = "&7&m----------&7[ &9AntiSkid &r&f" + pageNum + "&7/&f" + maxPage + "&7]&m----------";
+        sender.sendMessage(BukkitUtil.color(header));
+        int pageIndex = (pageNum - 1) * commandsPerPage;
 
-        String header = "&7&m----------&7[ &9AntiSkid &b%s&7/&b%s &7]&m----------"; // 34 chars
-        String line = "&9/antiskid %s&7 %s";
-        String footer = "&7&oHover for description";
-
-        sender.sendMessage(BukkitUtil.color(String.format(header, (page + 1), maxPage)));
-        for (int i = (page * 5); i < (page * 5) + 5; i++)
+        if(sender instanceof Player)
         {
-            if (i > commands.length - 1) continue;
+            executeToPlayer(sender, commands, pageIndex);
+        }
+        else
+        {
+            executeToNonPlayer(sender, commands, pageIndex);
+        }
+    }
 
+    public void executeToPlayer(CommandSender sender, Command[] commands, int pageIndex)
+    {
+        Player player = (Player) sender;
+
+        for (int i = pageIndex; i < (pageIndex + commandsPerPage) && i < commands.length; i++)
+        {
             Command command = commands[i];
-
-            String entry = String.format(line, command.getLabel(), command.getPermission());
-            TextComponent message = new TextComponent(BukkitUtil.color(entry));
-            message.setHoverEvent(
-                    new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            new ComponentBuilder(command.getDescription()).create()));
-
-            if (player != null)
+            String line;
+            TextComponent message;
+            if(player.hasPermission(command.getPermission()) || sender.isOp())
             {
-                player.spigot().sendMessage(message);
+                line =  color + "/" + CommandHandler.getLabel() + " %s&r %s";
             }
             else
             {
-                sender.sendMessage(message.getText());
+                line = "&4&m/" + CommandHandler.getLabel() + " %s&r %s";
             }
 
+            message = new TextComponent(BukkitUtil.color(String.format(line, command.getLabel(), BukkitUtil.color(descriptionColor + command.getPermission()))));
+            message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(command.getDescription()).create()));
+            player.spigot().sendMessage(message);
         }
+
+        String footer = "&7&oHover to view descriptions";
         sender.sendMessage(BukkitUtil.color(footer));
+    }
+
+    public void executeToNonPlayer(CommandSender sender, Command[] commands, int pageIndex)
+    {
+        for (int i = pageIndex; i < (pageIndex + commandsPerPage) && i < commands.length; i++)
+        {
+            Command command = commands[i];
+
+            String line;
+            if(sender.hasPermission(command.getPermission()) || sender.isOp())
+            {
+                line = color + "/" + CommandHandler.getLabel() + " %s&r %s";
+            }
+            else
+            {
+                line = "&4/&m" + CommandHandler.getLabel() + " %s&r %s";
+            }
+
+            String message = BukkitUtil.color(String.format(line, command.getLabel(), ChatColor.GRAY + command.getPermission()));
+            sender.sendMessage(message);
+        }
     }
 }

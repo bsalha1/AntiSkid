@@ -16,13 +16,14 @@ import java.util.*;
 
 public class CommandHandler implements CommandExecutor
 {
-    private Map<String, Command> subcommands = new HashMap<>();
-    private CommandHelp commandHelp;
+    private final Map<String, Command> subcommands = new HashMap<>();
+    private final CommandHelp commandHelp;
+    private final static String label = "antiskid";
 
     public CommandHandler()
     {
         this.commandHelp = new CommandHelp(this);
-        AntiSkid.INSTANCE.getCommand("antiskid").setExecutor(this);
+        AntiSkid.INSTANCE.getCommand(label).setExecutor(this);
     }
 
     @Override
@@ -71,7 +72,13 @@ public class CommandHandler implements CommandExecutor
 
         // By here, the command entered isn't valid
         commandHelp.execute(commandSender, args);
+        System.out.println(Arrays.toString(args));
         return true;
+    }
+
+    public static String getLabel()
+    {
+        return label;
     }
 
     public void addCommand(Command command)
@@ -79,7 +86,7 @@ public class CommandHandler implements CommandExecutor
         this.subcommands.put(command.getLabel().toLowerCase(), command);
     }
 
-    public Collection<Command> getCommands()
+    public Collection<Command> getSubCommands()
     {
         return Collections.unmodifiableCollection(subcommands.values());
     }

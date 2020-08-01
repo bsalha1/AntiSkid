@@ -15,7 +15,7 @@ public class MessageConfig extends Config
         for(Message message : Message.values())
         {
             message.setMessage(getString(BukkitUtil.color(message.getConfigKey()),
-                    message.getMessage().replace("§", "&")));
+                    message.getLoneMessage().replace("§", "&")));
         }
 
         save();
