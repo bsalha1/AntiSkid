@@ -92,18 +92,13 @@ public class MainConfig extends Config
             if(Bukkit.getPluginManager().isPluginEnabled("PlotSquared"))
             {
                 String plotSquaredVersion = Bukkit.getPluginManager().getPlugin("PlotSquared").getDescription().getVersion();
-                if(plotSquaredVersion.startsWith("3"))
-                {
-                    plotSquaredHook = new PlotSquared3Hook();
-                }
-                else if(plotSquaredVersion.startsWith("4"))
+                if(plotSquaredVersion.startsWith("4"))
                 {
                     plotSquaredHook = new PlotSquared4Hook();
                 }
                 else
                 {
-                    Bukkit.getLogger().log(Level.SEVERE, "Unsupported PlotSquared version: " + plotSquaredVersion + " please contact developers!");
-                    return;
+                    plotSquaredHook = new PlotSquared3Hook();
                 }
 
                 // Get Enabled Worlds
