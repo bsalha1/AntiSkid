@@ -34,4 +34,4 @@ There are two config files in this plugin: `config.yml` and `messages.yml`. `con
 
 ## Support
 
-For any support regarding this plugin (anything from bugs to suggestions) please contact `Reachy#8217` on Discord or email `bsalha1@gmail.com`.
+For any support regarding this plugin (anything from bugs to suggestions) please contact `Reachy#0001` on Discord or email `bsalha1@gmail.com`.
